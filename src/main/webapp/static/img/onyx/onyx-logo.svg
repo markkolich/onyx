@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="onyx" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+     width="978px" height="978px" viewBox="0 0 978 978" style="enable-background:new 0 0 978 978;" xml:space="preserve">
+<g>
+	<path style="fill:#e74a3b"
+          d="M0,903c0,33.1,26.9,60,60,60h160c33.1,0,60-26.9,60-60V75c0-33.1-26.9-60-60-60H60C26.9,15,0,41.9,0,75V903z"/>
+    <path style="fill:#1cc88a"
+          d="M409,15c-33.1,0-60,26.9-60,60v828c0,33.1,26.9,60,60,60h160c33.1,0,60-26.9,60-60V75c0-33.1-26.9-60-60-60H409z"/>
+    <path style="fill:#36b9cc;"
+          d="M758,963h160c33.1,0,60-26.9,60-60V75c0-33.1-26.9-60-60-60H758c-33.1,0-60,26.9-60,60v828C698,936.1,724.9,963,758,963z"/>
+</g>
+</svg>

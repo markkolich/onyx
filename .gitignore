@@ -1,0 +1,23 @@
+*.class
+
+# Package Files #
+*.war
+*.ear
+*.jar
+
+.project
+.classpath
+.cache
+.idea
+target
+bin
+dist
+lib_managed
+src/main/webapp/static/node
+src/main/webapp/static/node_modules
+src/main/webapp/static/build
+release
+*.iml
+*.ipr
+*.iws
+.DS_Store
