@@ -8,7 +8,10 @@
         <span aria-hidden="true"><i class="fas fa-times fa-sm"></i></span>
       </button>
     </div>
-    <div class="modal-body">Are you sure you want to delete this directory?</div>
+    <div class="modal-body">
+        <p>Are you sure you want to delete this directory?</p>
+        <p class="mb-0" data-modal="name"></p>
+    </div>
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
         <button class="btn btn-primary" type="submit">Delete</button>

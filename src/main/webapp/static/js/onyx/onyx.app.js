@@ -127,6 +127,9 @@
                         modal = $('#deleteFileModal'),
 
                         showModal = function(resource) {
+                            var name = resource.split('/').pop();
+                            modal.find('[data-modal="name"]').html(name);
+
                             modal.on('shown.bs.modal', function() {
                                 modal.find('button[type="submit"]').unbind().click(function() {
                                     $.ajax({
@@ -236,6 +239,9 @@
                         modal = $('#deleteDirectoryModal'),
 
                         showModal = function(resource) {
+                            var name = resource.split('/').pop();
+                            modal.find('[data-modal="name"]').html(name);
+
                             modal.on('shown.bs.modal', function() {
                                 modal.find('button[type="submit"]').unbind().click(function() {
                                     $.ajax({
