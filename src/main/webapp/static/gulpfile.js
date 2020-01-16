@@ -18,6 +18,7 @@ gulp.task('clean', function() {
 gulp.task('concat-css', function() {
     const cssResources = [
         'vendor/fontawesome-free/css/all.css',
+        'vendor/featherlight/featherlight.min.css',
         'css/nunito.css',
         'css/sb-admin-2.css'
     ];
@@ -52,6 +53,7 @@ gulp.task('concat-js', ['eslint-js'], function() {
         'vendor/jquery.fileupload/jquery.fileupload-validate.js',
         'vendor/jquery-easing/jquery.easing.min.js',
         'vendor/jquery.copy-to-clipboard/jquery.copy-to-clipboard.js',
+        'vendor/featherlight/featherlight.min.js',
         'js/sb-admin-2.js',
         'js/onyx/onyx.js',
         'js/onyx/onyx.app.js'
