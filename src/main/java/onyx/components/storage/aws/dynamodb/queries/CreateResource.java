@@ -27,7 +27,7 @@
 package onyx.components.storage.aws.dynamodb.queries;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import onyx.entities.aws.dynamodb.Resource;
+import onyx.entities.storage.aws.dynamodb.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

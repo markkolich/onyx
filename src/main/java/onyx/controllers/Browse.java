@@ -33,11 +33,13 @@ import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.AssetManager;
+import onyx.components.storage.AsynchronousResourcePool;
+import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.ResourceManager.Extensions;
-import onyx.entities.Session;
-import onyx.entities.aws.dynamodb.Resource;
+import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
+import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.resource.ResourceForbiddenException;
 import onyx.exceptions.resource.ResourceNotFoundException;
 import org.apache.commons.io.FileUtils;
@@ -53,15 +55,19 @@ public final class Browse extends AbstractOnyxController {
 
     private final AssetManager assetManager_;
     private final ResourceManager resourceManager_;
+    private final CacheManager cacheManager_;
 
     @Injectable
     public Browse(
             final OnyxConfig onyxConfig,
+            final AsynchronousResourcePool asynchronousResourcePool,
             final AssetManager assetManager,
-            final ResourceManager resourceManager) {
-        super(onyxConfig);
+            final ResourceManager resourceManager,
+            final CacheManager cacheManager) {
+        super(onyxConfig, asynchronousResourcePool);
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
+        cacheManager_ = cacheManager;
     }
 
     @RequestMapping(value = "^/browse/(?<username>[a-zA-Z0-9]*)$")
@@ -164,9 +170,35 @@ public final class Browse extends AbstractOnyxController {
             }
         }
 
-        final URL presignedUrl = assetManager_.getPresignedDownloadUrlForResource(file);
+        final URL downloadUrl;
+        {
+            final boolean localCacheEnabled = onyxConfig_.localCacheEnabled();
 
-        response.sendRedirect(presignedUrl.toString());
+            // Only favorite files are stored in the local cache.
+            if (localCacheEnabled && file.getFavorite()) {
+                // Attempt to resolve the file from the local cache first; then if the file
+                // is not found in the cache, generate the S3 download URL.
+                final URL cacheUrl = cacheManager_.getCachedDownloadUrlForResource(file);
+                if (cacheUrl != null) {
+                    // File was found in cache; send back cached resource URL.
+                    downloadUrl = cacheUrl;
+                } else {
+                    // File was not found in cache; trigger a download of the file to the cache
+                    // only if the resource has private visibility.
+                    if (Resource.Visibility.PRIVATE.equals(file.getVisibility())) {
+                        cacheManager_.downloadResourceToCacheAsync(file, executorService_);
+                    }
+
+                    downloadUrl = assetManager_.getPresignedDownloadUrlForResource(file);
+                }
+            } else {
+                // Not a favorite file; would not be in the cache as only favorite files can
+                // be stored locally. Generate the S3 download URL.
+                downloadUrl = assetManager_.getPresignedDownloadUrlForResource(file);
+            }
+        }
+
+        response.sendRedirect(downloadUrl.toString());
         context.complete();
     }
 

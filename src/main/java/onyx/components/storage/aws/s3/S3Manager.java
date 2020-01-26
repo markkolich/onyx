@@ -39,7 +39,7 @@ import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.AssetManager;
-import onyx.entities.aws.dynamodb.Resource;
+import onyx.entities.storage.aws.dynamodb.Resource;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +50,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import static com.amazonaws.util.SdkHttpUtils.urlDecode;
 
 @Component
 public final class S3Manager implements AssetManager {
@@ -96,16 +94,14 @@ public final class S3Manager implements AssetManager {
 
         final S3Link s3Link = resource.getS3Link();
 
-        final String name = FilenameUtils.getName(resource.getPath());
+        final String name = resource.getName();
         final String extension = FilenameUtils.getExtension(s3Link.getKey()).toLowerCase();
         final String contentType = CuracaoConfigLoader.getContentTypeForExtension(extension,
                 DEFAULT_CONTENT_TYPE);
 
         final ResponseHeaderOverrides responseHeaderOverrides = new ResponseHeaderOverrides()
                 .withContentType(contentType)
-                // Note: the inline filename is the URL-decoded name to preserve spaces and other
-                // non-URL safe characters on file downloads.
-                .withContentDisposition(String.format("inline; filename=\"%s\"", urlDecode(name)));
+                .withContentDisposition(String.format("inline; filename=\"%s\"", name));
 
         final GeneratePresignedUrlRequest presignedUrlRequest =
                 new GeneratePresignedUrlRequest(s3Link.getBucketName(), s3Link.getKey())

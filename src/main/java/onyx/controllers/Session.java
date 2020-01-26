@@ -33,6 +33,7 @@ import curacao.annotations.parameters.RequestBody;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.config.OnyxConfig;
+import onyx.components.storage.AsynchronousResourcePool;
 import onyx.entities.freemarker.FreeMarkerContent;
 import org.apache.commons.lang3.StringUtils;
 
@@ -55,9 +56,10 @@ public final class Session extends AbstractOnyxController {
     @Injectable
     public Session(
             final OnyxConfig onyxConfig,
+            final AsynchronousResourcePool asynchronousResourcePool,
             final UserAuthenticator userAuthenticator,
             final SessionManager sessionManager) {
-        super(onyxConfig);
+        super(onyxConfig, asynchronousResourcePool);
         userAuthenticator_ = userAuthenticator;
         sessionManager_ = sessionManager;
     }
@@ -80,7 +82,7 @@ public final class Session extends AbstractOnyxController {
                     .build();
         }
 
-        final onyx.entities.Session session =
+        final onyx.entities.authentication.Session session =
                 userAuthenticator_.getSession(username, password);
         if (session == null) {
             return new FreeMarkerContent.Builder("templates/login.ftl")

@@ -29,6 +29,7 @@ package onyx.components.config;
 import com.amazonaws.regions.Regions;
 import com.typesafe.config.Config;
 
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
 public interface OnyxConfig {
@@ -42,6 +43,11 @@ public interface OnyxConfig {
     String SESSION_SIGNER_SECRET_PROP = "session.signer-secret";
     String SESSION_HTTPS_PROP = "session.https";
     String SESSION_USERS_PROP = "session.users";
+
+    String LOCAL_CACHE_ENABLED = "local-cache.enabled";
+    String LOCAL_CACHE_DIRECTORY = "local-cache.directory";
+    String LOCAL_CACHE_TOKEN_SIGNER_SECRET = "local-cache.token-signer-secret";
+    String LOCAL_CACHE_TOKEN_VALIDITY_DURATION = "local-cache.token-validity-duration";
 
     String AWS_ACCESS_KEY_PROP = "aws.access-key";
     String AWS_SECRET_KEY_PROP = "aws.secret-key";
@@ -64,6 +70,8 @@ public interface OnyxConfig {
 
     boolean isDevMode();
 
+    // Session config
+
     long getSessionDuration(
             final TimeUnit timeUnit);
 
@@ -71,7 +79,18 @@ public interface OnyxConfig {
 
     boolean isSessionUsingHttps();
 
-    // AWS
+    // Local resource cache config
+
+    boolean localCacheEnabled();
+
+    Path getLocalCacheDirectory();
+
+    String getLocalCacheTokenSignerSecret();
+
+    long getLocalCacheTokenValidityDuration(
+            final TimeUnit timeUnit);
+
+    // AWS config
 
     String getAwsAccessKey();
 
@@ -79,11 +98,11 @@ public interface OnyxConfig {
 
     Regions getAwsRegion();
 
-    // AWS DynamoDB
+    // AWS DynamoDB config
 
     String getAwsDynamoDbTableName();
 
-    // AWS S3
+    // AWS S3 config
 
     String getAwsS3BucketName();
 

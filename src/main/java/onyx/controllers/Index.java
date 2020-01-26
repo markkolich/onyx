@@ -32,8 +32,9 @@ import curacao.annotations.RequestMapping;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.ResourceManager;
-import onyx.entities.Session;
-import onyx.entities.aws.dynamodb.Resource;
+import onyx.components.storage.AsynchronousResourcePool;
+import onyx.entities.authentication.Session;
+import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.entities.freemarker.FreeMarkerContent;
 
 import java.util.List;
@@ -47,9 +48,10 @@ public final class Index extends AbstractOnyxController {
     @Injectable
     public Index(
             final OnyxConfig onyxConfig,
+            final AsynchronousResourcePool asynchronousResourcePool,
             final AssetManager assetManager,
             final ResourceManager resourceManager) {
-        super(onyxConfig);
+        super(onyxConfig, asynchronousResourcePool);
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
     }

@@ -34,7 +34,7 @@ import curacao.annotations.Injectable;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.aws.dynamodb.queries.*;
-import onyx.entities.aws.dynamodb.Resource;
+import onyx.entities.storage.aws.dynamodb.Resource;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -28,7 +28,7 @@
 
         <kolich-common.version>0.5</kolich-common.version>
 
-        <jetty.version>9.4.25.v20191220</jetty.version>
+        <jetty.version>9.4.26.v20200117</jetty.version>
 
         <typesafe-config.version>1.4.0</typesafe-config.version>
 
@@ -48,6 +48,8 @@
 
         <bcprov-ext-jdk15on.version>1.64</bcprov-ext-jdk15on.version>
         <jbcrypt.version>0.4</jbcrypt.version>
+
+        <async-http-client.version>2.10.4</async-http-client.version>
 
         <picocli.version>4.1.1</picocli.version>
 
@@ -200,6 +202,20 @@
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
             <version>${jbcrypt.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.asynchttpclient</groupId>
+            <artifactId>async-http-client</artifactId>
+            <version>${async-http-client.version}</version>
+            <exclusions>
+                <!-- https://github.com/AsyncHttpClient/async-http-client/issues/1541 -->
+                <!-- https://github.com/AsyncHttpClient/async-http-client/issues/1589 -->
+                <exclusion>
+                    <groupId>com.sun.activation</groupId>
+                    <artifactId>javax.activation</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

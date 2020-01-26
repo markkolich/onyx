@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.authentication;
+package onyx.components.storage.cache;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +32,7 @@ import com.kolich.common.util.secure.KolichStringSigner;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.config.OnyxConfig;
-import onyx.entities.authentication.Session;
+import onyx.entities.storage.cache.CachedResourceToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,55 +41,56 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @Component
-public final class OnyxSignedSessionManager implements SessionManager {
+public final class LocalCachedResourceSigner implements CachedResourceSigner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OnyxSignedSessionManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LocalCachedResourceSigner.class);
 
     private static final ObjectMapper OBJECT_MAPPER =
             new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    private final String sessionSignerSecret_;
+    private final String cacheTokenSignerSecret_;
 
     @Injectable
-    public OnyxSignedSessionManager(
+    public LocalCachedResourceSigner(
             final OnyxConfig onyxConfig) {
-        sessionSignerSecret_ = onyxConfig.getSessionSignerSecret();
+        cacheTokenSignerSecret_ = onyxConfig.getLocalCacheTokenSignerSecret();
     }
 
     @Nullable
     @Override
-    public String signSession(
-            final Session session) {
-        checkNotNull(session, "Session to sign cannot be null.");
+    public String signCachedResourceToken(
+            final CachedResourceToken cachedResourceToken) {
+        checkNotNull(cachedResourceToken, "Cached resource token cannot be null.");
 
         try {
-            final String serializedSession = OBJECT_MAPPER.writeValueAsString(session);
-            return new KolichStringSigner(sessionSignerSecret_).sign(serializedSession);
+            final String serializedCachedResource = OBJECT_MAPPER.writeValueAsString(cachedResourceToken);
+            return new KolichStringSigner(cacheTokenSignerSecret_).sign(serializedCachedResource);
         } catch (final Exception e) {
-            LOG.warn("Failed to sign session: " + session.getId(), e);
+            LOG.warn("Failed to sign cached resource token: " + cachedResourceToken.getPath(), e);
             return null;
         }
     }
 
     @Nullable
     @Override
-    public Session extractSignedSession(
-            final String signedSession) {
-        checkNotNull(signedSession, "Signed session string cannot be null.");
+    public CachedResourceToken extractSignedCachedResourceToken(
+            final String signedToken) {
+        checkNotNull(signedToken, "Signed cached resource token string cannot be null.");
 
         try {
-            final String sessionString = new KolichStringSigner(sessionSignerSecret_).isValid(signedSession);
-            final Session session = OBJECT_MAPPER.readValue(sessionString, Session.class);
+            final String tokenString = new KolichStringSigner(cacheTokenSignerSecret_).isValid(signedToken);
+            final CachedResourceToken cachedResource = OBJECT_MAPPER.readValue(tokenString,
+                    CachedResourceToken.class);
 
             final long now = System.currentTimeMillis();
-            if (now > session.getExpiry().getTime()) {
-                LOG.debug("Session expired: {}", session.getId());
+            if (now > cachedResource.getExpiry().getTime()) {
+                LOG.debug("Cached resource token expired: {}", cachedResource.getPath());
                 return null;
             }
 
-            return session;
+            return cachedResource;
         } catch (final Exception e) {
-            LOG.warn("Failed to get session from signed session string: " + signedSession, e);
+            LOG.warn("Failed to get cached resource from signed token: " + signedToken, e);
             return null;
         }
     }

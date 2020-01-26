@@ -24,17 +24,20 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.authentication;
+package onyx.components.storage.cache;
 
-import onyx.entities.authentication.Session;
+import onyx.entities.storage.cache.CachedResourceToken;
 
 import javax.annotation.Nullable;
 
-public interface UserAuthenticator {
+public interface CachedResourceSigner {
 
     @Nullable
-    Session getSession(
-            final String username,
-            final String password);
+    String signCachedResourceToken(
+            final CachedResourceToken cachedResource);
+
+    @Nullable
+    CachedResourceToken extractSignedCachedResourceToken(
+            final String signedToken);
 
 }

@@ -28,7 +28,7 @@ package onyx.entities.freemarker;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import onyx.entities.Session;
+import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.Utf8TextEntity.HtmlEntityType;
 
 import javax.annotation.Nullable;

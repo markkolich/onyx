@@ -26,7 +26,7 @@
 
 package onyx.components.authentication;
 
-import onyx.entities.Session;
+import onyx.entities.authentication.Session;
 
 import javax.annotation.Nullable;
 

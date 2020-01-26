@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.entities.aws.dynamodb;
+package onyx.entities.storage.aws.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import com.amazonaws.services.s3.model.Region;
@@ -188,12 +188,23 @@ public final class Resource {
     /**
      * Returns the simple name of a resource, typically the string after the last "/".
      * For example, given a resource with path "/foo/bar/baz" this method would
+     * return "baz". Note, this method does not URL decode or HTML escape
+     * the resulting filename; for that, see {@link #getHtmlName()}.
+     */
+    @DynamoDBIgnore
+    public String getName() {
+        return FilenameUtils.getName(path_);
+    }
+
+    /**
+     * Returns the simple name of a resource, typically the string after the last "/".
+     * For example, given a resource with path "/foo/bar/baz" this method would
      * return "baz". This method handles all URL decoding and HTML escaping of
      * the resulting name safe for injection into a HTML template.
      */
     @DynamoDBIgnore
     public String getHtmlName() {
-        return escapeHtml4(urlDecode(FilenameUtils.getName(path_)));
+        return escapeHtml4(urlDecode(getName()));
     }
 
     /**

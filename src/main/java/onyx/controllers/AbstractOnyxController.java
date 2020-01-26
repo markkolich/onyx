@@ -29,9 +29,11 @@ package onyx.controllers;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import onyx.components.config.OnyxConfig;
+import onyx.components.storage.AsynchronousResourcePool;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import static com.amazonaws.util.SdkHttpUtils.urlDecode;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
@@ -42,9 +44,13 @@ public abstract class AbstractOnyxController {
 
     protected final OnyxConfig onyxConfig_;
 
+    protected final ExecutorService executorService_;
+
     protected AbstractOnyxController(
-            final OnyxConfig onyxConfig) {
+            final OnyxConfig onyxConfig,
+            final AsynchronousResourcePool asynchronousResourcePool) {
         onyxConfig_ = onyxConfig;
+        executorService_ = asynchronousResourcePool.getExecutorService();
     }
 
     /**

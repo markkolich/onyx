@@ -31,7 +31,7 @@ import curacao.annotations.Mapper;
 import curacao.context.CuracaoContext;
 import curacao.mappers.request.ControllerArgumentMapper;
 import onyx.components.authentication.SessionManager;
-import onyx.entities.Session;
+import onyx.entities.authentication.Session;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;

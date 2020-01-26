@@ -28,21 +28,17 @@ package onyx.controllers.api;
 
 import curacao.entities.empty.StatusCodeOnlyCuracaoEntity;
 import onyx.components.config.OnyxConfig;
-import onyx.components.storage.aws.AsynchronousResourcePool;
+import onyx.components.storage.AsynchronousResourcePool;
 import onyx.controllers.AbstractOnyxController;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.concurrent.ExecutorService;
 
 public abstract class AbstractOnyxApiController extends AbstractOnyxController {
-
-    protected final ExecutorService executorService_;
 
     protected AbstractOnyxApiController(
             final OnyxConfig onyxConfig,
             final AsynchronousResourcePool asynchronousResourcePool) {
-        super(onyxConfig);
-        executorService_ = asynchronousResourcePool.getExecutorService();
+        super(onyxConfig, asynchronousResourcePool);
     }
 
     /**

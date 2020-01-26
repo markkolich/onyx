@@ -26,7 +26,7 @@
 
 package onyx.components.storage;
 
-import onyx.entities.aws.dynamodb.Resource;
+import onyx.entities.storage.aws.dynamodb.Resource;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

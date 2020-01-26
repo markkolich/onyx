@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.entities;
+package onyx.entities.storage.cache;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,31 +34,23 @@ import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-@JsonDeserialize(builder = Session.Builder.class)
-public final class Session {
+@JsonDeserialize(builder = CachedResourceToken.Builder.class)
+public final class CachedResourceToken {
 
-    private final String id_;
-    private final String username_;
+    private final String path_;
 
     private final Date expiry_;
 
-    private Session(
-            final String id,
-            final String username,
+    private CachedResourceToken(
+            final String path,
             final Date expiry) {
-        id_ = id;
-        username_ = username;
+        path_ = path;
         expiry_ = expiry;
     }
 
-    @JsonProperty("id")
-    public String getId() {
-        return id_;
-    }
-
-    @JsonProperty("username")
-    public String getUsername() {
-        return username_;
+    @JsonProperty("path")
+    public String getPath() {
+        return path_;
     }
 
     @JsonProperty("expiry")
@@ -69,22 +61,14 @@ public final class Session {
 
     public static final class Builder {
 
-        private String id_;
-        private String username_;
+        private String path_;
 
         private Date expiry_;
 
-        @JsonProperty("id")
-        public Builder setId(
-                final String id) {
-            id_ = id;
-            return this;
-        }
-
-        @JsonProperty("username")
-        public Builder setUsername(
-                final String username) {
-            username_ = username;
+        @JsonProperty("path")
+        public Builder setPath(
+                final String path) {
+            path_ = path;
             return this;
         }
 
@@ -96,12 +80,11 @@ public final class Session {
             return this;
         }
 
-        public Session build() {
-            checkNotNull(id_, "Session ID cannot be null.");
-            checkNotNull(username_, "Session username cannot be null.");
-            checkNotNull(expiry_, "Session expiry cannot be null.");
+        public CachedResourceToken build() {
+            checkNotNull(path_, "Cached resource path cannot be null.");
+            checkNotNull(expiry_, "Cached resource expiry cannot be null.");
 
-            return new Session(id_, username_, expiry_);
+            return new CachedResourceToken(path_, expiry_);
         }
 
     }

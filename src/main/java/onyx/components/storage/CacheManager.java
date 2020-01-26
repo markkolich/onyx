@@ -24,17 +24,37 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.authentication;
+package onyx.components.storage;
 
-import onyx.entities.authentication.Session;
+import onyx.entities.storage.aws.dynamodb.Resource;
 
 import javax.annotation.Nullable;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
 
-public interface UserAuthenticator {
+public interface CacheManager {
 
     @Nullable
-    Session getSession(
-            final String username,
-            final String password);
+    URL getCachedDownloadUrlForResource(
+            final Resource resource) throws Exception;
+
+    @Nullable
+    Path getCachedResourceFileForPath(
+            final String resourcePath);
+
+    void downloadResourceToCache(
+            final Resource resource);
+
+    void downloadResourceToCacheAsync(
+            final Resource resource,
+            final ExecutorService executorService);
+
+    void deleteResourceFromCache(
+            final Resource resource);
+
+    void deleteResourceFromCacheAsync(
+            final Resource resource,
+            final ExecutorService executorService);
 
 }

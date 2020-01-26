@@ -28,7 +28,7 @@ package onyx.entities.api.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import onyx.entities.aws.dynamodb.Resource;
+import onyx.entities.storage.aws.dynamodb.Resource;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;

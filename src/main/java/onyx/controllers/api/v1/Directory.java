@@ -37,14 +37,14 @@ import curacao.annotations.parameters.RequestBody;
 import curacao.entities.CuracaoEntity;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.AssetManager;
+import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
-import onyx.components.storage.aws.AsynchronousResourcePool;
 import onyx.components.storage.aws.dynamodb.DynamoDbMapper;
 import onyx.controllers.api.AbstractOnyxApiController;
-import onyx.entities.Session;
 import onyx.entities.api.request.CreateDirectoryRequest;
 import onyx.entities.api.request.UpdateDirectoryRequest;
-import onyx.entities.aws.dynamodb.Resource;
+import onyx.entities.authentication.Session;
+import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.api.ApiBadRequestException;
 import onyx.exceptions.api.ApiConflictException;
 import onyx.exceptions.api.ApiForbiddenException;
@@ -69,10 +69,10 @@ public final class Directory extends AbstractOnyxApiController {
     @Injectable
     public Directory(
             final OnyxConfig onyxConfig,
+            final AsynchronousResourcePool asynchronousResourcePool,
             final AssetManager assetManager,
             final ResourceManager resourceManager,
-            final DynamoDbMapper dynamoDbMapper,
-            final AsynchronousResourcePool asynchronousResourcePool) {
+            final DynamoDbMapper dynamoDbMapper) {
         super(onyxConfig, asynchronousResourcePool);
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;

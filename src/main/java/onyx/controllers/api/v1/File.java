@@ -37,15 +37,16 @@ import curacao.annotations.parameters.RequestBody;
 import curacao.entities.CuracaoEntity;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.AssetManager;
+import onyx.components.storage.AsynchronousResourcePool;
+import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
-import onyx.components.storage.aws.AsynchronousResourcePool;
 import onyx.components.storage.aws.dynamodb.DynamoDbMapper;
 import onyx.controllers.api.AbstractOnyxApiController;
-import onyx.entities.Session;
 import onyx.entities.api.request.UpdateFileRequest;
 import onyx.entities.api.request.UploadFileRequest;
 import onyx.entities.api.response.UploadFileResponse;
-import onyx.entities.aws.dynamodb.Resource;
+import onyx.entities.authentication.Session;
+import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.api.ApiBadRequestException;
 import onyx.exceptions.api.ApiConflictException;
 import onyx.exceptions.api.ApiForbiddenException;
@@ -65,19 +66,22 @@ public final class File extends AbstractOnyxApiController {
 
     private final AssetManager assetManager_;
     private final ResourceManager resourceManager_;
+    private final CacheManager cacheManager_;
 
     private final IDynamoDBMapper dbMapper_;
 
     @Injectable
     public File(
             final OnyxConfig onyxConfig,
+            final AsynchronousResourcePool asynchronousResourcePool,
             final AssetManager assetManager,
             final ResourceManager resourceManager,
-            final DynamoDbMapper dynamoDbMapper,
-            final AsynchronousResourcePool asynchronousResourcePool) {
+            final CacheManager cacheManager,
+            final DynamoDbMapper dynamoDbMapper) {
         super(onyxConfig, asynchronousResourcePool);
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
+        cacheManager_ = cacheManager;
         dbMapper_ = dynamoDbMapper.getDbMapper();
     }
 
@@ -200,6 +204,18 @@ public final class File extends AbstractOnyxApiController {
         final Boolean favorite = request.getFavorite();
         if (favorite != null) {
             file.setFavorite(favorite);
+
+            // Trigger a download of the file to the cache only if the resource has private visibility.
+            final boolean localCacheEnabled = onyxConfig_.localCacheEnabled();
+            if (localCacheEnabled && Resource.Visibility.PRIVATE.equals(file.getVisibility())) {
+                if (BooleanUtils.isTrue(favorite)) {
+                    // When a file is favorited, trigger a download of the resource to the cache.
+                    cacheManager_.downloadResourceToCacheAsync(file, executorService_);
+                } else {
+                    // When a file is un-favorited, deleted it from the cache.
+                    cacheManager_.deleteResourceFromCacheAsync(file, executorService_);
+                }
+            }
         }
 
         resourceManager_.updateResource(file);
@@ -232,8 +248,14 @@ public final class File extends AbstractOnyxApiController {
 
         resourceManager_.deleteResource(file);
 
-        // Recursively delete any assets asynchronously.
+        // Delete the asset asynchronously.
         assetManager_.deleteResourceAsync(file, executorService_);
+
+        // Delete the asset from the cache asynchronously too.
+        final boolean localCacheEnabled = onyxConfig_.localCacheEnabled();
+        if (localCacheEnabled) {
+            cacheManager_.deleteResourceFromCacheAsync(file, executorService_);
+        }
 
         return noContent();
     }

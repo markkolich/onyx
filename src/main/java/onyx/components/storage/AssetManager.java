@@ -27,7 +27,7 @@
 package onyx.components.storage;
 
 import com.amazonaws.HttpMethod;
-import onyx.entities.aws.dynamodb.Resource;
+import onyx.entities.storage.aws.dynamodb.Resource;
 
 import java.net.URL;
 import java.util.concurrent.ExecutorService;
