@@ -68,21 +68,21 @@ public final class ListDirectory {
 
         final PaginatedScanList<Resource> scanResult = dbMapper.scan(Resource.class, se);
 
-        final List<Resource> directories = scanResult.parallelStream()
+        final List<Resource> directories = scanResult.stream()
                 // Intentionally keep the root "/" out of the listing.
                 .filter(resource -> !ROOT_PATH.equals(resource.getPath()))
                 .filter(resource -> Resource.Type.DIRECTORY.equals(resource.getType()))
                 // Sort the results alphabetically based on path.
                 .sorted(Comparator.comparing(Resource::getPath))
                 .collect(ImmutableList.toImmutableList());
-        final List<Resource> filesAndLinks = scanResult.parallelStream()
+        final List<Resource> files = scanResult.stream()
                 .filter(resource -> Resource.Type.FILE.equals(resource.getType()))
                 // Sort the results alphabetically based on path.
                 .sorted(Comparator.comparing(Resource::getPath))
                 .collect(ImmutableList.toImmutableList());
 
         // Directories go first, then files and links sorted alphabetically.
-        return ImmutableList.copyOf(Iterables.concat(directories, filesAndLinks));
+        return ImmutableList.copyOf(Iterables.concat(directories, files));
     }
 
     private Map<String, String> buildExpressionAttributes() {

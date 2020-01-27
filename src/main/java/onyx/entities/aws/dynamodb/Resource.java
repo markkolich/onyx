@@ -30,6 +30,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import com.amazonaws.services.s3.model.Region;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
 
@@ -56,6 +57,7 @@ public final class Resource {
     private Visibility visibility_;
     private String owner_;
     private Date createdAt_;
+    private Boolean favorite_;
 
     private S3Link s3Link_;
 
@@ -150,6 +152,17 @@ public final class Resource {
         return this;
     }
 
+    @DynamoDBAttribute(attributeName = "favorite")
+    public Boolean getFavorite() {
+        return BooleanUtils.isTrue(favorite_);
+    }
+
+    public Resource setFavorite(
+            final Boolean favorite) {
+        favorite_ = favorite;
+        return this;
+    }
+
     @DynamoDBAttribute(attributeName = "s3")
     public S3Link getS3Link() {
         return s3Link_;
@@ -210,6 +223,7 @@ public final class Resource {
         private Visibility visibility_;
         private String owner_;
         private Date createdAt_;
+        private Boolean favorite_;
 
         private S3Link s3Link_;
 
@@ -263,6 +277,12 @@ public final class Resource {
         public Builder setCreatedAt(
                 final Date createdAt) {
             createdAt_ = checkNotNull(createdAt, "Resource created at cannot be null.");
+            return this;
+        }
+
+        public Builder setFavorite(
+                final Boolean favorite) {
+            favorite_ = checkNotNull(favorite, "Resource favorite cannot be null.");
             return this;
         }
 
@@ -322,6 +342,7 @@ public final class Resource {
                     .setVisibility(visibility_)
                     .setOwner(owner_)
                     .setCreatedAt(createdAt_)
+                    .setFavorite(favorite_)
                     .setS3Link(s3Link_);
         }
 

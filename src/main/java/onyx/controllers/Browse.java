@@ -34,6 +34,7 @@ import curacao.annotations.parameters.Path;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.ResourceManager.Extensions;
 import onyx.entities.Session;
 import onyx.entities.aws.dynamodb.Resource;
 import onyx.entities.freemarker.FreeMarkerContent;
@@ -96,15 +97,19 @@ public final class Browse extends AbstractOnyxController {
             }
         }
 
+        final boolean userAuthenticated = (session != null);
+
         final ImmutableSet.Builder<Resource.Visibility> visibility = ImmutableSet.builder();
         visibility.add(Resource.Visibility.PUBLIC);
         // Only show private resources inside of the directory if the authenticated user is
         // the directory resource owner.
-        if (session != null && session.getUsername().equals(directory.getOwner())) {
+        if (userAuthenticated && session.getUsername().equals(directory.getOwner())) {
             visibility.add(Resource.Visibility.PRIVATE);
         }
 
-        final List<Resource> children = resourceManager_.listDirectory(directory, visibility.build());
+        final List<Resource> children = resourceManager_.listDirectory(directory, visibility.build(),
+                // Sort only if the user is authenticated.
+                userAuthenticated ? Extensions.Sort.FAVORITE : Extensions.Sort.NONE);
         final List<Triple<String, String, String>> breadcrumbs = splitNormalizedPathToElements(directory.getPath());
 
         final long directoryCount = children.stream()

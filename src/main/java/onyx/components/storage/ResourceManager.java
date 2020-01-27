@@ -38,6 +38,15 @@ public interface ResourceManager {
 
     String ROOT_PATH = "/";
 
+    final class Extensions {
+
+        public enum Sort {
+            NONE,
+            FAVORITE;
+        }
+
+    }
+
     @Nullable
     Resource getResourceAtPath(
             final String path);
@@ -63,7 +72,8 @@ public interface ResourceManager {
     @Nonnull
     List<Resource> listDirectory(
             final Resource directory,
-            final Set<Resource.Visibility> visibility);
+            final Set<Resource.Visibility> visibility,
+            @Nullable final Extensions.Sort sort);
 
     @Nonnull
     List<Resource> listHomeDirectories();

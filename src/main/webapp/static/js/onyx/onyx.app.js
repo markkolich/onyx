@@ -113,10 +113,27 @@
                                     window.location.reload(true);
                                 }
                             });
+                        },
+
+                        toggleFavorite = function(resource, favorite) {
+                            var newFavorite = (favorite === false) ? true : false;
+
+                            $.ajax({
+                                type: 'PUT',
+                                url: data.baseApiUrl + 'v1/file' + resource,
+                                contentType: 'application/json',
+                                data: JSON.stringify({
+                                    favorite: newFavorite
+                                }),
+                                success: function(res, status, xhr) {
+                                    window.location.reload(true);
+                                }
+                            });
                         };
 
                     return {
-                        'toggleVisibility': toggleVisibility
+                        'toggleVisibility': toggleVisibility,
+                        'toggleFavorite': toggleFavorite
                     };
 
                 }()),
@@ -225,10 +242,27 @@
                                     window.location.reload(true);
                                 }
                             });
+                        },
+
+                        toggleFavorite = function(resource, favorite) {
+                            var newFavorite = (favorite === false) ? true : false;
+
+                            $.ajax({
+                                type: 'PUT',
+                                url: data.baseApiUrl + 'v1/directory' + resource,
+                                contentType: 'application/json',
+                                data: JSON.stringify({
+                                    favorite: newFavorite
+                                }),
+                                success: function(res, status, xhr) {
+                                    window.location.reload(true);
+                                }
+                            });
                         };
 
                     return {
-                        'toggleVisibility': toggleVisibility
+                        'toggleVisibility': toggleVisibility,
+                        'toggleFavorite': toggleFavorite
                     };
 
                 }()),
@@ -290,6 +324,14 @@
                 e.preventDefault();
                 return true;
             });
+            data.$contentDiv.find('[data-action="toggle-file-favorite"]').unbind().click(function(e) {
+                var resource = $(this).closest('tr[data-resource]').data('resource');
+                var favorite = $(this).closest('tr[data-resource-favorite]').data('resource-favorite');
+                file.update.toggleFavorite(resource, favorite);
+
+                e.preventDefault();
+                return true;
+            });
             data.$contentDiv.find('[data-action="delete-file"]').unbind().click(function(e) {
                 var resource = $(this).closest('tr[data-resource]').data('resource');
                 file.del.showModal(resource);
@@ -314,17 +356,17 @@
                 e.preventDefault();
                 return true;
             });
-            data.$contentDiv.find('[data-action="delete-directory"]').unbind().click(function(e) {
+            data.$contentDiv.find('[data-action="toggle-directory-favorite"]').unbind().click(function(e) {
                 var resource = $(this).closest('tr[data-resource]').data('resource');
-                directory.del.showModal(resource);
+                var favorite = $(this).closest('tr[data-resource-favorite]').data('resource-favorite');
+                directory.update.toggleFavorite(resource, favorite);
 
                 e.preventDefault();
                 return true;
             });
-
-            data.$contentDiv.find('[data-action="copy-sharable-link"]').unbind().click(function(e) {
-                var resourceLink = $(this).closest('tr[data-resource]').find('a[data-resource-type]');
-                CopyToClipboard(resourceLink[0].href);
+            data.$contentDiv.find('[data-action="delete-directory"]').unbind().click(function(e) {
+                var resource = $(this).closest('tr[data-resource]').data('resource');
+                directory.del.showModal(resource);
 
                 e.preventDefault();
                 return true;

@@ -28,6 +28,7 @@ package onyx.components.storage.aws.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.config.OnyxConfig;
@@ -108,8 +109,35 @@ public final class DynamoDbManager implements ResourceManager {
     @Override
     public List<Resource> listDirectory(
             final Resource directory,
-            final Set<Resource.Visibility> visibility) {
-        return new ListDirectory(directory, visibility).run(dbMapper_);
+            final Set<Resource.Visibility> visibility,
+            @Nullable final Extensions.Sort sort) {
+        final List<Resource> resources = new ListDirectory(directory, visibility).run(dbMapper_);
+
+        final List<Resource> sorted;
+        if (Extensions.Sort.FAVORITE.equals(sort)) {
+            final ImmutableList.Builder<Resource> sortedBuilder = ImmutableList.builder();
+
+            // Favorite resources first.
+            sortedBuilder.addAll(resources.stream()
+                    .filter(r -> Resource.Type.DIRECTORY.equals(r.getType()))
+                    .filter(Resource::getFavorite)
+                    .collect(ImmutableList.toImmutableList()));
+            sortedBuilder.addAll(resources.stream()
+                    .filter(r -> Resource.Type.FILE.equals(r.getType()))
+                    .filter(Resource::getFavorite)
+                    .collect(ImmutableList.toImmutableList()));
+
+            // Then, add all other non-favorite resources.
+            sortedBuilder.addAll(resources.stream()
+                    .filter(r -> !r.getFavorite())
+                    .collect(ImmutableList.toImmutableList()));
+
+            sorted = sortedBuilder.build();
+        } else {
+            sorted = resources;
+        }
+
+        return sorted;
     }
 
     @Nonnull

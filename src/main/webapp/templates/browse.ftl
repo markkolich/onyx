@@ -81,7 +81,7 @@
                     <tbody>
                         <#if children?has_content>
                             <#list children as child>
-                                <tr data-resource="${child.getPath()}" data-resource-visibility="${child.getVisibility()}">
+                                <tr data-resource="${child.getPath()}" data-resource-visibility="${child.getVisibility()}" data-resource-favorite="${child.getFavorite()?then('true','false')}">
                                     <td class="align-middle">
                                         <#if child.getType() == "DIRECTORY">
                                             <#if child.getVisibility() == "PRIVATE">
@@ -91,9 +91,9 @@
                                             </#if>
                                         <#elseif child.getType() == "FILE">
                                             <#if child.getVisibility() == "PRIVATE">
-                                                <i class="pl-2 fas fa-file-alt text-dark"></i>
+                                                <i class="pl-2 fas fa-file text-dark"></i>
                                             <#else>
-                                                <i class="pl-2 far fa-file-alt"></i>
+                                                <i class="pl-2 far fa-file"></i>
                                             </#if>
                                         </#if>
                                     </td>
@@ -124,18 +124,15 @@
                                     <td class="align-middle text-right">
                                         <#if session?has_content>
                                             <div class="btn-group" role="group">
-                                                <#-- Sharable links are only available for public resources. -->
-                                                <#if child.getVisibility() == "PUBLIC">
-                                                    <button type="button" class="btn btn-sm btn-success" data-action="copy-sharable-link"><i class="fas fa-link fa-fw"></i></button>
-                                                </#if>
-
                                                 <#-- Controls are only visible if the authenticated user is the owner of the resource. -->
                                                 <#if child.getOwner() == session.getUsername()>
                                                     <#if child.getType() == "DIRECTORY">
                                                         <button type="button" class="btn btn-sm <#if child.getVisibility() == "PUBLIC">btn-dark<#else>btn-light</#if>" data-action="toggle-directory-visibility"><i class="<#if child.getVisibility() == "PUBLIC">fas fa-user-secret<#else>far fa-eye</#if> fa-fw"></i></button>
+                                                        <button type="button" class="btn btn-sm btn-warning" data-action="toggle-directory-favorite"><i class="<#if child.getFavorite()>fas<#else>far</#if> fa-star fa-fw"></i></button>
                                                         <button type="button" class="btn btn-sm btn-danger" data-action="delete-directory"><i class="fas fa-trash fa-fw"></i></button>
                                                     <#elseif child.getType() == "FILE">
                                                         <button type="button" class="btn btn-sm <#if child.getVisibility() == "PUBLIC">btn-dark<#else>btn-light</#if>" data-action="toggle-file-visibility"><i class="<#if child.getVisibility() == "PUBLIC">fas fa-user-secret<#else>far fa-eye</#if> fa-fw" fa-fw"></i></button>
+                                                        <button type="button" class="btn btn-sm btn-warning" data-action="toggle-file-favorite"><i class="<#if child.getFavorite()>fas<#else>far</#if> fa-star fa-fw"></i></button>
                                                         <button type="button" class="btn btn-sm btn-danger" data-action="delete-file"><i class="fas fa-trash fa-fw"></i></button>
                                                     </#if>
                                                 </#if>

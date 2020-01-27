@@ -186,7 +186,16 @@ public final class Directory extends AbstractOnyxApiController {
         }
 
         final Resource.Visibility visibility = request.getVisibility();
-        resourceManager_.updateResource(directory.setVisibility(visibility));
+        if (visibility != null) {
+            directory.setVisibility(visibility);
+        }
+
+        final Boolean favorite = request.getFavorite();
+        if (favorite != null) {
+            directory.setFavorite(favorite);
+        }
+
+        resourceManager_.updateResource(directory);
 
         return noContent();
     }

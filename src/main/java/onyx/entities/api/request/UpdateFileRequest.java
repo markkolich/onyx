@@ -30,38 +30,54 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import onyx.entities.aws.dynamodb.Resource;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import javax.annotation.Nullable;
 
 @JsonDeserialize(builder = UpdateFileRequest.Builder.class)
 public final class UpdateFileRequest {
 
     private final Resource.Visibility visibility_;
+    private final Boolean favorite_;
 
     private UpdateFileRequest(
-            final Resource.Visibility visibility) {
+            final Resource.Visibility visibility,
+            final Boolean favorite) {
         visibility_ = visibility;
+        favorite_ = favorite;
     }
 
+    @Nullable
     @JsonProperty("visibility")
     public Resource.Visibility getVisibility() {
         return visibility_;
     }
 
+    @Nullable
+    @JsonProperty("favorite")
+    public Boolean getFavorite() {
+        return favorite_;
+    }
+
     public static final class Builder {
 
         private Resource.Visibility visibility_;
+        private Boolean favorite_;
 
         @JsonProperty("visibility")
         public Builder setVisibility(
-                final Resource.Visibility visibility) {
+                @Nullable final Resource.Visibility visibility) {
             visibility_ = visibility;
             return this;
         }
 
-        public UpdateFileRequest build() {
-            checkNotNull(visibility_, "Visibility cannot be null.");
+        @JsonProperty("favorite")
+        public Builder setFavorite(
+                @Nullable final Boolean favorite) {
+            favorite_ = favorite;
+            return this;
+        }
 
-            return new UpdateFileRequest(visibility_);
+        public UpdateFileRequest build() {
+            return new UpdateFileRequest(visibility_, favorite_);
         }
 
     }

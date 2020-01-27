@@ -54,7 +54,7 @@ public final class ListHomeDirectories {
 
         final PaginatedScanList<Resource> scanResult = dbMapper.scan(Resource.class, se);
 
-        return scanResult.parallelStream()
+        return scanResult.stream()
                 // Sort the results alphabetically based on path.
                 .sorted(Comparator.comparing(Resource::getPath))
                 .collect(ImmutableList.toImmutableList());

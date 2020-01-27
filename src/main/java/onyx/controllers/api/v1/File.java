@@ -193,7 +193,16 @@ public final class File extends AbstractOnyxApiController {
         }
 
         final Resource.Visibility visibility = request.getVisibility();
-        resourceManager_.updateResource(file.setVisibility(visibility));
+        if (visibility != null) {
+            file.setVisibility(visibility);
+        }
+
+        final Boolean favorite = request.getFavorite();
+        if (favorite != null) {
+            file.setFavorite(favorite);
+        }
+
+        resourceManager_.updateResource(file);
 
         return noContent();
     }

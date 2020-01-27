@@ -30,26 +30,37 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import onyx.entities.aws.dynamodb.Resource;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import javax.annotation.Nullable;
 
 @JsonDeserialize(builder = UpdateDirectoryRequest.Builder.class)
 public final class UpdateDirectoryRequest {
 
     private final Resource.Visibility visibility_;
+    private final Boolean favorite_;
 
     private UpdateDirectoryRequest(
-            final Resource.Visibility visibility) {
+            final Resource.Visibility visibility,
+            final Boolean favorite) {
         visibility_ = visibility;
+        favorite_ = favorite;
     }
 
+    @Nullable
     @JsonProperty("visibility")
     public Resource.Visibility getVisibility() {
         return visibility_;
     }
 
+    @Nullable
+    @JsonProperty("favorite")
+    public Boolean getFavorite() {
+        return favorite_;
+    }
+
     public static final class Builder {
 
         private Resource.Visibility visibility_;
+        private Boolean favorite_;
 
         @JsonProperty("visibility")
         public Builder setVisibility(
@@ -58,10 +69,15 @@ public final class UpdateDirectoryRequest {
             return this;
         }
 
-        public UpdateDirectoryRequest build() {
-            checkNotNull(visibility_, "Visibility cannot be null.");
+        @JsonProperty("favorite")
+        public Builder setFavorite(
+                @Nullable final Boolean favorite) {
+            favorite_ = favorite;
+            return this;
+        }
 
-            return new UpdateDirectoryRequest(visibility_);
+        public UpdateDirectoryRequest build() {
+            return new UpdateDirectoryRequest(visibility_, favorite_);
         }
 
     }
