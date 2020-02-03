@@ -53,9 +53,11 @@ public final class DeleteResource {
 
     public void run(
             final IDynamoDBMapper dbMapper) {
-        if (Resource.Type.FILE.equals(resource_.getType())) {
+        final Resource.Type resourceType = resource_.getType();
+
+        if (Resource.Type.FILE.equals(resourceType)) {
             dbMapper.delete(resource_);
-        } else if (Resource.Type.DIRECTORY.equals(resource_.getType())) {
+        } else if (Resource.Type.DIRECTORY.equals(resourceType)) {
             // First, delete the parent directory itself.
             dbMapper.delete(resource_);
 
@@ -77,7 +79,9 @@ public final class DeleteResource {
 
     private Map<String, AttributeValue> buildExpressionAttributeValues() {
         // IMPORTANT: note the trailing slash on the value, which is to scan for any children
-        // of the directory.
+        // of the directory. For example, if the path to delete was "/foo/bar/baz" we add the
+        // trailing slash so a resource with a similar begins-with path of "/foo/bar/baz.txt"
+        // isn't deleted by mistake.
         return ImmutableMap.of(":value0",
                 new AttributeValue().withS(resource_.getPath() + ResourceManager.ROOT_PATH));
     }

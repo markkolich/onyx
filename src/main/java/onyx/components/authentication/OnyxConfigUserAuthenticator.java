@@ -35,7 +35,8 @@ import com.typesafe.config.ConfigValueType;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentInitializable;
-import onyx.components.config.OnyxConfig;
+import onyx.components.config.authentication.OnyxSessionConfig;
+import onyx.components.config.aws.OnyxAwsConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.aws.dynamodb.DynamoDbMapper;
 import onyx.entities.authentication.Session;
@@ -61,7 +62,8 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
     private static final String USERS_USERNAME_PROP = "username";
     private static final String USERS_PASSWORD_PROP = "password";
 
-    private final OnyxConfig onyxConfig_;
+    private final OnyxSessionConfig onyxSessionConfig_;
+    private final OnyxAwsConfig onyxAwsConfig_;
 
     private final ResourceManager resourceManager_;
 
@@ -72,10 +74,12 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
 
     @Injectable
     public OnyxConfigUserAuthenticator(
-            final OnyxConfig onyxConfig,
+            final OnyxSessionConfig onyxSessionConfig,
+            final OnyxAwsConfig onyxAwsConfig,
             final ResourceManager resourceManager,
             final DynamoDbMapper dynamoDbMapper) {
-        onyxConfig_ = onyxConfig;
+        onyxSessionConfig_ = onyxSessionConfig;
+        onyxAwsConfig_ = onyxAwsConfig;
         resourceManager_ = resourceManager;
         dbMapper_ = dynamoDbMapper.getDbMapper();
 
@@ -87,8 +91,7 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
         final ImmutableMap.Builder<String, String> userCredentialsBuilder =
                 ImmutableMap.builder();
 
-        final ConfigList userCredentialsInConfig =
-                onyxConfig_.getOnyxConfig().getList(OnyxConfig.SESSION_USERS_PROP);
+        final ConfigList userCredentialsInConfig = onyxSessionConfig_.getUsers();
         for (final ConfigValue configValue : userCredentialsInConfig) {
             if (!ConfigValueType.OBJECT.equals(configValue.valueType())) {
                 continue;
@@ -133,7 +136,7 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
         }
 
         final long sessionDurationInSeconds =
-                onyxConfig_.getSessionDuration(TimeUnit.SECONDS);
+                onyxSessionConfig_.getSessionDuration(TimeUnit.SECONDS);
         final Date sessionExpiry =
                 new Date(Instant.now().plusSeconds(sessionDurationInSeconds).toEpochMilli());
 
@@ -161,8 +164,8 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
                         .setVisibility(Resource.Visibility.PUBLIC)
                         .setOwner(username)
                         .setCreatedAt(new Date()) // now
-                        .withS3BucketRegion(Region.fromValue(onyxConfig_.getAwsRegion().getName()))
-                        .withS3Bucket(onyxConfig_.getAwsS3BucketName())
+                        .withS3BucketRegion(Region.fromValue(onyxAwsConfig_.getAwsRegion().getName()))
+                        .withS3Bucket(onyxAwsConfig_.getAwsS3BucketName())
                         .withDbMapper(dbMapper_)
                         .build();
 

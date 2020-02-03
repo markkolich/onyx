@@ -24,25 +24,27 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.config;
+package onyx.components.config.cache;
 
-import com.typesafe.config.Config;
+import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
-public interface OnyxConfig {
+public interface OnyxLocalCacheConfig {
 
-    String CONTEXT_PATH_PROP = "context-path";
-    String BASE_URI_PROP = "base-uri";
-    String FULL_URI_PROP = "full-uri";
-    String DEV_MODE_PROP = "dev-mode";
+    String LOCAL_CACHE_CONFIG_PATH = "local-cache";
 
-    Config getOnyxConfig();
+    String LOCAL_CACHE_ENABLED_PROP = "enabled";
+    String LOCAL_CACHE_DIRECTORY_PROP = "directory";
+    String LOCAL_CACHE_TOKEN_SIGNER_SECRET_PROP = "token-signer-secret";
+    String LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP = "token-validity-duration";
 
-    String getContextPath();
+    boolean localCacheEnabled();
 
-    String getBaseUri();
+    Path getLocalCacheDirectory();
 
-    String getFullUri();
+    String getLocalCacheTokenSignerSecret();
 
-    boolean isDevMode();
+    long getLocalCacheTokenValidityDuration(
+            final TimeUnit timeUnit);
 
 }

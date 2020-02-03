@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolich.common.util.secure.KolichStringSigner;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.config.OnyxConfig;
+import onyx.components.config.cache.OnyxLocalCacheConfig;
 import onyx.entities.storage.cache.CachedResourceToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +52,8 @@ public final class LocalCachedResourceSigner implements CachedResourceSigner {
 
     @Injectable
     public LocalCachedResourceSigner(
-            final OnyxConfig onyxConfig) {
-        cacheTokenSignerSecret_ = onyxConfig.getLocalCacheTokenSignerSecret();
+            final OnyxLocalCacheConfig onyxLocalCacheConfig) {
+        cacheTokenSignerSecret_ = onyxLocalCacheConfig.getLocalCacheTokenSignerSecret();
     }
 
     @Nullable

@@ -24,41 +24,46 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws.s3;
+package onyx.components.config.authentication;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigList;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.components.ComponentDestroyable;
-import onyx.components.config.aws.OnyxAwsConfig;
-import onyx.components.storage.aws.AwsClientConfiguration;
-import onyx.components.storage.aws.AwsCredentials;
+import onyx.components.config.OnyxConfig;
+
+import java.util.concurrent.TimeUnit;
 
 @Component
-public final class S3Client implements ComponentDestroyable {
+public final class OnyxTypesafeSessionConfig implements OnyxSessionConfig {
 
-    private final AmazonS3 s3_;
+    private final Config config_;
 
     @Injectable
-    public S3Client(
-            final OnyxAwsConfig onyxAwsConfig,
-            final AwsCredentials awsCredentials,
-            final AwsClientConfiguration awsClientConfiguration) {
-        s3_ = AmazonS3ClientBuilder.standard()
-                .withCredentials(awsCredentials.getCredentialsProvider())
-                .withClientConfiguration(awsClientConfiguration.getClientConfiguration())
-                .withRegion(onyxAwsConfig.getAwsRegion())
-                .build();
-    }
-
-    public AmazonS3 getS3Client() {
-        return s3_;
+    public OnyxTypesafeSessionConfig(
+            final OnyxConfig onyxConfig) {
+        config_ = onyxConfig.getOnyxConfig().getConfig(SESSION_CONFIG_PATH);
     }
 
     @Override
-    public void destroy() throws Exception {
-        s3_.shutdown();
+    public ConfigList getUsers() {
+        return config_.getList(SESSION_USERS_PROP);
+    }
+
+    @Override
+    public long getSessionDuration(
+            final TimeUnit timeUnit) {
+        return config_.getDuration(SESSION_DURATION_PROP, timeUnit);
+    }
+
+    @Override
+    public String getSessionSignerSecret() {
+        return config_.getString(SESSION_SIGNER_SECRET_PROP);
+    }
+
+    @Override
+    public boolean isSessionUsingHttps() {
+        return config_.getBoolean(SESSION_HTTPS_PROP);
     }
 
 }

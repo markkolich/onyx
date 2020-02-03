@@ -24,25 +24,40 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.config;
+package onyx.components.config.aws;
 
-import com.typesafe.config.Config;
+import com.amazonaws.regions.Regions;
 
-public interface OnyxConfig {
+import java.util.concurrent.TimeUnit;
 
-    String CONTEXT_PATH_PROP = "context-path";
-    String BASE_URI_PROP = "base-uri";
-    String FULL_URI_PROP = "full-uri";
-    String DEV_MODE_PROP = "dev-mode";
+public interface OnyxAwsConfig {
 
-    Config getOnyxConfig();
+    String AWS_CONFIG_PATH = "aws";
 
-    String getContextPath();
+    String AWS_ACCESS_KEY_PROP = "access-key";
+    String AWS_SECRET_KEY_PROP = "secret-key";
+    String AWS_REGION_PROP = "region";
 
-    String getBaseUri();
+    String AWS_DYNAMO_DB_TABLE_NAME_PROP = "dynamo-db.table-name";
 
-    String getFullUri();
+    String AWS_S3_BUCKET_NAME_PROP = "s3.bucket-name";
+    String AWS_S3_ASSET_URL_VALIDITY_DURATION_PROP = "s3.asset-url-validity-duration";
 
-    boolean isDevMode();
+    String getAwsAccessKey();
+
+    String getAwsSecretKey();
+
+    Regions getAwsRegion();
+
+    // DynamoDB config
+
+    String getAwsDynamoDbTableName();
+
+    // S3 config
+
+    String getAwsS3BucketName();
+
+    long getAwsS3PresignedAssetUrlValidityDuration(
+            final TimeUnit timeUnit);
 
 }

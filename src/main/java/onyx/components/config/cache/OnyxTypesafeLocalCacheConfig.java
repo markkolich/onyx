@@ -24,41 +24,46 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws.s3;
+package onyx.components.config.cache;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.typesafe.config.Config;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.components.ComponentDestroyable;
-import onyx.components.config.aws.OnyxAwsConfig;
-import onyx.components.storage.aws.AwsClientConfiguration;
-import onyx.components.storage.aws.AwsCredentials;
+import onyx.components.config.OnyxConfig;
+
+import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
 @Component
-public final class S3Client implements ComponentDestroyable {
+public final class OnyxTypesafeLocalCacheConfig implements OnyxLocalCacheConfig {
 
-    private final AmazonS3 s3_;
+    private final Config config_;
 
     @Injectable
-    public S3Client(
-            final OnyxAwsConfig onyxAwsConfig,
-            final AwsCredentials awsCredentials,
-            final AwsClientConfiguration awsClientConfiguration) {
-        s3_ = AmazonS3ClientBuilder.standard()
-                .withCredentials(awsCredentials.getCredentialsProvider())
-                .withClientConfiguration(awsClientConfiguration.getClientConfiguration())
-                .withRegion(onyxAwsConfig.getAwsRegion())
-                .build();
-    }
-
-    public AmazonS3 getS3Client() {
-        return s3_;
+    public OnyxTypesafeLocalCacheConfig(
+            final OnyxConfig onyxConfig) {
+        config_ = onyxConfig.getOnyxConfig().getConfig(LOCAL_CACHE_CONFIG_PATH);
     }
 
     @Override
-    public void destroy() throws Exception {
-        s3_.shutdown();
+    public boolean localCacheEnabled() {
+        return config_.getBoolean(LOCAL_CACHE_ENABLED_PROP);
+    }
+
+    @Override
+    public Path getLocalCacheDirectory() {
+        return Path.of(config_.getString(LOCAL_CACHE_DIRECTORY_PROP));
+    }
+
+    @Override
+    public String getLocalCacheTokenSignerSecret() {
+        return config_.getString(LOCAL_CACHE_TOKEN_SIGNER_SECRET_PROP);
+    }
+
+    @Override
+    public long getLocalCacheTokenValidityDuration(
+            final TimeUnit timeUnit) {
+        return config_.getDuration(LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP, timeUnit);
     }
 
 }

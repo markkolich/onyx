@@ -24,25 +24,28 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.config;
+package onyx.components.config.authentication;
 
-import com.typesafe.config.Config;
+import com.typesafe.config.ConfigList;
 
-public interface OnyxConfig {
+import java.util.concurrent.TimeUnit;
 
-    String CONTEXT_PATH_PROP = "context-path";
-    String BASE_URI_PROP = "base-uri";
-    String FULL_URI_PROP = "full-uri";
-    String DEV_MODE_PROP = "dev-mode";
+public interface OnyxSessionConfig {
 
-    Config getOnyxConfig();
+    String SESSION_CONFIG_PATH = "session";
 
-    String getContextPath();
+    String SESSION_USERS_PROP = "users";
+    String SESSION_DURATION_PROP = "duration";
+    String SESSION_SIGNER_SECRET_PROP = "signer-secret";
+    String SESSION_HTTPS_PROP = "https";
 
-    String getBaseUri();
+    ConfigList getUsers();
 
-    String getFullUri();
+    long getSessionDuration(
+            final TimeUnit timeUnit);
 
-    boolean isDevMode();
+    String getSessionSignerSecret();
+
+    boolean isSessionUsingHttps();
 
 }

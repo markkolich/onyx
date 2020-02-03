@@ -33,6 +33,7 @@ import curacao.annotations.parameters.RequestBody;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.config.OnyxConfig;
+import onyx.components.config.authentication.OnyxSessionConfig;
 import onyx.components.storage.AsynchronousResourcePool;
 import onyx.entities.freemarker.FreeMarkerContent;
 import org.apache.commons.lang3.StringUtils;
@@ -50,6 +51,8 @@ public final class Session extends AbstractOnyxController {
     private static final String USERNAME_FIELD = "username";
     private static final String PASSWORD_FIELD = "password";
 
+    private final OnyxSessionConfig onyxSessionConfig_;
+
     private final UserAuthenticator userAuthenticator_;
     private final SessionManager sessionManager_;
 
@@ -57,9 +60,11 @@ public final class Session extends AbstractOnyxController {
     public Session(
             final OnyxConfig onyxConfig,
             final AsynchronousResourcePool asynchronousResourcePool,
+            final OnyxSessionConfig onyxSessionConfig,
             final UserAuthenticator userAuthenticator,
             final SessionManager sessionManager) {
         super(onyxConfig, asynchronousResourcePool);
+        onyxSessionConfig_ = onyxSessionConfig;
         userAuthenticator_ = userAuthenticator;
         sessionManager_ = sessionManager;
     }
@@ -91,7 +96,7 @@ public final class Session extends AbstractOnyxController {
 
         final String signedSession = sessionManager_.signSession(session);
         setCookie(SessionManager.SESSION_NAME, signedSession,
-                onyxConfig_.isSessionUsingHttps(), response);
+                onyxSessionConfig_.isSessionUsingHttps(), response);
         response.sendRedirect(onyxConfig_.getFullUri() + "browse/" + session.getUsername());
         context.complete();
 
@@ -102,7 +107,7 @@ public final class Session extends AbstractOnyxController {
     public void logout(
             final HttpServletResponse response,
             final AsyncContext context) throws Exception {
-        unsetCookie(SessionManager.SESSION_NAME, onyxConfig_.isSessionUsingHttps(), response);
+        unsetCookie(SessionManager.SESSION_NAME, onyxSessionConfig_.isSessionUsingHttps(), response);
         response.sendRedirect(onyxConfig_.getFullUri());
         context.complete();
     }

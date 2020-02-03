@@ -31,7 +31,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentDestroyable;
-import onyx.components.config.OnyxConfig;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,21 +46,16 @@ public final class AsynchronousResourcePool implements ComponentDestroyable {
             .setNameFormat("onyx-resource-pool-worker-%d")
             .build();
 
-    private final OnyxConfig onyxConfig_;
-
     private final ExecutorService executorService_;
 
     @Injectable
-    public AsynchronousResourcePool(
-            final OnyxConfig onyxConfig) {
-        this(onyxConfig, Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE, THREAD_FACTORY));
+    public AsynchronousResourcePool() {
+        this(Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE, THREAD_FACTORY));
     }
 
     @VisibleForTesting
     protected AsynchronousResourcePool(
-            final OnyxConfig onyxConfig,
             final ExecutorService executorService) {
-        onyxConfig_ = onyxConfig;
         executorService_ = executorService;
     }
 

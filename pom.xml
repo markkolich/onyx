@@ -24,7 +24,7 @@
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <logback.version>1.2.3</logback.version>
 
-        <curacao.version>6.2.0</curacao.version>
+        <curacao.version>6.2.1</curacao.version>
 
         <kolich-common.version>0.5</kolich-common.version>
 
@@ -37,7 +37,7 @@
         <commons-io.version>2.6</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
 
-        <aws-sdk.version>1.11.699</aws-sdk.version>
+        <aws-sdk.version>1.11.714</aws-sdk.version>
 
         <guava.version>28.2-jre</guava.version>
 
@@ -51,13 +51,13 @@
 
         <async-http-client.version>2.10.4</async-http-client.version>
 
-        <picocli.version>4.1.1</picocli.version>
+        <picocli.version>4.1.4</picocli.version>
 
-        <checkstyle.version>8.27</checkstyle.version>
+        <checkstyle.version>8.29</checkstyle.version>
 
         <!-- Test dependency versions -->
 
-        <junit.jupiter.version>5.5.2</junit.jupiter.version>
+        <junit.jupiter.version>5.6.0</junit.jupiter.version>
         <mockito-core.version>3.2.4</mockito-core.version>
     </properties>
 

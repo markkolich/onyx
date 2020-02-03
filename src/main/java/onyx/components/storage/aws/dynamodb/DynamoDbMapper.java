@@ -31,8 +31,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import onyx.components.config.aws.OnyxAwsConfig;
 import onyx.components.storage.aws.AwsCredentials;
-import onyx.components.config.OnyxConfig;
 
 @Component
 public final class DynamoDbMapper {
@@ -41,11 +41,11 @@ public final class DynamoDbMapper {
 
     @Injectable
     public DynamoDbMapper(
-            final OnyxConfig onyxConfig,
+            final OnyxAwsConfig onyxAwsConfig,
             final AwsCredentials awsCredentials,
             final DynamoDbClient dynamoDbClient) {
         final DynamoDBMapperConfig dbMapperConfig = DynamoDBMapperConfig.builder()
-                .withTableNameResolver((clazz, config) -> onyxConfig.getAwsDynamoDbTableName())
+                .withTableNameResolver((clazz, config) -> onyxAwsConfig.getAwsDynamoDbTableName())
                 .build();
 
         dbMapper_ = new DynamoDBMapper(dynamoDbClient.getDbClient(), dbMapperConfig,

@@ -27,8 +27,7 @@
 package onyx;
 
 import com.google.common.base.Splitter;
-import curacao.CuracaoContextListener.CuracaoCoreObjectMap;
-import onyx.components.config.OnyxConfig;
+import onyx.components.config.cache.OnyxLocalCacheConfig;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.cache.CachedResourceSigner;
 import onyx.entities.storage.cache.CachedResourceToken;
@@ -38,12 +37,12 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import java.nio.file.Path;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.componentFromContext;
 
 public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
 
@@ -63,8 +62,10 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
         final ServletContext context = getServletContext();
 
         // If the local cache is not enabled, immediately bail.
-        final OnyxConfig onyxConfig = getComponentForServletContext(context, OnyxConfig.class);
-        final boolean localCacheEnabled = onyxConfig.localCacheEnabled();
+        final OnyxLocalCacheConfig onyxLocalCacheConfig =
+                componentFromContext(context, OnyxLocalCacheConfig.class);
+        checkNotNull(onyxLocalCacheConfig, "Local cache config cannot be null; context not initialized?");
+        final boolean localCacheEnabled = onyxLocalCacheConfig.localCacheEnabled();
         if (!localCacheEnabled) {
             LOG.debug("Local resource cache not enabled; bye.");
             return null;
@@ -80,7 +81,8 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
         // Validate the signed cache token.
         final String token = tokens.iterator().next();
         final CachedResourceSigner cachedResourceSigner =
-                getComponentForServletContext(context, CachedResourceSigner.class);
+                componentFromContext(context, CachedResourceSigner.class);
+        checkNotNull(cachedResourceSigner, "Cached resource signer cannot be null; context not initialized?");
         final CachedResourceToken cachedResourceToken =
                 cachedResourceSigner.extractSignedCachedResourceToken(token);
         if (cachedResourceToken == null) {
@@ -89,7 +91,8 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
         }
 
         // Locate the cached asset/file for the resource token.
-        final CacheManager cacheManager = getComponentForServletContext(context, CacheManager.class);
+        final CacheManager cacheManager = componentFromContext(context, CacheManager.class);
+        checkNotNull(cacheManager, "Cache manager cannot be null; context not initialized?");
         final Path cachedResource = cacheManager.getCachedResourceFileForPath(cachedResourceToken.getPath());
         if (cachedResource == null) {
             LOG.warn("Got valid token, but found no asset/file in cache for path: {}",
@@ -104,21 +107,6 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
                     cachedResourceToken.getPath(), e);
             return null;
         }
-    }
-
-    @Nonnull
-    @SuppressWarnings("unchecked") // intentional & safe
-    private static <T> T getComponentForServletContext(
-            final ServletContext servletContext,
-            final Class<T> componentClass) {
-        final CuracaoCoreObjectMap coreObjectMap = CuracaoCoreObjectMap.objectMapFromContext(servletContext);
-        checkNotNull(coreObjectMap, "Curacao core object map should not be null; context not initialized?");
-
-        final T component = (T) coreObjectMap.componentTable_.getComponentForType(componentClass);
-        checkNotNull(component, "Failed to find component for class: " + componentClass.getCanonicalName()
-                + "; context not initialized?");
-
-        return component;
     }
 
 }

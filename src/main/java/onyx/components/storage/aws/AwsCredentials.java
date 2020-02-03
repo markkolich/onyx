@@ -32,7 +32,7 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.config.OnyxConfig;
+import onyx.components.config.aws.OnyxAwsConfig;
 
 @Component
 public final class AwsCredentials {
@@ -42,8 +42,9 @@ public final class AwsCredentials {
 
     @Injectable
     public AwsCredentials(
-            final OnyxConfig onyxConfig) {
-        awsCredentials_ = new BasicAWSCredentials(onyxConfig.getAwsAccessKey(), onyxConfig.getAwsSecretKey());
+            final OnyxAwsConfig onyxAwsConfig) {
+        awsCredentials_ = new BasicAWSCredentials(onyxAwsConfig.getAwsAccessKey(),
+                onyxAwsConfig.getAwsSecretKey());
         awsCredentialsProvider_ = new AWSStaticCredentialsProvider(awsCredentials_);
     }
 

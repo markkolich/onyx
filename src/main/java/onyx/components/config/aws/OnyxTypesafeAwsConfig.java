@@ -24,41 +24,60 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws.s3;
+package onyx.components.config.aws;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.regions.Regions;
+import com.typesafe.config.Config;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.components.ComponentDestroyable;
-import onyx.components.config.aws.OnyxAwsConfig;
-import onyx.components.storage.aws.AwsClientConfiguration;
-import onyx.components.storage.aws.AwsCredentials;
+import onyx.components.config.OnyxConfig;
+
+import java.util.concurrent.TimeUnit;
 
 @Component
-public final class S3Client implements ComponentDestroyable {
+public final class OnyxTypesafeAwsConfig implements OnyxAwsConfig {
 
-    private final AmazonS3 s3_;
+    private final Config config_;
 
     @Injectable
-    public S3Client(
-            final OnyxAwsConfig onyxAwsConfig,
-            final AwsCredentials awsCredentials,
-            final AwsClientConfiguration awsClientConfiguration) {
-        s3_ = AmazonS3ClientBuilder.standard()
-                .withCredentials(awsCredentials.getCredentialsProvider())
-                .withClientConfiguration(awsClientConfiguration.getClientConfiguration())
-                .withRegion(onyxAwsConfig.getAwsRegion())
-                .build();
-    }
-
-    public AmazonS3 getS3Client() {
-        return s3_;
+    public OnyxTypesafeAwsConfig(
+            final OnyxConfig onyxConfig) {
+        config_ = onyxConfig.getOnyxConfig().getConfig(AWS_CONFIG_PATH);
     }
 
     @Override
-    public void destroy() throws Exception {
-        s3_.shutdown();
+    public String getAwsAccessKey() {
+        return config_.getString(AWS_ACCESS_KEY_PROP);
+    }
+
+    @Override
+    public String getAwsSecretKey() {
+        return config_.getString(AWS_SECRET_KEY_PROP);
+    }
+
+    @Override
+    public Regions getAwsRegion() {
+        return Regions.fromName(config_.getString(AWS_REGION_PROP));
+    }
+
+    // AWS DynamoDB
+
+    @Override
+    public String getAwsDynamoDbTableName() {
+        return config_.getString(AWS_DYNAMO_DB_TABLE_NAME_PROP);
+    }
+
+    // AWS S3
+
+    @Override
+    public String getAwsS3BucketName() {
+        return config_.getString(AWS_S3_BUCKET_NAME_PROP);
+    }
+
+    @Override
+    public long getAwsS3PresignedAssetUrlValidityDuration(
+            final TimeUnit timeUnit) {
+        return config_.getDuration(AWS_S3_ASSET_URL_VALIDITY_DURATION_PROP, timeUnit);
     }
 
 }

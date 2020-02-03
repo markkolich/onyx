@@ -36,6 +36,7 @@ import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.RequestBody;
 import curacao.entities.CuracaoEntity;
 import onyx.components.config.OnyxConfig;
+import onyx.components.config.aws.OnyxAwsConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
@@ -61,6 +62,8 @@ import static curacao.annotations.RequestMapping.Method.*;
 @Controller
 public final class Directory extends AbstractOnyxApiController {
 
+    private final OnyxAwsConfig onyxAwsConfig_;
+
     private final AssetManager assetManager_;
     private final ResourceManager resourceManager_;
 
@@ -70,10 +73,12 @@ public final class Directory extends AbstractOnyxApiController {
     public Directory(
             final OnyxConfig onyxConfig,
             final AsynchronousResourcePool asynchronousResourcePool,
+            final OnyxAwsConfig onyxAwsConfig,
             final AssetManager assetManager,
             final ResourceManager resourceManager,
             final DynamoDbMapper dynamoDbMapper) {
         super(onyxConfig, asynchronousResourcePool);
+        onyxAwsConfig_ = onyxAwsConfig;
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
         dbMapper_ = dynamoDbMapper.getDbMapper();
@@ -118,8 +123,8 @@ public final class Directory extends AbstractOnyxApiController {
                             .setVisibility(request.getVisibility())
                             .setOwner(session.getUsername())
                             .setCreatedAt(new Date()) // now
-                            .withS3BucketRegion(Region.fromValue(onyxConfig_.getAwsRegion().getName()))
-                            .withS3Bucket(onyxConfig_.getAwsS3BucketName())
+                            .withS3BucketRegion(Region.fromValue(onyxAwsConfig_.getAwsRegion().getName()))
+                            .withS3Bucket(onyxAwsConfig_.getAwsS3BucketName())
                             .withDbMapper(dbMapper_)
                             .build();
 
@@ -151,8 +156,8 @@ public final class Directory extends AbstractOnyxApiController {
                 .setVisibility(request.getVisibility())
                 .setOwner(session.getUsername())
                 .setCreatedAt(new Date()) // now
-                .withS3BucketRegion(Region.fromValue(onyxConfig_.getAwsRegion().getName()))
-                .withS3Bucket(onyxConfig_.getAwsS3BucketName())
+                .withS3BucketRegion(Region.fromValue(onyxAwsConfig_.getAwsRegion().getName()))
+                .withS3Bucket(onyxAwsConfig_.getAwsS3BucketName())
                 .withDbMapper(dbMapper_)
                 .build();
 

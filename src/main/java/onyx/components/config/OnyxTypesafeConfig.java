@@ -26,19 +26,13 @@
 
 package onyx.components.config;
 
-import com.amazonaws.regions.Regions;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import curacao.annotations.Component;
 
-import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
-
 /**
  * An {@link OnyxConfig} implementation backed by the Typesafe (a.k.a., Lightbend)
- * configuration library:
- *
- * https://github.com/lightbend/config
+ * configuration library.
  */
 @Component
 public final class OnyxTypesafeConfig implements OnyxConfig {
@@ -76,80 +70,6 @@ public final class OnyxTypesafeConfig implements OnyxConfig {
     @Override
     public boolean isDevMode() {
         return config_.getBoolean(DEV_MODE_PROP);
-    }
-
-    @Override
-    public long getSessionDuration(
-            final TimeUnit timeUnit) {
-        return config_.getDuration(SESSION_DURATION_PROP, timeUnit);
-    }
-
-    @Override
-    public String getSessionSignerSecret() {
-        return config_.getString(SESSION_SIGNER_SECRET_PROP);
-    }
-
-    @Override
-    public boolean isSessionUsingHttps() {
-        return config_.getBoolean(SESSION_HTTPS_PROP);
-    }
-
-    @Override
-    public boolean localCacheEnabled() {
-        return config_.getBoolean(LOCAL_CACHE_ENABLED);
-    }
-
-    @Override
-    public Path getLocalCacheDirectory() {
-        return Path.of(config_.getString(LOCAL_CACHE_DIRECTORY));
-    }
-
-    @Override
-    public String getLocalCacheTokenSignerSecret() {
-        return config_.getString(LOCAL_CACHE_TOKEN_SIGNER_SECRET);
-    }
-
-    @Override
-    public long getLocalCacheTokenValidityDuration(
-            final TimeUnit timeUnit) {
-        return config_.getDuration(LOCAL_CACHE_TOKEN_VALIDITY_DURATION, timeUnit);
-    }
-
-    // AWS
-
-    @Override
-    public String getAwsAccessKey() {
-        return config_.getString(AWS_ACCESS_KEY_PROP);
-    }
-
-    @Override
-    public String getAwsSecretKey() {
-        return config_.getString(AWS_SECRET_KEY_PROP);
-    }
-
-    @Override
-    public Regions getAwsRegion() {
-        return Regions.fromName(config_.getString(AWS_REGION_PROP));
-    }
-
-    // AWS DynamoDB
-
-    @Override
-    public String getAwsDynamoDbTableName() {
-        return config_.getString(AWS_DYNAMO_DB_TABLE_NAME_PROP);
-    }
-
-    // AWS S3
-
-    @Override
-    public String getAwsS3BucketName() {
-        return config_.getString(AWS_S3_BUCKET_NAME_PROP);
-    }
-
-    @Override
-    public long getAwsS3PresignedAssetUrlValidityDuration(
-            final TimeUnit timeUnit) {
-        return config_.getDuration(AWS_S3_ASSET_URL_VALIDITY_DURATION_PROP, timeUnit);
     }
 
 }

@@ -37,7 +37,7 @@ import com.google.common.net.MediaType;
 import curacao.CuracaoConfigLoader;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.config.OnyxConfig;
+import onyx.components.config.aws.OnyxAwsConfig;
 import onyx.components.storage.AssetManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.apache.commons.io.FilenameUtils;
@@ -61,15 +61,15 @@ public final class S3Manager implements AssetManager {
     private static final String SLASH_STRING = "/";
     private static final String EMPTY_STRING = "";
 
-    private final OnyxConfig onyxConfig_;
+    private final OnyxAwsConfig onyxAwsConfig_;
 
     private final AmazonS3 s3_;
 
     @Injectable
     public S3Manager(
-            final OnyxConfig onyxConfig,
+            final OnyxAwsConfig onyxAwsConfig,
             final S3Client onyxS3Client) {
-        onyxConfig_ = onyxConfig;
+        onyxAwsConfig_ = onyxAwsConfig;
         s3_ = onyxS3Client.getS3Client();
     }
 
@@ -90,7 +90,7 @@ public final class S3Manager implements AssetManager {
             final Resource resource,
             final HttpMethod httpMethod) {
         final long linkValidityDurationInSeconds =
-                onyxConfig_.getAwsS3PresignedAssetUrlValidityDuration(TimeUnit.SECONDS);
+                onyxAwsConfig_.getAwsS3PresignedAssetUrlValidityDuration(TimeUnit.SECONDS);
 
         final S3Link s3Link = resource.getS3Link();
 
@@ -115,10 +115,12 @@ public final class S3Manager implements AssetManager {
     @Override
     public void deleteResource(
             final Resource resource) {
-        if (Resource.Type.FILE.equals(resource.getType())) {
+        final Resource.Type resourceType = resource.getType();
+
+        if (Resource.Type.FILE.equals(resourceType)) {
             final S3Link s3Link = resource.getS3Link();
             s3_.deleteObject(s3Link.getBucketName(), s3Link.getKey());
-        } else if (Resource.Type.DIRECTORY.equals(resource.getType())) {
+        } else if (Resource.Type.DIRECTORY.equals(resourceType)) {
             final S3Link s3Link = resource.getS3Link();
 
             // IMPORTANT: note the trailing slash on the key, which is to catch all "children"

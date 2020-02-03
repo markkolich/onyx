@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolich.common.util.secure.KolichStringSigner;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.config.OnyxConfig;
+import onyx.components.config.authentication.OnyxSessionConfig;
 import onyx.entities.authentication.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +52,8 @@ public final class OnyxSignedSessionManager implements SessionManager {
 
     @Injectable
     public OnyxSignedSessionManager(
-            final OnyxConfig onyxConfig) {
-        sessionSignerSecret_ = onyxConfig.getSessionSignerSecret();
+            final OnyxSessionConfig onyxSessionConfig) {
+        sessionSignerSecret_ = onyxSessionConfig.getSessionSignerSecret();
     }
 
     @Nullable
