@@ -148,6 +148,19 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
     }
 
     @Override
+    public Session refreshSession(
+            final Session session) {
+        final long sessionDurationInSeconds =
+                onyxSessionConfig_.getSessionDuration(TimeUnit.SECONDS);
+        final Date sessionExpiry =
+                new Date(Instant.now().plusSeconds(sessionDurationInSeconds).toEpochMilli());
+
+        return session.toBuilder()
+                .setExpiry(sessionExpiry)
+                .build();
+    }
+
+    @Override
     public void initialize() throws Exception {
         // Verify that any users in configuration have an active "home directory".
         // If not, create them!

@@ -27,6 +27,7 @@
 package onyx.entities.storage.cache;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -57,6 +58,13 @@ public final class CachedResourceToken {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     public Date getExpiry() {
         return expiry_;
+    }
+
+    @JsonIgnore
+    public Builder toBuilder() {
+        return new Builder()
+                .setPath(path_)
+                .setExpiry(expiry_);
     }
 
     public static final class Builder {

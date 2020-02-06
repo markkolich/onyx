@@ -37,4 +37,7 @@ public interface UserAuthenticator {
             final String username,
             final String password);
 
+    Session refreshSession(
+            final Session session);
+
 }

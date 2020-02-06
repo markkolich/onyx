@@ -27,6 +27,7 @@
 package onyx.entities.authentication;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -65,6 +66,14 @@ public final class Session {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     public Date getExpiry() {
         return expiry_;
+    }
+
+    @JsonIgnore
+    public Builder toBuilder() {
+        return new Builder()
+                .setId(id_)
+                .setUsername(username_)
+                .setExpiry(expiry_);
     }
 
     public static final class Builder {

@@ -30,6 +30,7 @@ import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.RequestBody;
+import curacao.entities.CuracaoEntity;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.config.OnyxConfig;
@@ -110,6 +111,24 @@ public final class Session extends AbstractOnyxController {
         unsetCookie(SessionManager.SESSION_NAME, onyxSessionConfig_.isSessionUsingHttps(), response);
         response.sendRedirect(onyxConfig_.getFullUri());
         context.complete();
+    }
+
+    @RequestMapping(value = "^/keepalive$")
+    public CuracaoEntity keepalive(
+            final onyx.entities.authentication.Session session,
+            final HttpServletResponse response) {
+        if (session == null) {
+            return badRequest();
+        }
+
+        // Refresh any existing & valid session attached to the user context.
+        final onyx.entities.authentication.Session refreshed =
+                userAuthenticator_.refreshSession(session);
+        final String signedRefreshedSession = sessionManager_.signSession(refreshed);
+        setCookie(SessionManager.SESSION_NAME, signedRefreshedSession,
+                onyxSessionConfig_.isSessionUsingHttps(), response);
+
+        return noContent();
     }
 
 }

@@ -26,6 +26,7 @@
 
 package onyx.entities.api.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import onyx.entities.storage.aws.dynamodb.Resource;
@@ -55,6 +56,13 @@ public final class UpdateDirectoryRequest {
     @JsonProperty("favorite")
     public Boolean getFavorite() {
         return favorite_;
+    }
+
+    @JsonIgnore
+    public Builder toBuilder() {
+        return new Builder()
+                .setVisibility(visibility_)
+                .setFavorite(favorite_);
     }
 
     public static final class Builder {

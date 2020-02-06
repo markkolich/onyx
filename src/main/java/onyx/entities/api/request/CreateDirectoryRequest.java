@@ -26,6 +26,7 @@
 
 package onyx.entities.api.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import onyx.entities.storage.aws.dynamodb.Resource;
@@ -53,6 +54,13 @@ public final class CreateDirectoryRequest {
     @JsonProperty("visibility")
     public Resource.Visibility getVisibility() {
         return visibility_;
+    }
+
+    @JsonIgnore
+    public Builder toBuilder() {
+        return new Builder()
+                .setDescription(description_)
+                .setVisibility(visibility_);
     }
 
     public static final class Builder {

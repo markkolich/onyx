@@ -144,7 +144,7 @@
                         modal = $('#deleteFileModal'),
 
                         showModal = function(resource) {
-                            var name = resource.split('/').pop();
+                            var name = decodeURIComponent(resource.split('/').pop());
                             modal.find('[data-modal="name"]').html(name);
 
                             modal.on('shown.bs.modal', function() {
@@ -273,7 +273,7 @@
                         modal = $('#deleteDirectoryModal'),
 
                         showModal = function(resource) {
-                            var name = resource.split('/').pop();
+                            var name = decodeURIComponent(resource.split('/').pop());
                             modal.find('[data-modal="name"]').html(name);
 
                             modal.on('shown.bs.modal', function() {

@@ -5,7 +5,7 @@
     <#include "common/css.ftl">
 </head>
 
-<body class="bg-gray-100" data-path="${directory.getPath()}">
+<body class="bg-gray-100" data-path="${directory.getPath()}"<#if session?has_content> data-session="${session.id}"</#if>>
 
   <!-- Page Wrapper -->
   <div id="wrapper">
@@ -46,7 +46,6 @@
                 <#if directory.getHtmlDescription()?has_content>
                     <p class="text-muted mb-3">${directory.getHtmlDescription()}</p>
                 </#if>
-
 
                 <table class="table table-striped table-hover mb-0">
 
