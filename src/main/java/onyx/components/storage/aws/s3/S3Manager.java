@@ -29,10 +29,9 @@ package onyx.components.storage.aws.s3;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.dynamodbv2.datamodeling.S3Link;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.Headers;
+import com.amazonaws.services.s3.model.*;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.net.MediaType;
 import curacao.CuracaoConfigLoader;
 import curacao.annotations.Component;
@@ -40,14 +39,17 @@ import curacao.annotations.Injectable;
 import onyx.components.config.aws.OnyxAwsConfig;
 import onyx.components.storage.AssetManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.net.URL;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -76,19 +78,24 @@ public final class S3Manager implements AssetManager {
     @Override
     public URL getPresignedDownloadUrlForResource(
             final Resource resource) {
-        return getPresignedUrlForResource(resource, HttpMethod.GET);
+        return getPresignedUrlForResource(resource, HttpMethod.GET, null);
     }
 
     @Override
     public URL getPresignedUploadUrlForResource(
             final Resource resource) {
-        return getPresignedUrlForResource(resource, HttpMethod.PUT);
+        final StorageClass defaultStorageClass = onyxAwsConfig_.getAwsS3DefaultStorageClass();
+        final Map<String, String> requestParameters = ImmutableMap.of(
+                Headers.STORAGE_CLASS, defaultStorageClass.toString());
+
+        return getPresignedUrlForResource(resource, HttpMethod.PUT, requestParameters);
     }
 
     @Override
     public URL getPresignedUrlForResource(
             final Resource resource,
-            final HttpMethod httpMethod) {
+            final HttpMethod httpMethod,
+            @Nullable final Map<String, String> requestParameters) {
         final long linkValidityDurationInSeconds =
                 onyxAwsConfig_.getAwsS3PresignedAssetUrlValidityDuration(TimeUnit.SECONDS);
 
@@ -108,6 +115,13 @@ public final class S3Manager implements AssetManager {
                 .withExpiration(new Date(Instant.now().plusSeconds(linkValidityDurationInSeconds).toEpochMilli()))
                 .withResponseHeaders(responseHeaderOverrides)
                 .withMethod(httpMethod);
+
+        // Attach custom request parameters, if any.
+        if (MapUtils.isNotEmpty(requestParameters)) {
+            for (final Map.Entry<String, String> parameter : requestParameters.entrySet()) {
+                presignedUrlRequest.addRequestParameter(parameter.getKey(), parameter.getValue());
+            }
+        }
 
         return s3_.generatePresignedUrl(presignedUrlRequest);
     }

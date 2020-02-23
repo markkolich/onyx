@@ -98,15 +98,6 @@ public final class DynamoDbManager implements ResourceManager {
 
     @Nonnull
     @Override
-    public List<Resource> searchResources(
-            final String query,
-            final String owner) {
-        // TODO(mark): implement
-        throw new UnsupportedOperationException("Not implemented yet.");
-    }
-
-    @Nonnull
-    @Override
     public List<Resource> listDirectory(
             final Resource directory,
             final Set<Resource.Visibility> visibility,

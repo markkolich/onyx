@@ -27,6 +27,7 @@
 package onyx.components.config.aws;
 
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.model.StorageClass;
 import com.typesafe.config.Config;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
@@ -78,6 +79,11 @@ public final class OnyxTypesafeAwsConfig implements OnyxAwsConfig {
     public long getAwsS3PresignedAssetUrlValidityDuration(
             final TimeUnit timeUnit) {
         return config_.getDuration(AWS_S3_ASSET_URL_VALIDITY_DURATION_PROP, timeUnit);
+    }
+
+    @Override
+    public StorageClass getAwsS3DefaultStorageClass() {
+        return StorageClass.fromValue(config_.getString(AWS_S3_DEFAULT_STORAGE_CLASS_PROP));
     }
 
 }

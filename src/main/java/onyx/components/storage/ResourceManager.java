@@ -65,11 +65,6 @@ public interface ResourceManager {
             final ExecutorService executorService);
 
     @Nonnull
-    List<Resource> searchResources(
-            final String query,
-            final String owner);
-
-    @Nonnull
     List<Resource> listDirectory(
             final Resource directory,
             final Set<Resource.Visibility> visibility,

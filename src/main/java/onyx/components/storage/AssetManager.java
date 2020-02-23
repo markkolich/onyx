@@ -29,7 +29,9 @@ package onyx.components.storage;
 import com.amazonaws.HttpMethod;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
+import javax.annotation.Nullable;
 import java.net.URL;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public interface AssetManager {
@@ -42,7 +44,8 @@ public interface AssetManager {
 
     URL getPresignedUrlForResource(
             final Resource resource,
-            final HttpMethod method);
+            final HttpMethod method,
+            @Nullable final Map<String, String> requestParameters);
 
     void deleteResource(
             final Resource resource);

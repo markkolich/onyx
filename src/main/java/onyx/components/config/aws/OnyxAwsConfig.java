@@ -27,6 +27,7 @@
 package onyx.components.config.aws;
 
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.model.StorageClass;
 
 import java.util.concurrent.TimeUnit;
 
@@ -42,6 +43,7 @@ public interface OnyxAwsConfig {
 
     String AWS_S3_BUCKET_NAME_PROP = "s3.bucket-name";
     String AWS_S3_ASSET_URL_VALIDITY_DURATION_PROP = "s3.asset-url-validity-duration";
+    String AWS_S3_DEFAULT_STORAGE_CLASS_PROP = "s3.default-storage-class";
 
     String getAwsAccessKey();
 
@@ -59,5 +61,7 @@ public interface OnyxAwsConfig {
 
     long getAwsS3PresignedAssetUrlValidityDuration(
             final TimeUnit timeUnit);
+
+    StorageClass getAwsS3DefaultStorageClass();
 
 }
