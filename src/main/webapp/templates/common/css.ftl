@@ -5,5 +5,5 @@
 <#if devMode>
     <link href="${contextPath}static/build/app.css?${.now?long?c}" rel="stylesheet">
 <#else>
-    <link href="${contextPath}static/release/app.min.css" rel="stylesheet">
+    <link href="${contextPath}static/release/app.min.css?${buildVersion.getBuildNumber()}" rel="stylesheet">
 </#if>

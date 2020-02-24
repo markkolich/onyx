@@ -12,6 +12,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
+        <maven-buildnumber-plugin.version>1.4</maven-buildnumber-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
         <maven-frontend-plugin.version>1.8.0</maven-frontend-plugin.version>
@@ -60,6 +61,23 @@
         <junit.jupiter.version>5.6.0</junit.jupiter.version>
         <mockito-core.version>3.3.0</mockito-core.version>
     </properties>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/markkolich/onyx/issues</url>
+    </issueManagement>
+    <scm>
+        <connection>scm:git:https://github.com/markkolich/onyx.git</connection>
+        <developerConnection>scm:git:https://github.com/markkolich/onyx.git</developerConnection>
+        <url>https://github.com/markkolich/onyx</url>
+    </scm>
+    <developers>
+        <developer>
+            <id>markkolich</id>
+            <name>Mark Kolich</name>
+            <email>social@kolich.com</email>
+        </developer>
+    </developers>
 
     <dependencies>
 
@@ -304,6 +322,28 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>${maven-buildnumber-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>create-buildnumber</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                        <configuration>
+                            <doCheck>false</doCheck>
+                            <doUpdate>false</doUpdate>
+                            <!-- 7-characters to match Git's default "abbreviated commit hash" length. -->
+                            <shortRevisionLength>7</shortRevisionLength>
+                            <!-- An ISO-8601 compliant timestamp string. -->
+                            <timestampFormat>{0,date,yyyy-MM-dd'T'HH:mm:ssXXX}</timestampFormat>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
                 <version>${maven-frontend-plugin.version}</version>
@@ -435,6 +475,17 @@
                 </configuration>
             </plugin>
         </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <!--
+                    Filtering must be set to 'true' here to support the 'buildnumber-maven-plugin'
+                    injecting the build number into the resulting properties file resource.
+                -->
+                <filtering>true</filtering>
+            </resource>
+        </resources>
 
     </build>
 

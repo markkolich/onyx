@@ -32,6 +32,7 @@ import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import onyx.BuildVersion;
 import onyx.components.config.OnyxConfig;
 import onyx.entities.freemarker.AbstractFreeMarkerContent;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ public final class FreeMarkerContentToString {
 
     private static final Logger LOG = LoggerFactory.getLogger(FreeMarkerContentToString.class);
 
+    private static final String BUILD_VERSION_ATTR = "buildVersion";
     private static final String CONTEXT_PATH_ATTR = "contextPath";
     private static final String DEV_MODE_ATTR = "devMode";
 
@@ -80,9 +82,15 @@ public final class FreeMarkerContentToString {
 
     public final Map<String, Object> getGlobalDataMap() {
         final ImmutableMap.Builder<String, Object> map = ImmutableMap.builder();
+
+        // Application build version
+        final BuildVersion buildVersion = BuildVersion.getInstance();
+        map.put(BUILD_VERSION_ATTR, buildVersion);
+
         // Shared application/service properties
         map.put(CONTEXT_PATH_ATTR, onyxConfig_.getContextPath());
         map.put(DEV_MODE_ATTR, onyxConfig_.isDevMode());
+
         return map.build();
     }
 
