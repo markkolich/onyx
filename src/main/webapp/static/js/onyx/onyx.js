@@ -41,41 +41,14 @@ this['Onyx'] = this['Onyx'] || {};
         baseUrl = protocol + '//' + hostname,
         baseAppUrl = baseUrl + ((appPath.port !== '') ? ':' + appPath.port : '') + appPath.path,
         baseApiUrl = baseUrl + ((apiPath.port !== '') ? ':' + apiPath.port : '') + apiPath.path,
-        baseApiVersion = apiVersion,
+        baseApiVersion = apiVersion;
 
-        // Do we have access to window.console as provided by Firebug or the browser?
-        // If not, leave things undefined in which case we'll new up stubs to mimic the logger.
-        console = window.console ? window.console : undefined,
-
-        init = (function() {
-            return function() {
-                // If no console exists, then we define a stub console for
-                // each supported logging function.
-                if (!console) {
-                    var names = ['log', 'debug', 'info', 'warn', 'error',
-                        'assert', 'dir', 'dirxml', 'group', 'groupEnd','time',
-                        'timeEnd', 'count', 'trace', 'profile', 'profileEnd'];
-                    console = {};
-                    for (var i = 0, l = names.length; i < l; i++) {
-                        console[names[i]] = function() {};
-                    }
-                }
-            };
-        }());
-
-    self['baseUrl'] = baseUrl;
-
-    self['baseAppUrl'] = baseAppUrl;
-    self['baseAppPath'] = appPath.path;
-
-    self['baseApiUrl'] = baseApiUrl;
-    self['baseApiPath'] = apiPath.path;
-    self['baseApiVersion'] = baseApiVersion;
-
-    self['console'] = console;
-
-    init();
-
-    return self;
+    // Exports
+    self.baseUrl = baseUrl;
+    self.baseAppUrl = baseAppUrl;
+    self.baseAppPath = appPath.path;
+    self.baseApiUrl = baseApiUrl;
+    self.baseApiPath = apiPath.path;
+    self.baseApiVersion = baseApiVersion;
 
 })(Onyx, Onyx || {}, this, this.document);

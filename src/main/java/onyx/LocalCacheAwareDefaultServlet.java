@@ -79,10 +79,10 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
         }
 
         // Validate the signed cache token.
-        final String token = tokens.iterator().next();
         final CachedResourceSigner cachedResourceSigner =
                 componentFromContext(context, CachedResourceSigner.class);
         checkNotNull(cachedResourceSigner, "Cached resource signer cannot be null; context not initialized?");
+        final String token = tokens.iterator().next();
         final CachedResourceToken cachedResourceToken =
                 cachedResourceSigner.extractSignedCachedResourceToken(token);
         if (cachedResourceToken == null) {

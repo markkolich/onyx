@@ -54,7 +54,7 @@ public final class OnyxFreeMarkerConfig {
         final Resource baseResource =
                 (Resource) servletContext.getAttribute(Application.CONTEXT_ATTRIBUTE_BASE_RESOURCE);
 
-        freemarkerConfig_ = new Configuration(Configuration.VERSION_2_3_29);
+        freemarkerConfig_ = new Configuration(Configuration.VERSION_2_3_30);
         freemarkerConfig_.setDefaultEncoding(StandardCharsets.UTF_8.toString());
         freemarkerConfig_.setTemplateLookupStrategy(new TemplateLookupStrategy() {
             @Override

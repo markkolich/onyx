@@ -1,9 +1,9 @@
-(function(hv, parent, window, document) {
+(function(parent, window, document) {
     'use strict';
 
     var
 
-        // Namespace.
+        // Namespace
         self = parent.Session = parent.Session || {},
 
         data = {
@@ -48,4 +48,4 @@
     // Only initialize the application if we're in a context supporting sessions.
     $('body[data-session]').length > 0 && init();
 
-})(Onyx, Onyx.App || {}, this, this.document);
+})(Onyx.App || {}, this, this.document);
