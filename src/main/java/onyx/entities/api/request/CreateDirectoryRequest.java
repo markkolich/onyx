@@ -34,36 +34,22 @@ import onyx.entities.storage.aws.dynamodb.Resource;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @JsonDeserialize(builder = CreateDirectoryRequest.Builder.class)
-public final class CreateDirectoryRequest {
-
-    private final String description_;
-    private final Resource.Visibility visibility_;
-
-    private CreateDirectoryRequest(
-            final String description,
-            final Resource.Visibility visibility) {
-        description_ = description;
-        visibility_ = visibility;
-    }
+public interface CreateDirectoryRequest {
 
     @JsonProperty("description")
-    public String getDescription() {
-        return description_;
-    }
+    String getDescription();
 
     @JsonProperty("visibility")
-    public Resource.Visibility getVisibility() {
-        return visibility_;
-    }
+    Resource.Visibility getVisibility();
 
     @JsonIgnore
-    public Builder toBuilder() {
+    default Builder toBuilder() {
         return new Builder()
-                .setDescription(description_)
-                .setVisibility(visibility_);
+                .setDescription(getDescription())
+                .setVisibility(getVisibility());
     }
 
-    public static final class Builder {
+    final class Builder {
 
         private String description_;
         private Resource.Visibility visibility_;
@@ -86,7 +72,17 @@ public final class CreateDirectoryRequest {
             checkNotNull(description_, "Description cannot be null.");
             checkNotNull(visibility_, "Visibility cannot be null.");
 
-            return new CreateDirectoryRequest(description_, visibility_);
+            return new CreateDirectoryRequest() {
+                @Override
+                public String getDescription() {
+                    return description_;
+                }
+
+                @Override
+                public Resource.Visibility getVisibility() {
+                    return visibility_;
+                }
+            };
         }
 
     }

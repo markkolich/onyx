@@ -26,32 +26,24 @@
 
 package onyx.entities.api.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import curacao.jackson.JacksonAppendableCuracaoEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static javax.servlet.http.HttpServletResponse.SC_CREATED;
 
-public final class UploadFileResponse extends JacksonAppendableCuracaoEntity {
-
-    private final String presignedUploadUrl_;
-
-    private UploadFileResponse(
-            final String presignedUploadUrl) {
-        presignedUploadUrl_ = presignedUploadUrl;
-    }
+public interface UploadFileResponse extends OnyxApiResponseEntity {
 
     @JsonProperty("presignedUploadUrl")
-    public String getPresignedUploadUrl() {
-        return presignedUploadUrl_;
-    }
+    String getPresignedUploadUrl();
 
+    @JsonIgnore
     @Override
-    public int getStatus() {
+    default int getStatus() {
         return SC_CREATED;
     }
 
-    public static final class Builder {
+    final class Builder {
 
         private String presignedUploadUrl_;
 
@@ -64,7 +56,7 @@ public final class UploadFileResponse extends JacksonAppendableCuracaoEntity {
         public UploadFileResponse build() {
             checkNotNull(presignedUploadUrl_, "Presigned upload URL cannot be null.");
 
-            return new UploadFileResponse(presignedUploadUrl_);
+            return () -> presignedUploadUrl_;
         }
 
     }

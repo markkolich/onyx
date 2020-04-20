@@ -34,7 +34,8 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import onyx.BuildVersion;
 import onyx.components.config.OnyxConfig;
-import onyx.entities.freemarker.AbstractFreeMarkerContent;
+import onyx.entities.freemarker.FreeMarkerContent;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,12 +64,12 @@ public final class FreeMarkerContentToString {
     }
 
     public final String contentToString(
-            final AbstractFreeMarkerContent content) throws Exception {
+            final FreeMarkerContent content) throws Exception {
         return contentToWriter(content).toString();
     }
 
     public final Writer contentToWriter(
-            final AbstractFreeMarkerContent content) throws Exception {
+            final FreeMarkerContent content) throws Exception {
         final Writer w = new StringWriter();
         try {
             final Configuration freeMarkerConfig = onyxFreeMarkerConfig_.getFreeMarkerConfig();
@@ -96,7 +97,7 @@ public final class FreeMarkerContentToString {
 
     private final Map<String, Object> getMergedTemplateDataMap(
             final Template tp,
-            final AbstractFreeMarkerContent content) {
+            final FreeMarkerContent content) {
         // The resulting map is intentionally not immutable here because it's
         // mutated during template processing.
         final Map<String, Object> map = Maps.newLinkedHashMap();
@@ -104,7 +105,7 @@ public final class FreeMarkerContentToString {
         map.putAll(getGlobalDataMap());
         // Get the entity defined set of template attributes.
         final Map<String, Object> templateDataMap = content.getDataMap();
-        if (templateDataMap != null) {
+        if (MapUtils.isNotEmpty(templateDataMap)) {
             map.putAll(templateDataMap);
         }
         // Get the template defined set of attributes (these are defined

@@ -36,47 +36,27 @@ import java.util.Date;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @JsonDeserialize(builder = Session.Builder.class)
-public final class Session {
-
-    private final String id_;
-    private final String username_;
-
-    private final Date expiry_;
-
-    private Session(
-            final String id,
-            final String username,
-            final Date expiry) {
-        id_ = id;
-        username_ = username;
-        expiry_ = expiry;
-    }
+public interface Session {
 
     @JsonProperty("id")
-    public String getId() {
-        return id_;
-    }
+    String getId();
 
     @JsonProperty("username")
-    public String getUsername() {
-        return username_;
-    }
+    String getUsername();
 
     @JsonProperty("expiry")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    public Date getExpiry() {
-        return expiry_;
-    }
+    Date getExpiry();
 
     @JsonIgnore
-    public Builder toBuilder() {
+    default Builder toBuilder() {
         return new Builder()
-                .setId(id_)
-                .setUsername(username_)
-                .setExpiry(expiry_);
+                .setId(getId())
+                .setUsername(getUsername())
+                .setExpiry(getExpiry());
     }
 
-    public static final class Builder {
+    final class Builder {
 
         private String id_;
         private String username_;
@@ -110,7 +90,22 @@ public final class Session {
             checkNotNull(username_, "Session username cannot be null.");
             checkNotNull(expiry_, "Session expiry cannot be null.");
 
-            return new Session(id_, username_, expiry_);
+            return new Session() {
+                @Override
+                public String getId() {
+                    return id_;
+                }
+
+                @Override
+                public String getUsername() {
+                    return username_;
+                }
+
+                @Override
+                public Date getExpiry() {
+                    return expiry_;
+                }
+            };
         }
 
     }

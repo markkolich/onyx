@@ -35,45 +35,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 @JsonDeserialize(builder = UploadFileRequest.Builder.class)
-public final class UploadFileRequest {
-
-    private final long size_;
-    private final String description_;
-    private final Resource.Visibility visibility_;
-
-    private UploadFileRequest(
-            final long size,
-            final String description,
-            final Resource.Visibility visibility) {
-        size_ = size;
-        description_ = description;
-        visibility_ = visibility;
-    }
+public interface UploadFileRequest {
 
     @JsonProperty("size")
-    public long getSize() {
-        return size_;
-    }
+    long getSize();
 
     @JsonProperty("description")
-    public String getDescription() {
-        return description_;
-    }
+    String getDescription();
 
     @JsonProperty("visibility")
-    public Resource.Visibility getVisibility() {
-        return visibility_;
-    }
+    Resource.Visibility getVisibility();
 
     @JsonIgnore
-    public Builder toBuilder() {
+    default Builder toBuilder() {
         return new Builder()
-                .setSize(size_)
-                .setDescription(description_)
-                .setVisibility(visibility_);
+                .setSize(getSize())
+                .setDescription(getDescription())
+                .setVisibility(getVisibility());
     }
 
-    public static final class Builder {
+    final class Builder {
 
         private long size_;
         private String description_;
@@ -105,7 +86,22 @@ public final class UploadFileRequest {
             checkNotNull(description_, "Description cannot be null.");
             checkNotNull(visibility_, "Visibility cannot be null.");
 
-            return new UploadFileRequest(size_, description_, visibility_);
+            return new UploadFileRequest() {
+                @Override
+                public long getSize() {
+                    return size_;
+                }
+
+                @Override
+                public String getDescription() {
+                    return description_;
+                }
+
+                @Override
+                public Resource.Visibility getVisibility() {
+                    return visibility_;
+                }
+            };
         }
 
     }

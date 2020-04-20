@@ -27,9 +27,8 @@
 package onyx.entities.freemarker;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import onyx.entities.authentication.Session;
-import onyx.entities.freemarker.Utf8TextEntity.HtmlEntityType;
+import onyx.entities.freemarker.Utf8TextEntity.EntityType;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -38,69 +37,57 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
-public final class FreeMarkerContent extends AbstractFreeMarkerContent {
+public interface FreeMarkerContent {
 
-    private static final String DATA_MAP_SESSION_ATTR = "session";
+    String DATA_MAP_SESSION_ATTR = "session";
 
-    private final String templateName_;
-    private final HtmlEntityType entityType_;
-    private final int status_;
+    String getTemplateName();
 
-    private final Map<String, Object> dataMap_;
+    EntityType getEntityType();
 
-    private FreeMarkerContent(
-            final String templateName,
-            final HtmlEntityType entityType,
-            final int status) {
-        templateName_ = checkNotNull(templateName, "Template name cannot be null.");
-        entityType_ = checkNotNull(entityType, "Entity type cannot be null.");
-        checkState(status >= SC_OK, "HTTP response status attached to template content cannot be < " + SC_OK);
-        status_ = status;
-        dataMap_ = Maps.newLinkedHashMap();
-    }
-
-    @Override
-    public String getTemplateName() {
-        return templateName_;
-    }
-
-    @Override
-    public int getStatus() {
-        return status_;
-    }
-
-    @Override
-    public HtmlEntityType getEntityType() {
-        return entityType_;
-    }
+    int getStatus();
 
     @Nullable
-    @Override
-    public Map<String, Object> getDataMap() {
-        return ImmutableMap.copyOf(dataMap_);
+    default Map<String, Object> getDataMap() {
+        return ImmutableMap.of();
     }
 
-    public static final class Builder {
+    final class Builder {
 
-        private final FreeMarkerContent content_;
+        private final String templateName_;
+        private final EntityType entityType_;
+        private final int status_;
+
+        /**
+         * Note, {@link ImmutableMap.Builder}'s do not support multiple calls to
+         * {@link ImmutableMap.Builder#put(Object, Object)} with the same key. If the consumer/caller
+         * of this builder invokes <code>put(x, y);</code> followed by a <code>put(x, z);</code> the
+         * internal call to {@link ImmutableMap.Builder#build()} will fail hard at builder-build time
+         * because of the duplicate keys. This is expected and avoids bugs/mistakes in creating the
+         * internal data map.
+         */
+        private final ImmutableMap.Builder<String, Object> dataMap_ = ImmutableMap.builder();
 
         public Builder(
                 final String templateName,
-                final HtmlEntityType entityType,
+                final EntityType entityType,
                 final int status) {
-            content_ = new FreeMarkerContent(templateName, entityType, status);
+            templateName_ = checkNotNull(templateName, "Template name cannot be null.");
+            entityType_ = checkNotNull(entityType, "Entity type cannot be null.");
+            checkState(status >= SC_OK, "HTTP response status attached to template cannot be < " + SC_OK);
+            status_ = status;
         }
 
         public Builder(
                 final String templateName,
                 final int status) {
-            content_ = new FreeMarkerContent(templateName, HtmlEntityType.HTML, status);
+            this(templateName, EntityType.HTML, status);
         }
 
         public Builder(
                 final String templateName,
-                final HtmlEntityType entityType) {
-            content_ = new FreeMarkerContent(templateName, entityType, SC_OK);
+                final EntityType entityType) {
+            this(templateName, entityType, SC_OK);
         }
 
         public Builder(
@@ -108,25 +95,43 @@ public final class FreeMarkerContent extends AbstractFreeMarkerContent {
             this(templateName, SC_OK);
         }
 
+        public final Builder withSession(
+                @Nullable final Session session) {
+            return withAttr(DATA_MAP_SESSION_ATTR, session);
+        }
+
         public final Builder withAttr(
                 @Nullable final String name,
                 @Nullable final Object value) {
             if (name != null && value != null) {
-                content_.dataMap_.put(name, value);
-            }
-            return this;
-        }
-
-        public final Builder withSession(
-                @Nullable final Session session) {
-            if (session != null) {
-                content_.dataMap_.put(DATA_MAP_SESSION_ATTR, session);
+                dataMap_.put(name, value);
             }
             return this;
         }
 
         public final FreeMarkerContent build() {
-            return content_;
+            return new FreeMarkerContent() {
+                @Override
+                public String getTemplateName() {
+                    return templateName_;
+                }
+
+                @Override
+                public EntityType getEntityType() {
+                    return entityType_;
+                }
+
+                @Override
+                public int getStatus() {
+                    return status_;
+                }
+
+                @Nullable
+                @Override
+                public Map<String, Object> getDataMap() {
+                    return dataMap_.build();
+                }
+            };
         }
 
     }

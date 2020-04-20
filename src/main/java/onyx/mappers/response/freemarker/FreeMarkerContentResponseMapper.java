@@ -29,7 +29,7 @@ package onyx.mappers.response.freemarker;
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import onyx.components.FreeMarkerContentToString;
-import onyx.entities.freemarker.AbstractFreeMarkerContent;
+import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
 
 import javax.annotation.Nonnull;
@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @Mapper
 public final class FreeMarkerContentResponseMapper
-        extends AbstractFreeMarkerContentAwareResponseMapper<AbstractFreeMarkerContent> {
+        extends AbstractFreeMarkerContentAwareResponseMapper<FreeMarkerContent> {
 
     @Injectable
     public FreeMarkerContentResponseMapper(
@@ -50,7 +50,7 @@ public final class FreeMarkerContentResponseMapper
     public void render(
             final AsyncContext context,
             final HttpServletResponse response,
-            @Nonnull final AbstractFreeMarkerContent content) throws Exception {
+            @Nonnull final FreeMarkerContent content) throws Exception {
         renderFreeMarkerContent(response, content);
     }
 

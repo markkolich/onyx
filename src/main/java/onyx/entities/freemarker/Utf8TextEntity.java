@@ -41,9 +41,7 @@ import java.io.Writer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.net.MediaType.HTML_UTF_8;
-import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
-import static com.google.common.net.MediaType.XML_UTF_8;
+import static com.google.common.net.MediaType.*;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.apache.commons.io.IOUtils.copyLarge;
 
@@ -53,7 +51,7 @@ public final class Utf8TextEntity extends AppendableCuracaoEntity {
     private static final String XML_UTF_8_STRING = XML_UTF_8.toString();
     private static final String TEXT_UTF_8_STRING = PLAIN_TEXT_UTF_8.toString();
 
-    public enum HtmlEntityType {
+    public enum EntityType {
 
         /**
          * HTML page; compressable.
@@ -82,7 +80,7 @@ public final class Utf8TextEntity extends AppendableCuracaoEntity {
          */
         private final boolean compressable_;
 
-        HtmlEntityType(
+        EntityType(
                 final String contentType,
                 final boolean compressable) {
             contentType_ = contentType;
@@ -99,12 +97,12 @@ public final class Utf8TextEntity extends AppendableCuracaoEntity {
 
     }
 
-    private final HtmlEntityType type_;
+    private final EntityType type_;
     private final int status_;
     private final String body_;
 
     public Utf8TextEntity(
-            @Nonnull final HtmlEntityType type,
+            @Nonnull final EntityType type,
             @Nonnegative final int status,
             @Nonnull final String body) {
         type_ = checkNotNull(type, "HTML entity type cannot be null.");
@@ -114,33 +112,33 @@ public final class Utf8TextEntity extends AppendableCuracaoEntity {
     }
 
     public Utf8TextEntity(
-            @Nonnull final HtmlEntityType type,
+            @Nonnull final EntityType type,
             @Nonnegative final int status,
             @Nonnull final byte[] body) {
         this(type, status, StringUtils.newStringUtf8(body));
     }
 
     public Utf8TextEntity(
-            @Nonnull final HtmlEntityType type,
+            @Nonnull final EntityType type,
             @Nonnegative final int status,
             @Nonnull final ByteArrayOutputStream body) {
         this(type, status, body.toByteArray());
     }
 
     public Utf8TextEntity(
-            @Nonnegative final HtmlEntityType type,
+            @Nonnegative final EntityType type,
             @Nonnull final String body) {
         this(type, SC_OK, body);
     }
 
     public Utf8TextEntity(
-            @Nonnull final HtmlEntityType type,
+            @Nonnull final EntityType type,
             @Nonnull final byte[] body) {
         this(type, SC_OK, body);
     }
 
     public Utf8TextEntity(
-            @Nonnull final HtmlEntityType type,
+            @Nonnull final EntityType type,
             @Nonnull final ByteArrayOutputStream body) {
         this(type, SC_OK, body);
     }

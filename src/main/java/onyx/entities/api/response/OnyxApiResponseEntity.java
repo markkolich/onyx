@@ -24,24 +24,52 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.entities.freemarker;
+package onyx.entities.api.response;
 
-import onyx.entities.freemarker.Utf8TextEntity.HtmlEntityType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import curacao.entities.CuracaoEntity;
 
-import javax.annotation.Nullable;
-import java.util.Map;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-public abstract class AbstractFreeMarkerContent {
+import static com.google.common.net.MediaType.JSON_UTF_8;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
 
-    public abstract String getTemplateName();
+public interface OnyxApiResponseEntity extends CuracaoEntity {
 
-    public abstract int getStatus();
+    @JsonIgnore
+    @Override
+    default int getStatus() {
+        return SC_OK;
+    }
 
-    public abstract HtmlEntityType getEntityType();
+    @JsonIgnore
+    @Override
+    default String getContentType() {
+        return JSON_UTF_8.toString();
+    }
 
-    @Nullable
-    public Map<String, Object> getDataMap() {
-        return null; // Default
+    @JsonIgnore
+    default Charset getCharset() {
+        return StandardCharsets.UTF_8;
+    }
+
+    @JsonIgnore
+    default ObjectMapper getMapper() {
+        return new ObjectMapper();
+    }
+
+    @JsonIgnore
+    @Override
+    default void write(
+            final OutputStream os) throws Exception {
+        try (final Writer w = new OutputStreamWriter(os, getCharset())) {
+            getMapper().writeValue(w, this);
+        }
     }
 
 }

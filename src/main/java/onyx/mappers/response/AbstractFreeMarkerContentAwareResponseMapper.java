@@ -28,7 +28,7 @@ package onyx.mappers.response;
 
 import curacao.mappers.response.ControllerReturnTypeMapper;
 import onyx.components.FreeMarkerContentToString;
-import onyx.entities.freemarker.AbstractFreeMarkerContent;
+import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.entities.freemarker.Utf8TextEntity;
 
 import javax.annotation.Nonnull;
@@ -48,7 +48,7 @@ public abstract class AbstractFreeMarkerContentAwareResponseMapper<T>
 
     protected final void renderFreeMarkerContent(
             final HttpServletResponse response,
-            final AbstractFreeMarkerContent content) throws Exception {
+            final FreeMarkerContent content) throws Exception {
         final String rendered = fmContentToString_.contentToString(content);
         renderEntity(response, new Utf8TextEntity(content.getEntityType(), content.getStatus(), rendered));
     }

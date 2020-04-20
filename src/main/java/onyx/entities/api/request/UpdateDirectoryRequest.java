@@ -34,38 +34,24 @@ import onyx.entities.storage.aws.dynamodb.Resource;
 import javax.annotation.Nullable;
 
 @JsonDeserialize(builder = UpdateDirectoryRequest.Builder.class)
-public final class UpdateDirectoryRequest {
-
-    private final Resource.Visibility visibility_;
-    private final Boolean favorite_;
-
-    private UpdateDirectoryRequest(
-            final Resource.Visibility visibility,
-            final Boolean favorite) {
-        visibility_ = visibility;
-        favorite_ = favorite;
-    }
+public interface UpdateDirectoryRequest {
 
     @Nullable
     @JsonProperty("visibility")
-    public Resource.Visibility getVisibility() {
-        return visibility_;
-    }
+    Resource.Visibility getVisibility();
 
     @Nullable
     @JsonProperty("favorite")
-    public Boolean getFavorite() {
-        return favorite_;
-    }
+    Boolean getFavorite();
 
     @JsonIgnore
-    public Builder toBuilder() {
+    default Builder toBuilder() {
         return new Builder()
-                .setVisibility(visibility_)
-                .setFavorite(favorite_);
+                .setVisibility(getVisibility())
+                .setFavorite(getFavorite());
     }
 
-    public static final class Builder {
+    final class Builder {
 
         private Resource.Visibility visibility_;
         private Boolean favorite_;
@@ -85,7 +71,19 @@ public final class UpdateDirectoryRequest {
         }
 
         public UpdateDirectoryRequest build() {
-            return new UpdateDirectoryRequest(visibility_, favorite_);
+            return new UpdateDirectoryRequest() {
+                @Nullable
+                @Override
+                public Resource.Visibility getVisibility() {
+                    return visibility_;
+                }
+
+                @Nullable
+                @Override
+                public Boolean getFavorite() {
+                    return favorite_;
+                }
+            };
         }
 
     }

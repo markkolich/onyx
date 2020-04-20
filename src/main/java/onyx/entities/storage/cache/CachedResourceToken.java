@@ -36,38 +36,23 @@ import java.util.Date;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @JsonDeserialize(builder = CachedResourceToken.Builder.class)
-public final class CachedResourceToken {
-
-    private final String path_;
-
-    private final Date expiry_;
-
-    private CachedResourceToken(
-            final String path,
-            final Date expiry) {
-        path_ = path;
-        expiry_ = expiry;
-    }
+public interface CachedResourceToken {
 
     @JsonProperty("path")
-    public String getPath() {
-        return path_;
-    }
+    String getPath();
 
     @JsonProperty("expiry")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    public Date getExpiry() {
-        return expiry_;
-    }
+    Date getExpiry();
 
     @JsonIgnore
-    public Builder toBuilder() {
+    default Builder toBuilder() {
         return new Builder()
-                .setPath(path_)
-                .setExpiry(expiry_);
+                .setPath(getPath())
+                .setExpiry(getExpiry());
     }
 
-    public static final class Builder {
+    final class Builder {
 
         private String path_;
 
@@ -92,7 +77,17 @@ public final class CachedResourceToken {
             checkNotNull(path_, "Cached resource path cannot be null.");
             checkNotNull(expiry_, "Cached resource expiry cannot be null.");
 
-            return new CachedResourceToken(path_, expiry_);
+            return new CachedResourceToken() {
+                @Override
+                public String getPath() {
+                    return path_;
+                }
+
+                @Override
+                public Date getExpiry() {
+                    return expiry_;
+                }
+            };
         }
 
     }
