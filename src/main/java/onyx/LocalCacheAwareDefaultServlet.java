@@ -33,6 +33,7 @@ import onyx.components.storage.cache.CachedResourceSigner;
 import onyx.entities.storage.cache.CachedResourceToken;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,13 +101,7 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
             return null;
         }
 
-        try {
-            return Resource.newResource(cachedResource.toUri());
-        } catch (final Exception e) {
-            LOG.error("Failed to resolve cached resource file from path: {}",
-                    cachedResourceToken.getPath(), e);
-            return null;
-        }
+        return new PathResource(cachedResource);
     }
 
 }
