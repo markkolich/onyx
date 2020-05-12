@@ -19,8 +19,8 @@
         <maven-frontend-node.version>v8.16.2</maven-frontend-node.version>
         <maven-frontend-npm.version>6.4.1</maven-frontend-npm.version>
         <maven-checkstyle-plugin.version>3.1.1</maven-checkstyle-plugin.version>
-        <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
-        <maven-assembly-plugin.version>3.2.0</maven-assembly-plugin.version>
+        <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
+        <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
 
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <logback.version>1.2.3</logback.version>
@@ -38,7 +38,7 @@
         <commons-io.version>2.6</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
 
-        <aws-sdk.version>1.11.759</aws-sdk.version>
+        <aws-sdk.version>1.11.779</aws-sdk.version>
 
         <guava.version>29.0-jre</guava.version>
 
@@ -50,11 +50,11 @@
         <bcprov-ext-jdk15on.version>1.64</bcprov-ext-jdk15on.version>
         <jbcrypt.version>0.4</jbcrypt.version>
 
-        <async-http-client.version>2.12.0</async-http-client.version>
+        <async-http-client.version>2.12.1</async-http-client.version>
 
         <picocli.version>4.2.0</picocli.version>
 
-        <checkstyle.version>8.31</checkstyle.version>
+        <checkstyle.version>8.32</checkstyle.version>
 
         <!-- Test dependency versions -->
 
