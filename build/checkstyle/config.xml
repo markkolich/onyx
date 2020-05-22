@@ -275,7 +275,7 @@ https://google.github.io/styleguide/javaguide.html
             <property name="message" value="Constructor arguments must always start on a new-line"/>
         </module>
         <module name="Regexp">
-            <property name="format" value="(public|private|static|protected|native) ([A-Za-z0-9&lt;&gt;.]+) ([A-Za-z0-9]+)\((?!(\)|$))"/>
+            <property name="format" value="(public|private|static|protected|native) (final )?([A-Za-z0-9&lt;&gt;.]+) ([A-Za-z0-9]+)\((?!(\)|$))"/>
             <property name="illegalPattern" value="true"/>
             <property name="message" value="Method arguments must always start on a new-line"/>
         </module>
