@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Onyx PMD Ruleset"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+    <description>The default Onyx PMD check ruleset.</description>
+
+    <rule ref="category/java/bestpractices.xml/CheckResultSet" />
+    <!--
+        Checkstyle already checks for this, so we don't need PMD to do it. Also, PMD UnusedImports
+        erroneously flags wildcard imports, which are OK.
+    -->
+    <!--rule ref="category/java/bestpractices.xml/UnusedImports" /-->
+    <rule ref="category/java/bestpractices.xml/UnusedFormalParameter" />
+    <rule ref="category/java/bestpractices.xml/UnusedLocalVariable" />
+    <rule ref="category/java/bestpractices.xml/AvoidPrintStackTrace" />
+    <rule ref="category/java/bestpractices.xml/AvoidReassigningLoopVariables" />
+    <rule ref="category/java/bestpractices.xml/AvoidReassigningParameters" />
+    <rule ref="category/java/bestpractices.xml/AvoidStringBufferField" />
+    <rule ref="category/java/bestpractices.xml/DefaultLabelNotLastInSwitchStmt" />
+    <rule ref="category/java/bestpractices.xml/LooseCoupling" />
+    <rule ref="category/java/bestpractices.xml/MissingOverride" />
+    <rule ref="category/java/bestpractices.xml/OneDeclarationPerLine" />
+    <rule ref="category/java/bestpractices.xml/SwitchStmtsShouldHaveDefault" />
+    <rule ref="category/java/bestpractices.xml/UseCollectionIsEmpty" />
+    <rule ref="category/java/bestpractices.xml/UseTryWithResources" />
+    <rule ref="category/java/bestpractices.xml/UseVarargs" />
+    <rule ref="category/java/bestpractices.xml/WhileLoopWithLiteralBoolean" />
+
+    <rule ref="category/java/codestyle.xml/UseDiamondOperator" />
+    <rule ref="category/java/codestyle.xml/MethodArgumentCouldBeFinal" />
+    <rule ref="category/java/codestyle.xml/LocalVariableNamingConventions" />
+    <rule ref="category/java/codestyle.xml/ControlStatementBraces" />
+    <rule ref="category/java/codestyle.xml/GenericsNaming" />
+    <rule ref="category/java/codestyle.xml/NoPackage" />
+    <rule ref="category/java/codestyle.xml/DefaultPackage" />
+    <rule ref="category/java/codestyle.xml/PackageCase" />
+    <rule ref="category/java/codestyle.xml/DontImportJavaLang" />
+    <rule ref="category/java/codestyle.xml/DuplicateImports" />
+    <rule ref="category/java/codestyle.xml/ExtendsObject" />
+    <rule ref="category/java/codestyle.xml/ForLoopShouldBeWhileLoop" />
+    <!--
+        This catches and complains of cases where we really do need to the FQCN.
+    -->
+    <!--rule ref="category/java/codestyle.xml/UnnecessaryFullyQualifiedName" /-->
+    <rule ref="category/java/codestyle.xml/UnnecessaryModifier" />
+    <rule ref="category/java/codestyle.xml/UnnecessaryReturn" />
+    <rule ref="category/java/codestyle.xml/UselessQualifiedThis" />
+    <rule ref="category/java/codestyle.xml/ClassNamingConventions">
+        <properties>
+            <property name="abstractClassPattern" value="^Abstract[a-zA-Z0-9]*" />
+            <property name="utilityClassPattern" value="[A-Z][a-zA-Z0-9]*" />
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/AvoidProtectedFieldInFinalClass" />
+    <rule ref="category/java/codestyle.xml/AvoidProtectedMethodInFinalClassNotExtending" />
+    <rule ref="category/java/codestyle.xml/FieldNamingConventions">
+        <properties>
+            <property name="publicConstantPattern" value="[A-Z][A-Z_0-9]*" />
+            <property name="constantPattern" value="[A-Z][A-Z_0-9]*" />
+            <property name="enumConstantPattern" value="[A-Z][A-Z_0-9]*" />
+            <property name="finalFieldPattern" value="[a-z][a-zA-Z0-9]*_$" />
+            <property name="staticFieldPattern" value="[A-Z][A-Z0-9]*" />
+            <property name="defaultFieldPattern" value="[a-z][a-zA-Z0-9]*_$" />
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/FieldDeclarationsShouldBeAtStartOfClass" />
+
+    <rule ref="category/java/design.xml/CollapsibleIfStatements" />
+    <!--
+        A good suggestion, but occasionally makes the code less readable and
+        generally harder to understand.
+    -->
+    <!--rule ref="category/java/design.xml/SimplifiedTernary" /-->
+    <rule ref="category/java/design.xml/UselessOverridingMethod" />
+
+    <rule ref="category/java/errorprone.xml/AvoidBranchingStatementAsLastInLoop" />
+    <rule ref="category/java/errorprone.xml/AvoidDecimalLiteralsInBigDecimalConstructor" />
+    <rule ref="category/java/errorprone.xml/AvoidMultipleUnaryOperators" />
+    <rule ref="category/java/errorprone.xml/AvoidUsingOctalValues" />
+    <rule ref="category/java/errorprone.xml/BrokenNullCheck" />
+    <rule ref="category/java/errorprone.xml/CheckSkipResult" />
+    <rule ref="category/java/errorprone.xml/ClassCastExceptionWithToArray" />
+    <rule ref="category/java/errorprone.xml/DontUseFloatTypeForLoopIndices" />
+    <rule ref="category/java/errorprone.xml/EmptyCatchBlock">
+        <properties>
+            <property name="allowCommentedBlocks" value="true" />
+        </properties>
+    </rule>
+    <rule ref="category/java/errorprone.xml/EmptyFinallyBlock" />
+    <rule ref="category/java/errorprone.xml/EmptyIfStmt" />
+    <rule ref="category/java/errorprone.xml/EmptyInitializer" />
+    <rule ref="category/java/errorprone.xml/EmptyStatementBlock" />
+    <rule ref="category/java/errorprone.xml/EmptyStatementNotInLoop" />
+    <rule ref="category/java/errorprone.xml/EmptySwitchStatements" />
+    <rule ref="category/java/errorprone.xml/EmptySynchronizedBlock" />
+    <rule ref="category/java/errorprone.xml/EmptyTryBlock" />
+    <rule ref="category/java/errorprone.xml/EmptyWhileStmt" />
+    <rule ref="category/java/errorprone.xml/ImportFromSamePackage" />
+    <rule ref="category/java/errorprone.xml/JumbledIncrementer" />
+    <rule ref="category/java/errorprone.xml/MisplacedNullCheck" />
+    <rule ref="category/java/errorprone.xml/OverrideBothEqualsAndHashcode" />
+    <rule ref="category/java/errorprone.xml/ReturnFromFinallyBlock" />
+    <rule ref="category/java/errorprone.xml/UnconditionalIfStatement" />
+    <rule ref="category/java/errorprone.xml/UnnecessaryConversionTemporary" />
+    <rule ref="category/java/errorprone.xml/UnusedNullCheckInEquals" />
+    <rule ref="category/java/errorprone.xml/UselessOperationOnImmutable" />
+
+    <rule ref="category/java/multithreading.xml/AvoidThreadGroup" />
+    <rule ref="category/java/multithreading.xml/DontCallThreadRun" />
+    <rule ref="category/java/multithreading.xml/DoubleCheckedLocking" />
+
+    <rule ref="category/java/performance.xml/BigIntegerInstantiation" />
+    <rule ref="category/java/performance.xml/BooleanInstantiation" />
+
+</ruleset>

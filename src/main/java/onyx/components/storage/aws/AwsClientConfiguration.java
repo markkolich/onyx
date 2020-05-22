@@ -29,7 +29,6 @@ package onyx.components.storage.aws;
 import com.amazonaws.ClientConfiguration;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.config.OnyxConfig;
 
 @Component
 public final class AwsClientConfiguration {
@@ -39,8 +38,7 @@ public final class AwsClientConfiguration {
     private final ClientConfiguration clientConfiguration_;
 
     @Injectable
-    public AwsClientConfiguration(
-            final OnyxConfig onyxConfig) {
+    public AwsClientConfiguration() {
         clientConfiguration_ = new ClientConfiguration()
                 .withUserAgentPrefix(USER_AGENT_PREFIX);
     }

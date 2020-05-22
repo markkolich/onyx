@@ -67,7 +67,7 @@ public interface OnyxApiResponseEntity extends CuracaoEntity {
     @Override
     default void write(
             final OutputStream os) throws Exception {
-        try (final Writer w = new OutputStreamWriter(os, getCharset())) {
+        try (Writer w = new OutputStreamWriter(os, getCharset())) {
             getMapper().writeValue(w, this);
         }
     }

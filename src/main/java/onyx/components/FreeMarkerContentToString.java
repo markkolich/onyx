@@ -63,12 +63,12 @@ public final class FreeMarkerContentToString {
         onyxFreeMarkerConfig_ = onyxFreeMarkerConfig;
     }
 
-    public final String contentToString(
+    public String contentToString(
             final FreeMarkerContent content) throws Exception {
         return contentToWriter(content).toString();
     }
 
-    public final Writer contentToWriter(
+    public Writer contentToWriter(
             final FreeMarkerContent content) throws Exception {
         final Writer w = new StringWriter();
         try {
@@ -81,7 +81,7 @@ public final class FreeMarkerContentToString {
         return w;
     }
 
-    public final Map<String, Object> getGlobalDataMap() {
+    public Map<String, Object> getGlobalDataMap() {
         final ImmutableMap.Builder<String, Object> map = ImmutableMap.builder();
 
         // Application build version
@@ -95,7 +95,7 @@ public final class FreeMarkerContentToString {
         return map.build();
     }
 
-    private final Map<String, Object> getMergedTemplateDataMap(
+    private Map<String, Object> getMergedTemplateDataMap(
             final Template tp,
             final FreeMarkerContent content) {
         // The resulting map is intentionally not immutable here because it's

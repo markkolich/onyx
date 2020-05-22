@@ -95,12 +95,12 @@ public interface FreeMarkerContent {
             this(templateName, SC_OK);
         }
 
-        public final Builder withSession(
+        public Builder withSession(
                 @Nullable final Session session) {
             return withAttr(DATA_MAP_SESSION_ATTR, session);
         }
 
-        public final Builder withAttr(
+        public Builder withAttr(
                 @Nullable final String name,
                 @Nullable final Object value) {
             if (name != null && value != null) {
@@ -109,7 +109,7 @@ public interface FreeMarkerContent {
             return this;
         }
 
-        public final FreeMarkerContent build() {
+        public FreeMarkerContent build() {
             return new FreeMarkerContent() {
                 @Override
                 public String getTemplateName() {

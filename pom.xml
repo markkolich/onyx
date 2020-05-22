@@ -9,6 +9,8 @@
     <packaging>jar</packaging>
 
     <properties>
+        <project.java-source.version>11</project.java-source.version>
+        <project.java-runtime.version>[11,)</project.java-runtime.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
@@ -19,6 +21,8 @@
         <maven-frontend-node.version>v8.16.2</maven-frontend-node.version>
         <maven-frontend-npm.version>6.4.1</maven-frontend-npm.version>
         <maven-checkstyle-plugin.version>3.1.1</maven-checkstyle-plugin.version>
+        <maven-pmd-plugin.version>3.13.0</maven-pmd-plugin.version>
+        <maven-pmd-plugin.pmd.version>6.23.0</maven-pmd-plugin.pmd.version>
         <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
 
@@ -418,6 +422,46 @@
                     <!-- Validate source files in src/test/java too -->
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <!--consoleOutput>true</consoleOutput-->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${maven-pmd-plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-core</artifactId>
+                        <version>${maven-pmd-plugin.pmd.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-java</artifactId>
+                        <version>${maven-pmd-plugin.pmd.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>pmd-check</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <printFailingErrors>true</printFailingErrors>
+                    <includeTests>true</includeTests>
+                    <failOnViolation>true</failOnViolation>
+                    <linkXRef>false</linkXRef>
+                    <sourceEncoding>utf-8</sourceEncoding>
+                    <targetJdk>${project.java-source.version}</targetJdk>
+                    <rulesets>
+                        <ruleset>build/pmd/ruleset.xml</ruleset>
+                    </rulesets>
+                    <excludeRoots>
+                        <excludeRoot>target/generated-sources</excludeRoot>
+                    </excludeRoots>
                 </configuration>
             </plugin>
             <!-- Copies the resulting JAR from into the dist/ directory. -->
