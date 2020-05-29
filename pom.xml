@@ -22,7 +22,7 @@
         <maven-frontend-npm.version>6.4.1</maven-frontend-npm.version>
         <maven-checkstyle-plugin.version>3.1.1</maven-checkstyle-plugin.version>
         <maven-pmd-plugin.version>3.13.0</maven-pmd-plugin.version>
-        <maven-pmd-plugin.pmd.version>6.23.0</maven-pmd-plugin.pmd.version>
+        <maven-pmd-plugin.pmd.version>6.24.0</maven-pmd-plugin.pmd.version>
         <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
 
@@ -39,10 +39,10 @@
 
         <commons-lang3.version>3.10</commons-lang3.version>
         <commons-text.version>1.8</commons-text.version>
-        <commons-io.version>2.6</commons-io.version>
+        <commons-io.version>2.7</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
 
-        <aws-sdk.version>1.11.779</aws-sdk.version>
+        <aws-sdk.version>1.11.792</aws-sdk.version>
 
         <guava.version>29.0-jre</guava.version>
 

@@ -65,7 +65,7 @@ public final class Application {
     private int port_;
 
     public static void main(
-            final String... args) throws Exception {
+            final String... args) {
         try {
             final Application onyx = new Application();
             new CommandLine(onyx).parseArgs(args);
