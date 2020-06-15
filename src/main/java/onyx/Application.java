@@ -34,6 +34,7 @@ import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -120,17 +121,19 @@ public final class Application {
 
         final ServletHolder defaultHolder = new ServletHolder("static", LocalCacheAwareDefaultServlet.class);
         defaultHolder.setAsyncSupported(true); // Async supported = true
-        defaultHolder.setInitOrder(1); // Load on startup = true
-        context.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
-        context.setInitParameter(DefaultServlet.CONTEXT_INIT + "acceptRanges", "true");
-        context.setInitParameter(DefaultServlet.CONTEXT_INIT + "cacheControl", "public,max-age=3600");
+        defaultHolder.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
+        defaultHolder.setInitParameter(DefaultServlet.CONTEXT_INIT + "acceptRanges", "true");
+        defaultHolder.setInitParameter(DefaultServlet.CONTEXT_INIT + "cacheControl", "public,max-age=3600");
         context.addServlet(defaultHolder, STATIC_SERVLET_MAPPING_UNDER_CONTEXT);
 
         final ServletHolder curacaoHolder = new ServletHolder("curacao", CuracaoDispatcherServlet.class);
         curacaoHolder.setAsyncSupported(true); // Async supported = true
-        curacaoHolder.setInitOrder(1); // Load on startup = true
         context.addEventListener(new CuracaoContextListener()); // Required
         context.addServlet(curacaoHolder, CURACAO_SERVLET_MAPPING_UNDER_CONTEXT);
+
+        final ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
+        errorHandler.addErrorPage(ErrorPageErrorHandler.GLOBAL_ERROR_PAGE, "/forward-errors");
+        context.setErrorHandler(errorHandler);
 
         // Attach the context handler to the server, and go!
         server.setHandler(context);
