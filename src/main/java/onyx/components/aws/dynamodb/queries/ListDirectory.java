@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws.dynamodb.queries;
+package onyx.components.aws.dynamodb.queries;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;

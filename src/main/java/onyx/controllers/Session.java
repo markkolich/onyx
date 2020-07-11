@@ -33,14 +33,27 @@ import curacao.annotations.parameters.RequestBody;
 import curacao.entities.CuracaoEntity;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
+import onyx.components.authentication.twofactor.TwoFactorAuthCodeManager;
+import onyx.components.authentication.twofactor.TwoFactorAuthTokenManager;
 import onyx.components.config.OnyxConfig;
-import onyx.components.config.authentication.OnyxSessionConfig;
+import onyx.components.config.authentication.SessionConfig;
+import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
 import onyx.components.storage.AsynchronousResourcePool;
+import onyx.entities.authentication.User;
+import onyx.entities.authentication.twofactor.TwoFactorAuthToken;
 import onyx.entities.freemarker.FreeMarkerContent;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
+import java.time.Instant;
+import java.util.Date;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static curacao.annotations.RequestMapping.Method.POST;
 import static onyx.util.CookieBaker.setCookie;
@@ -49,25 +62,39 @@ import static onyx.util.CookieBaker.unsetCookie;
 @Controller
 public final class Session extends AbstractOnyxController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Session.class);
+
     private static final String USERNAME_FIELD = "username";
     private static final String PASSWORD_FIELD = "password";
+    private static final String TOKEN_FIELD = "token";
+    private static final String CODE_FIELD = "code";
 
-    private final OnyxSessionConfig onyxSessionConfig_;
+    private final SessionConfig sessionConfig_;
+    private final SessionManager sessionManager_;
 
     private final UserAuthenticator userAuthenticator_;
-    private final SessionManager sessionManager_;
+
+    private final TwoFactorAuthConfig twoFactorAuthConfig_;
+    private final TwoFactorAuthTokenManager twoFactorAuthTokenManager_;
+    private final TwoFactorAuthCodeManager twoFactorAuthCodeManager_;
 
     @Injectable
     public Session(
             final OnyxConfig onyxConfig,
             final AsynchronousResourcePool asynchronousResourcePool,
-            final OnyxSessionConfig onyxSessionConfig,
+            final SessionConfig sessionConfig,
+            final SessionManager sessionManager,
             final UserAuthenticator userAuthenticator,
-            final SessionManager sessionManager) {
+            final TwoFactorAuthConfig twoFactorAuthConfig,
+            final TwoFactorAuthTokenManager twoFactorAuthTokenManager,
+            final TwoFactorAuthCodeManager twoFactorAuthCodeManager) {
         super(onyxConfig, asynchronousResourcePool);
-        onyxSessionConfig_ = onyxSessionConfig;
-        userAuthenticator_ = userAuthenticator;
+        sessionConfig_ = sessionConfig;
         sessionManager_ = sessionManager;
+        userAuthenticator_ = userAuthenticator;
+        twoFactorAuthConfig_ = twoFactorAuthConfig;
+        twoFactorAuthTokenManager_ = twoFactorAuthTokenManager;
+        twoFactorAuthCodeManager_ = twoFactorAuthCodeManager;
     }
 
     @RequestMapping(value = "^/login$")
@@ -82,35 +109,93 @@ public final class Session extends AbstractOnyxController {
             @RequestBody(PASSWORD_FIELD) final String password,
             final HttpServletResponse response,
             final AsyncContext context) throws Exception {
-        if (StringUtils.isBlank(username)
-                || StringUtils.isBlank(password)) {
-            return new FreeMarkerContent.Builder("templates/login.ftl")
-                    .build();
+        if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
+            return login();
         }
 
-        final onyx.entities.authentication.Session session =
+        final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
+
+        final Pair<User, onyx.entities.authentication.Session> session =
                 userAuthenticator_.getSession(username, password);
         if (session == null) {
-            return new FreeMarkerContent.Builder("templates/login.ftl")
-                    .build();
+            return login();
+        } else if (!twoFactorAuthEnabled) {
+            processLogin(session.getRight(), response, context);
+            return null;
         }
 
-        final String signedSession = sessionManager_.signSession(session);
-        setCookie(SessionManager.SESSION_NAME, signedSession,
-                onyxSessionConfig_.isSessionUsingHttps(), response);
-        response.sendRedirect(onyxConfig_.getViewSafeFullUri() + "/browse/" + session.getUsername());
-        context.complete();
+        final int randomCodeLength = twoFactorAuthConfig_.getRandomCodeLength();
+        final String randomCode = RandomStringUtils.randomNumeric(randomCodeLength);
+
+        final String tokenHash = twoFactorAuthTokenManager_.generateTokenHash(username, randomCode);
+
+        final long tokenDurationInSeconds =
+                twoFactorAuthConfig_.getTokenDuration(TimeUnit.SECONDS);
+        final Date tokenExpiry =
+                new Date(Instant.now().plusSeconds(tokenDurationInSeconds).toEpochMilli());
+        final TwoFactorAuthToken token = new TwoFactorAuthToken.Builder()
+                .setId(UUID.randomUUID().toString())
+                .setHash(tokenHash)
+                .setSession(session.getRight())
+                .setExpiry(tokenExpiry)
+                .build();
+
+        // Send 2FA verification code!
+        twoFactorAuthCodeManager_.sendVerificationCodeToUser(session.getLeft(), randomCode);
+
+        final String signedToken = twoFactorAuthTokenManager_.signToken(token);
+        return new FreeMarkerContent.Builder("templates/login-verification.ftl")
+                .withAttr(TOKEN_FIELD, signedToken)
+                .build();
+    }
+
+    @RequestMapping(value = "^/login/verify$", methods = POST)
+    public CuracaoEntity doLoginVerify(
+            @RequestBody(TOKEN_FIELD) final String signedToken,
+            @RequestBody(CODE_FIELD) final String code,
+            final HttpServletResponse response,
+            final AsyncContext context) throws Exception {
+        final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
+        if (!twoFactorAuthEnabled) {
+            return logout(response, context);
+        } else if (StringUtils.isBlank(signedToken) || StringUtils.isBlank(code)) {
+            return logout(response, context);
+        }
+
+        // Extract the signed 2FA token on the request.
+        final TwoFactorAuthToken token = twoFactorAuthTokenManager_.extractSignedToken(signedToken);
+        if (token == null) {
+            LOG.warn("Failed to extract valid 2FA token from request: {}", signedToken);
+            return logout(response, context);
+        }
+
+        final onyx.entities.authentication.Session session = token.getSession();
+        final String username = session.getUsername();
+
+        final String generatedTokenHash = twoFactorAuthTokenManager_.generateTokenHash(username, code);
+        if (!token.getHash().equals(generatedTokenHash)) {
+            LOG.warn("Provided 2FA token hash on request did not match generated 2FA token hash: "
+                    + "provided={}, generated={}", token.getHash(), generatedTokenHash);
+            return logout(response, context);
+        }
+
+        // If we get here, then the provided 2FA verification code was valid and the session extracted
+        // from the 2FA token is good to go - let the user in!
+        processLogin(session, response, context);
 
         return null;
     }
 
     @RequestMapping(value = "^/logout$")
-    public void logout(
+    public CuracaoEntity logout(
             final HttpServletResponse response,
             final AsyncContext context) throws Exception {
-        unsetCookie(SessionManager.SESSION_NAME, onyxSessionConfig_.isSessionUsingHttps(), response);
+        unsetCookie(SessionManager.SESSION_NAME, onyxConfig_.getContextPath(),
+                sessionConfig_.isSessionUsingHttps(), response);
         response.sendRedirect(onyxConfig_.getViewSafeFullUri());
         context.complete();
+
+        return null;
     }
 
     @RequestMapping(value = "^/keepalive$")
@@ -125,10 +210,21 @@ public final class Session extends AbstractOnyxController {
         final onyx.entities.authentication.Session refreshed =
                 userAuthenticator_.refreshSession(session);
         final String signedRefreshedSession = sessionManager_.signSession(refreshed);
-        setCookie(SessionManager.SESSION_NAME, signedRefreshedSession,
-                onyxSessionConfig_.isSessionUsingHttps(), response);
+        setCookie(SessionManager.SESSION_NAME, signedRefreshedSession, onyxConfig_.getContextPath(),
+                sessionConfig_.isSessionUsingHttps(), response);
 
         return noContent();
+    }
+
+    private void processLogin(
+            final onyx.entities.authentication.Session session,
+            final HttpServletResponse response,
+            final AsyncContext context) throws Exception {
+        final String signedSession = sessionManager_.signSession(session);
+        setCookie(SessionManager.SESSION_NAME, signedSession, onyxConfig_.getContextPath(),
+                sessionConfig_.isSessionUsingHttps(), response);
+        response.sendRedirect(onyxConfig_.getViewSafeFullUri() + "/browse/" + session.getUsername());
+        context.complete();
     }
 
 }

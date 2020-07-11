@@ -119,7 +119,7 @@ public final class Application {
         // this at runtime can easily access it.
         context.setAttribute(CONTEXT_ATTRIBUTE_BASE_RESOURCE, baseResource);
 
-        final ServletHolder defaultHolder = new ServletHolder("static", LocalCacheAwareDefaultServlet.class);
+        final ServletHolder defaultHolder = new ServletHolder("default", LocalCacheAwareDefaultServlet.class);
         defaultHolder.setAsyncSupported(true); // Async supported = true
         defaultHolder.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
         defaultHolder.setInitParameter(DefaultServlet.CONTEXT_INIT + "acceptRanges", "true");

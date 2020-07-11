@@ -27,13 +27,15 @@
 package onyx.components.authentication;
 
 import onyx.entities.authentication.Session;
+import onyx.entities.authentication.User;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
 
 public interface UserAuthenticator {
 
     @Nullable
-    Session getSession(
+    Pair<User, Session> getSession(
             final String username,
             final String password);
 

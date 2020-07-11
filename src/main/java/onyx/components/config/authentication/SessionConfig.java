@@ -24,21 +24,28 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.mappers.request.api;
+package onyx.components.config.authentication;
 
-import curacao.annotations.Injectable;
-import curacao.annotations.Mapper;
-import onyx.components.OnyxJacksonObjectMapper;
-import onyx.entities.api.request.UpdateDirectoryRequest;
+import com.typesafe.config.ConfigList;
 
-@Mapper
-public final class UpdateDirectoryRequestArgumentRequestMapper
-        extends AbstractApiArgumentRequestMapper<UpdateDirectoryRequest> {
+import java.util.concurrent.TimeUnit;
 
-    @Injectable
-    public UpdateDirectoryRequestArgumentRequestMapper(
-            final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(UpdateDirectoryRequest.class, onyxJacksonObjectMapper.getObjectMapper());
-    }
+public interface SessionConfig {
+
+    String SESSION_CONFIG_PATH = "session";
+
+    String SESSION_USERS_PROP = "users";
+    String SESSION_DURATION_PROP = "duration";
+    String SESSION_SIGNER_SECRET_PROP = "signer-secret";
+    String SESSION_HTTPS_PROP = "https";
+
+    ConfigList getUsers();
+
+    long getSessionDuration(
+            final TimeUnit timeUnit);
+
+    String getSessionSignerSecret();
+
+    boolean isSessionUsingHttps();
 
 }

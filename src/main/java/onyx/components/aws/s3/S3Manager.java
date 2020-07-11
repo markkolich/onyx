@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws.s3;
+package onyx.components.aws.s3;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.dynamodbv2.datamodeling.S3Link;
@@ -36,7 +36,7 @@ import com.google.common.net.MediaType;
 import curacao.CuracaoConfigLoader;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.config.aws.OnyxAwsConfig;
+import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.AssetManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.apache.commons.collections4.MapUtils;
@@ -63,16 +63,16 @@ public final class S3Manager implements AssetManager {
     private static final String SLASH_STRING = "/";
     private static final String EMPTY_STRING = "";
 
-    private final OnyxAwsConfig onyxAwsConfig_;
+    private final AwsConfig awsConfig_;
 
     private final AmazonS3 s3_;
 
     @Injectable
     public S3Manager(
-            final OnyxAwsConfig onyxAwsConfig,
-            final S3Client onyxS3Client) {
-        onyxAwsConfig_ = onyxAwsConfig;
-        s3_ = onyxS3Client.getS3Client();
+            final AwsConfig awsConfig,
+            final S3Client s3Client) {
+        awsConfig_ = awsConfig;
+        s3_ = s3Client.getS3Client();
     }
 
     @Override
@@ -84,7 +84,7 @@ public final class S3Manager implements AssetManager {
     @Override
     public URL getPresignedUploadUrlForResource(
             final Resource resource) {
-        final StorageClass defaultStorageClass = onyxAwsConfig_.getAwsS3DefaultStorageClass();
+        final StorageClass defaultStorageClass = awsConfig_.getAwsS3DefaultStorageClass();
         final Map<String, String> requestParameters = ImmutableMap.of(
                 Headers.STORAGE_CLASS, defaultStorageClass.toString());
 
@@ -97,7 +97,7 @@ public final class S3Manager implements AssetManager {
             final HttpMethod httpMethod,
             @Nullable final Map<String, String> requestParameters) {
         final long linkValidityDurationInSeconds =
-                onyxAwsConfig_.getAwsS3PresignedAssetUrlValidityDuration(TimeUnit.SECONDS);
+                awsConfig_.getAwsS3PresignedAssetUrlValidityDuration(TimeUnit.SECONDS);
 
         final S3Link s3Link = resource.getS3Link();
 

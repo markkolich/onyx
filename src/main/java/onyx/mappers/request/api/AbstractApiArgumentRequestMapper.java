@@ -26,7 +26,6 @@
 
 package onyx.mappers.request.api;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.mappers.request.types.body.InputStreamReaderRequestBodyMapper;
 import onyx.exceptions.api.ApiBadRequestException;
@@ -38,21 +37,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class AbstractApiArgumentRequestMapper<T>
         extends InputStreamReaderRequestBodyMapper<T> {
 
-    private static final ObjectMapper OBJECT_MAPPER =
-            new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
     private final Class<T> clazz_;
 
+    private final ObjectMapper objectMapper_;
+
     public AbstractApiArgumentRequestMapper(
-            final Class<T> clazz) {
+            final Class<T> clazz,
+            final ObjectMapper objectMapper) {
         clazz_ = checkNotNull(clazz, "API argument request mapper entity class cannot be null.");
+        objectMapper_ = checkNotNull(objectMapper,
+                "API argument request Jackson object mapper cannot be null.");
     }
 
     @Override
     public final T resolveWithReader(
             final InputStreamReader reader) throws Exception {
         try {
-            return OBJECT_MAPPER.readValue(reader, clazz_);
+            return objectMapper_.readValue(reader, clazz_);
         } catch (final Exception e) {
             throw new ApiBadRequestException("Failed to parse request JSON.", e);
         }

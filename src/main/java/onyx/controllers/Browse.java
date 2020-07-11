@@ -32,7 +32,7 @@ import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
 import onyx.components.config.OnyxConfig;
-import onyx.components.config.cache.OnyxLocalCacheConfig;
+import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.CacheManager;
@@ -54,7 +54,7 @@ import java.util.List;
 @Controller
 public final class Browse extends AbstractOnyxController {
 
-    private final OnyxLocalCacheConfig onyxLocalCacheConfig_;
+    private final LocalCacheConfig localCacheConfig_;
 
     private final AssetManager assetManager_;
     private final ResourceManager resourceManager_;
@@ -64,12 +64,12 @@ public final class Browse extends AbstractOnyxController {
     public Browse(
             final OnyxConfig onyxConfig,
             final AsynchronousResourcePool asynchronousResourcePool,
-            final OnyxLocalCacheConfig onyxLocalCacheConfig,
+            final LocalCacheConfig localCacheConfig,
             final AssetManager assetManager,
             final ResourceManager resourceManager,
             final CacheManager cacheManager) {
         super(onyxConfig, asynchronousResourcePool);
-        onyxLocalCacheConfig_ = onyxLocalCacheConfig;
+        localCacheConfig_ = localCacheConfig;
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
         cacheManager_ = cacheManager;
@@ -177,7 +177,7 @@ public final class Browse extends AbstractOnyxController {
 
         final URL downloadUrl;
         {
-            final boolean localCacheEnabled = onyxLocalCacheConfig_.localCacheEnabled();
+            final boolean localCacheEnabled = localCacheConfig_.localCacheEnabled();
 
             // Only favorite files are stored in the local cache.
             if (localCacheEnabled && file.getFavorite()) {

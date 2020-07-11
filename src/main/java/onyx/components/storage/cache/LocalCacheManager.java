@@ -30,7 +30,7 @@ import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import io.netty.handler.codec.http.HttpHeaders;
 import onyx.components.config.OnyxConfig;
-import onyx.components.config.cache.OnyxLocalCacheConfig;
+import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
@@ -59,7 +59,7 @@ public final class LocalCacheManager implements CacheManager {
     private static final Logger LOG = LoggerFactory.getLogger(LocalCacheManager.class);
 
     private final OnyxConfig onyxConfig_;
-    private final OnyxLocalCacheConfig onyxLocalCacheConfig_;
+    private final LocalCacheConfig localCacheConfig_;
 
     private final AssetManager assetManager_;
 
@@ -68,11 +68,11 @@ public final class LocalCacheManager implements CacheManager {
     @Injectable
     public LocalCacheManager(
             final OnyxConfig onyxConfig,
-            final OnyxLocalCacheConfig onyxLocalCacheConfig,
+            final LocalCacheConfig localCacheConfig,
             final AssetManager assetManager,
             final CachedResourceSigner cachedResourceSigner) {
         onyxConfig_ = onyxConfig;
-        onyxLocalCacheConfig_ = onyxLocalCacheConfig;
+        localCacheConfig_ = localCacheConfig;
         assetManager_ = assetManager;
         cachedResourceSigner_ = cachedResourceSigner;
     }
@@ -87,7 +87,7 @@ public final class LocalCacheManager implements CacheManager {
         }
 
         final long tokenValidityDurationInSeconds =
-                onyxLocalCacheConfig_.getLocalCacheTokenValidityDuration(TimeUnit.SECONDS);
+                localCacheConfig_.getLocalCacheTokenValidityDuration(TimeUnit.SECONDS);
 
         final CachedResourceToken cachedResourceToken = new CachedResourceToken.Builder()
                 .setPath(resource.getPath())
@@ -183,7 +183,7 @@ public final class LocalCacheManager implements CacheManager {
      */
     private Path generateCachedResourcePath(
             final String resourcePath) {
-        final Path cacheDirectory = onyxLocalCacheConfig_.getLocalCacheDirectory();
+        final Path cacheDirectory = localCacheConfig_.getLocalCacheDirectory();
         // SHA-256 hash the resource path; this should provide enough URL-safe
         // uniqueness that there should not be any per-path conflicts when
         // used in a URL or in the name of a file on disk.

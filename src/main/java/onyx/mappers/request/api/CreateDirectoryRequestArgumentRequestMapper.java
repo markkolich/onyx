@@ -26,15 +26,19 @@
 
 package onyx.mappers.request.api;
 
+import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
+import onyx.components.OnyxJacksonObjectMapper;
 import onyx.entities.api.request.CreateDirectoryRequest;
 
 @Mapper
 public final class CreateDirectoryRequestArgumentRequestMapper
         extends AbstractApiArgumentRequestMapper<CreateDirectoryRequest> {
 
-    public CreateDirectoryRequestArgumentRequestMapper() {
-        super(CreateDirectoryRequest.class);
+    @Injectable
+    public CreateDirectoryRequestArgumentRequestMapper(
+            final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
+        super(CreateDirectoryRequest.class, onyxJacksonObjectMapper.getObjectMapper());
     }
 
 }

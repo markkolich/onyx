@@ -24,41 +24,24 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws.dynamodb;
+package onyx.components;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Component;
-import curacao.annotations.Injectable;
-import curacao.components.ComponentDestroyable;
-import onyx.components.config.aws.OnyxAwsConfig;
-import onyx.components.storage.aws.AwsClientConfiguration;
-import onyx.components.storage.aws.AwsCredentials;
 
 @Component
-public final class DynamoDbClient implements ComponentDestroyable {
+public final class OnyxJacksonObjectMapper {
 
-    private final AmazonDynamoDB dynamoDb_;
+    private final ObjectMapper objectMapper_;
 
-    @Injectable
-    public DynamoDbClient(
-            final OnyxAwsConfig onyxAwsConfig,
-            final AwsCredentials awsCredentials,
-            final AwsClientConfiguration awsClientConfiguration) {
-        dynamoDb_ = AmazonDynamoDBClientBuilder.standard()
-                .withCredentials(awsCredentials.getCredentialsProvider())
-                .withClientConfiguration(awsClientConfiguration.getClientConfiguration())
-                .withRegion(onyxAwsConfig.getAwsRegion())
-                .build();
+    public OnyxJacksonObjectMapper() {
+        objectMapper_ = new ObjectMapper()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
-    public AmazonDynamoDB getDbClient() {
-        return dynamoDb_;
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        dynamoDb_.shutdown();
+    public ObjectMapper getObjectMapper() {
+        return objectMapper_;
     }
 
 }

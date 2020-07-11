@@ -24,70 +24,56 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws.dynamodb.queries;
+package onyx.components.aws.dynamodb.queries;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+public final class ListHomeDirectories {
 
-public final class DeleteResource {
+    private static final Logger LOG = LoggerFactory.getLogger(ListHomeDirectories.class);
 
-    private static final Logger LOG = LoggerFactory.getLogger(DeleteResource.class);
-
-    private final Resource resource_;
-
-    public DeleteResource(
-            final Resource resource) {
-        resource_ = checkNotNull(resource, "Resource cannot be null.");
-    }
-
-    public void run(
+    public List<Resource> run(
             final IDynamoDBMapper dbMapper) {
-        final Resource.Type resourceType = resource_.getType();
+        final DynamoDBScanExpression se = new DynamoDBScanExpression()
+                .withExpressionAttributeNames(buildExpressionAttributes())
+                .withExpressionAttributeValues(buildExpressionAttributeValues())
+                .withFilterExpression(buildFilterExpression());
 
-        if (Resource.Type.FILE.equals(resourceType)) {
-            dbMapper.delete(resource_);
-        } else if (Resource.Type.DIRECTORY.equals(resourceType)) {
-            // First, delete the parent directory itself.
-            dbMapper.delete(resource_);
+        final PaginatedScanList<Resource> scanResult = dbMapper.scan(Resource.class, se);
 
-            // Then, delete any of the children recursively.
-            final DynamoDBScanExpression se = new DynamoDBScanExpression()
-                    .withExpressionAttributeNames(buildExpressionAttributes())
-                    .withExpressionAttributeValues(buildExpressionAttributeValues())
-                    .withFilterExpression(buildFilterExpression());
-            final PaginatedScanList<Resource> scanResult = dbMapper.scan(Resource.class, se);
-            for (final Resource child : scanResult) {
-                dbMapper.delete(child);
-            }
-        }
+        return scanResult.stream()
+                // Sort the results alphabetically based on path.
+                .sorted(Comparator.comparing(Resource::getPath))
+                .collect(ImmutableList.toImmutableList());
     }
 
     private Map<String, String> buildExpressionAttributes() {
-        return ImmutableMap.of("#name0", "path");
+        return ImmutableMap.of(
+                "#name0", "parent",
+                "#name1", "type");
     }
 
     private Map<String, AttributeValue> buildExpressionAttributeValues() {
-        // IMPORTANT: note the trailing slash on the value, which is to scan for any children
-        // of the directory. For example, if the path to delete was "/foo/bar/baz" we add the
-        // trailing slash so a resource with a similar begins-with path of "/foo/bar/baz.txt"
-        // isn't deleted by mistake.
-        return ImmutableMap.of(":value0",
-                new AttributeValue().withS(resource_.getPath() + ResourceManager.ROOT_PATH));
+        return ImmutableMap.of(
+                ":value0", new AttributeValue().withS(ResourceManager.ROOT_PATH),
+                ":value1", new AttributeValue().withS(Resource.Type.DIRECTORY.toString()));
     }
 
     private String buildFilterExpression() {
-        return "begins_with(#name0, :value0)";
+        return "#name0 = :value0 AND #name1 = :value1";
     }
 
 }

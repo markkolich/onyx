@@ -35,14 +35,14 @@ import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.RequestBody;
 import curacao.entities.CuracaoEntity;
+import onyx.components.aws.dynamodb.DynamoDbMapper;
 import onyx.components.config.OnyxConfig;
-import onyx.components.config.aws.OnyxAwsConfig;
-import onyx.components.config.cache.OnyxLocalCacheConfig;
+import onyx.components.config.aws.AwsConfig;
+import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
-import onyx.components.storage.aws.dynamodb.DynamoDbMapper;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.request.UpdateFileRequest;
 import onyx.entities.api.request.UploadFileRequest;
@@ -66,8 +66,8 @@ import static curacao.annotations.RequestMapping.Method.*;
 @Controller
 public final class File extends AbstractOnyxApiController {
 
-    private final OnyxAwsConfig onyxAwsConfig_;
-    private final OnyxLocalCacheConfig onyxLocalCacheConfig_;
+    private final AwsConfig awsConfig_;
+    private final LocalCacheConfig localCacheConfig_;
 
     private final AssetManager assetManager_;
     private final ResourceManager resourceManager_;
@@ -79,15 +79,15 @@ public final class File extends AbstractOnyxApiController {
     public File(
             final OnyxConfig onyxConfig,
             final AsynchronousResourcePool asynchronousResourcePool,
-            final OnyxAwsConfig onyxAwsConfig,
-            final OnyxLocalCacheConfig onyxLocalCacheConfig,
+            final AwsConfig awsConfig,
+            final LocalCacheConfig localCacheConfig,
             final AssetManager assetManager,
             final ResourceManager resourceManager,
             final CacheManager cacheManager,
             final DynamoDbMapper dynamoDbMapper) {
         super(onyxConfig, asynchronousResourcePool);
-        onyxAwsConfig_ = onyxAwsConfig;
-        onyxLocalCacheConfig_ = onyxLocalCacheConfig;
+        awsConfig_ = awsConfig;
+        localCacheConfig_ = localCacheConfig;
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
         cacheManager_ = cacheManager;
@@ -133,8 +133,8 @@ public final class File extends AbstractOnyxApiController {
                             .setVisibility(request.getVisibility())
                             .setOwner(session.getUsername())
                             .setCreatedAt(new Date()) // now
-                            .withS3BucketRegion(Region.fromValue(onyxAwsConfig_.getAwsRegion().getName()))
-                            .withS3Bucket(onyxAwsConfig_.getAwsS3BucketName())
+                            .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region().getName()))
+                            .withS3Bucket(awsConfig_.getAwsS3BucketName())
                             .withDbMapper(dbMapper_)
                             .build();
 
@@ -167,8 +167,8 @@ public final class File extends AbstractOnyxApiController {
                 .setVisibility(request.getVisibility())
                 .setOwner(session.getUsername())
                 .setCreatedAt(new Date()) // now
-                .withS3BucketRegion(Region.fromValue(onyxAwsConfig_.getAwsRegion().getName()))
-                .withS3Bucket(onyxAwsConfig_.getAwsS3BucketName())
+                .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region().getName()))
+                .withS3Bucket(awsConfig_.getAwsS3BucketName())
                 .withDbMapper(dbMapper_)
                 .build();
 
@@ -215,7 +215,7 @@ public final class File extends AbstractOnyxApiController {
             file.setFavorite(favorite);
 
             // Trigger a download of the file to the cache only if the resource has private visibility.
-            final boolean localCacheEnabled = onyxLocalCacheConfig_.localCacheEnabled();
+            final boolean localCacheEnabled = localCacheConfig_.localCacheEnabled();
             if (localCacheEnabled && Resource.Visibility.PRIVATE.equals(file.getVisibility())) {
                 if (BooleanUtils.isTrue(favorite)) {
                     // When a file is favorited, trigger a download of the resource to the cache.
@@ -261,7 +261,7 @@ public final class File extends AbstractOnyxApiController {
         assetManager_.deleteResourceAsync(file, executorService_);
 
         // Delete the asset from the cache asynchronously too.
-        final boolean localCacheEnabled = onyxLocalCacheConfig_.localCacheEnabled();
+        final boolean localCacheEnabled = localCacheConfig_.localCacheEnabled();
         if (localCacheEnabled) {
             cacheManager_.deleteResourceFromCacheAsync(file, executorService_);
         }

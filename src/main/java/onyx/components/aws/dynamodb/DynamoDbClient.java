@@ -24,21 +24,41 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.mappers.request.api;
+package onyx.components.aws.dynamodb;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.annotations.Mapper;
-import onyx.components.OnyxJacksonObjectMapper;
-import onyx.entities.api.request.UpdateDirectoryRequest;
+import curacao.components.ComponentDestroyable;
+import onyx.components.config.aws.AwsConfig;
+import onyx.components.aws.AwsClientConfiguration;
+import onyx.components.aws.AwsCredentials;
 
-@Mapper
-public final class UpdateDirectoryRequestArgumentRequestMapper
-        extends AbstractApiArgumentRequestMapper<UpdateDirectoryRequest> {
+@Component
+public final class DynamoDbClient implements ComponentDestroyable {
+
+    private final AmazonDynamoDB dynamoDb_;
 
     @Injectable
-    public UpdateDirectoryRequestArgumentRequestMapper(
-            final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(UpdateDirectoryRequest.class, onyxJacksonObjectMapper.getObjectMapper());
+    public DynamoDbClient(
+            final AwsConfig awsConfig,
+            final AwsCredentials awsCredentials,
+            final AwsClientConfiguration awsClientConfiguration) {
+        dynamoDb_ = AmazonDynamoDBClientBuilder.standard()
+                .withCredentials(awsCredentials.getCredentialsProvider())
+                .withClientConfiguration(awsClientConfiguration.getClientConfiguration())
+                .withRegion(awsConfig.getAwsDynamoDbRegion())
+                .build();
+    }
+
+    public AmazonDynamoDB getDbClient() {
+        return dynamoDb_;
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        dynamoDb_.shutdown();
     }
 
 }

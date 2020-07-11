@@ -24,21 +24,24 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.mappers.request.api;
+package onyx.components.authentication.twofactor;
 
-import curacao.annotations.Injectable;
-import curacao.annotations.Mapper;
-import onyx.components.OnyxJacksonObjectMapper;
-import onyx.entities.api.request.UpdateDirectoryRequest;
+import onyx.entities.authentication.twofactor.TwoFactorAuthToken;
 
-@Mapper
-public final class UpdateDirectoryRequestArgumentRequestMapper
-        extends AbstractApiArgumentRequestMapper<UpdateDirectoryRequest> {
+import javax.annotation.Nullable;
 
-    @Injectable
-    public UpdateDirectoryRequestArgumentRequestMapper(
-            final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(UpdateDirectoryRequest.class, onyxJacksonObjectMapper.getObjectMapper());
-    }
+public interface TwoFactorAuthTokenManager {
+
+    @Nullable
+    String signToken(
+            final TwoFactorAuthToken token);
+
+    @Nullable
+    TwoFactorAuthToken extractSignedToken(
+            final String signedToken);
+
+    String generateTokenHash(
+            final String username,
+            final String code);
 
 }

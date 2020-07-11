@@ -26,12 +26,12 @@
 
 package onyx.components.storage.cache;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolich.common.util.secure.KolichStringSigner;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.config.cache.OnyxLocalCacheConfig;
+import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.config.cache.LocalCacheConfig;
 import onyx.entities.storage.cache.CachedResourceToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,15 +45,16 @@ public final class LocalCachedResourceSigner implements CachedResourceSigner {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalCachedResourceSigner.class);
 
-    private static final ObjectMapper OBJECT_MAPPER =
-            new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private final ObjectMapper objectMapper_;
 
     private final String cacheTokenSignerSecret_;
 
     @Injectable
     public LocalCachedResourceSigner(
-            final OnyxLocalCacheConfig onyxLocalCacheConfig) {
-        cacheTokenSignerSecret_ = onyxLocalCacheConfig.getLocalCacheTokenSignerSecret();
+            final LocalCacheConfig localCacheConfig,
+            final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
+        cacheTokenSignerSecret_ = localCacheConfig.getLocalCacheTokenSignerSecret();
+        objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
     @Nullable
@@ -63,7 +64,7 @@ public final class LocalCachedResourceSigner implements CachedResourceSigner {
         checkNotNull(cachedResourceToken, "Cached resource token cannot be null.");
 
         try {
-            final String serializedCachedResource = OBJECT_MAPPER.writeValueAsString(cachedResourceToken);
+            final String serializedCachedResource = objectMapper_.writeValueAsString(cachedResourceToken);
             return new KolichStringSigner(cacheTokenSignerSecret_).sign(serializedCachedResource);
         } catch (final Exception e) {
             LOG.warn("Failed to sign cached resource token: " + cachedResourceToken.getPath(), e);
@@ -79,7 +80,7 @@ public final class LocalCachedResourceSigner implements CachedResourceSigner {
 
         try {
             final String tokenString = new KolichStringSigner(cacheTokenSignerSecret_).isValid(signedToken);
-            final CachedResourceToken cachedResource = OBJECT_MAPPER.readValue(tokenString,
+            final CachedResourceToken cachedResource = objectMapper_.readValue(tokenString,
                     CachedResourceToken.class);
 
             final long now = System.currentTimeMillis();

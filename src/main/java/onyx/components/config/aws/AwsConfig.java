@@ -24,46 +24,53 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.config.cache;
+package onyx.components.config.aws;
 
-import com.typesafe.config.Config;
-import curacao.annotations.Component;
-import curacao.annotations.Injectable;
-import onyx.components.config.OnyxConfig;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.model.StorageClass;
 
-import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
-@Component
-public final class OnyxTypesafeLocalCacheConfig implements LocalCacheConfig {
+public interface AwsConfig {
 
-    private final Config config_;
+    String AWS_CONFIG_PATH = "aws";
 
-    @Injectable
-    public OnyxTypesafeLocalCacheConfig(
-            final OnyxConfig onyxConfig) {
-        config_ = onyxConfig.getOnyxConfig().getConfig(LOCAL_CACHE_CONFIG_PATH);
-    }
+    String AWS_ACCESS_KEY_PROP = "access-key";
+    String AWS_SECRET_KEY_PROP = "secret-key";
 
-    @Override
-    public boolean localCacheEnabled() {
-        return config_.getBoolean(LOCAL_CACHE_ENABLED_PROP);
-    }
+    String AWS_DYNAMO_DB_REGION_PROP = "dynamo-db.region";
+    String AWS_DYNAMO_DB_TABLE_NAME_PROP = "dynamo-db.table-name";
 
-    @Override
-    public Path getLocalCacheDirectory() {
-        return Path.of(config_.getString(LOCAL_CACHE_DIRECTORY_PROP));
-    }
+    String AWS_S3_REGION_PROP = "s3.region";
+    String AWS_S3_BUCKET_NAME_PROP = "s3.bucket-name";
+    String AWS_S3_ASSET_URL_VALIDITY_DURATION_PROP = "s3.asset-url-validity-duration";
+    String AWS_S3_DEFAULT_STORAGE_CLASS_PROP = "s3.default-storage-class";
 
-    @Override
-    public String getLocalCacheTokenSignerSecret() {
-        return config_.getString(LOCAL_CACHE_TOKEN_SIGNER_SECRET_PROP);
-    }
+    String AWS_SNS_REGION_PROP = "sns.region";
 
-    @Override
-    public long getLocalCacheTokenValidityDuration(
-            final TimeUnit timeUnit) {
-        return config_.getDuration(LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP, timeUnit);
-    }
+    String getAwsAccessKey();
+
+    String getAwsSecretKey();
+
+    // DynamoDB config
+
+    Regions getAwsDynamoDbRegion();
+
+    String getAwsDynamoDbTableName();
+
+    // S3 config
+
+    Regions getAwsS3Region();
+
+    String getAwsS3BucketName();
+
+    long getAwsS3PresignedAssetUrlValidityDuration(
+            final TimeUnit timeUnit);
+
+    StorageClass getAwsS3DefaultStorageClass();
+
+    // SNS config
+
+    Regions getAwsSnsRegion();
 
 }

@@ -24,15 +24,16 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.authentication;
+package onyx.components.authentication.twofactor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolich.common.util.secure.KolichStringSigner;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.OnyxJacksonObjectMapper;
-import onyx.components.config.authentication.SessionConfig;
-import onyx.entities.authentication.Session;
+import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
+import onyx.entities.authentication.twofactor.TwoFactorAuthToken;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,58 +42,69 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @Component
-public final class OnyxSignedSessionManager implements SessionManager {
+public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OnyxSignedSessionManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OnyxTwoFactorAuthTokenManager.class);
 
     private final ObjectMapper objectMapper_;
 
-    private final String sessionSignerSecret_;
+    private final String tokenSignerSecret_;
 
     @Injectable
-    public OnyxSignedSessionManager(
-            final SessionConfig sessionConfig,
+    public OnyxTwoFactorAuthTokenManager(
+            final TwoFactorAuthConfig onyxTwoFactorAuthConfig,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
-        sessionSignerSecret_ = sessionConfig.getSessionSignerSecret();
+        tokenSignerSecret_ = onyxTwoFactorAuthConfig.getTokenSignerSecret();
     }
 
     @Nullable
     @Override
-    public String signSession(
-            final Session session) {
-        checkNotNull(session, "Session to sign cannot be null.");
+    public String signToken(
+            final TwoFactorAuthToken token) {
+        checkNotNull(token, "2FA token cannot be null.");
 
         try {
-            final String serializedSession = objectMapper_.writeValueAsString(session);
-            return new KolichStringSigner(sessionSignerSecret_).sign(serializedSession);
+            final String serializedSession = objectMapper_.writeValueAsString(token);
+            return new KolichStringSigner(tokenSignerSecret_).sign(serializedSession);
         } catch (final Exception e) {
-            LOG.warn("Failed to sign session: " + session.getId(), e);
+            LOG.warn("Failed to sign 2FA token for session ID: " + token.getSession().getId(), e);
             return null;
         }
     }
 
     @Nullable
     @Override
-    public Session extractSignedSession(
-            final String signedSession) {
-        checkNotNull(signedSession, "Signed session string cannot be null.");
+    public TwoFactorAuthToken extractSignedToken(
+            final String signedToken) {
+        checkNotNull(signedToken, "Signed 2FA token string cannot be null.");
 
         try {
-            final String sessionString = new KolichStringSigner(sessionSignerSecret_).isValid(signedSession);
-            final Session session = objectMapper_.readValue(sessionString, Session.class);
+            final String tokenString = new KolichStringSigner(tokenSignerSecret_).isValid(signedToken);
+            final TwoFactorAuthToken token =
+                    objectMapper_.readValue(tokenString, TwoFactorAuthToken.class);
 
             final long now = System.currentTimeMillis();
-            if (now > session.getExpiry().getTime()) {
-                LOG.debug("Session expired: {}", session.getId());
+            if (now > token.getExpiry().getTime()) {
+                LOG.debug("2FA token expired for session ID: {}", token.getSession().getId());
                 return null;
             }
 
-            return session;
+            return token;
         } catch (final Exception e) {
-            LOG.warn("Failed to get session from signed session string: " + signedSession, e);
+            LOG.warn("Failed to get 2FA token from signed token string: " + signedToken, e);
             return null;
         }
+    }
+
+    @Override
+    public String generateTokenHash(
+            final String username,
+            final String code) {
+        checkNotNull(username, "2FA username cannot be null.");
+        checkNotNull(code, "2FA verification code cannot be null.");
+
+        return DigestUtils.sha512Hex(String.format("%s_%s", username, code));
     }
 
 }

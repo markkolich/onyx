@@ -24,29 +24,34 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws.dynamodb.queries;
+package onyx.components.aws;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import onyx.entities.storage.aws.dynamodb.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.amazonaws.ClientConfiguration;
+import curacao.annotations.Component;
+import curacao.annotations.Injectable;
+import onyx.BuildVersion;
+import onyx.components.config.OnyxConfig;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+@Component
+public final class AwsClientConfiguration {
 
-public final class UpdateResource {
+    private static final String USER_AGENT_PREFIX_FORMAT = "Onyx/%s (+%s)";
 
-    private static final Logger LOG = LoggerFactory.getLogger(UpdateResource.class);
+    private final ClientConfiguration clientConfiguration_;
 
-    private final Resource resource_;
+    @Injectable
+    public AwsClientConfiguration(
+            final OnyxConfig onyxConfig) {
+        final BuildVersion buildVersion = BuildVersion.getInstance();
 
-    public UpdateResource(
-            final Resource resource) {
-        resource_ = checkNotNull(resource, "Resource cannot be null.");
+        final String userAgentPrefix = String.format(USER_AGENT_PREFIX_FORMAT,
+                buildVersion.getBuildNumber(), onyxConfig.getViewSafeFullUri());
+        clientConfiguration_ = new ClientConfiguration()
+                .withUserAgentPrefix(userAgentPrefix);
     }
 
-    public void run(
-            final IDynamoDBMapper dbMapper) {
-        dbMapper.save(resource_);
+    public ClientConfiguration getClientConfiguration() {
+        return clientConfiguration_;
     }
 
 }

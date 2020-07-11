@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>Onyx - Login</title>
+    <title>Onyx - Verify your Identity</title>
     <#include "common/css.ftl">
 </head>
 <body>
@@ -20,15 +20,15 @@
                     <div class="p-5">
                       <div class="text-center">
                         <h3 class="text-dark mb-4">Onyx</h3>
+                        <h5>Verify your Identity</h5>
+                        <p>Please enter the verification code sent to the mobile phone number for this account.</p>
                       </div>
-                      <form action="${contextPath}/login" method="post">
+                      <form action="${contextPath}/login/verify" method="post">
+                        <input type="hidden" name="token" value="${token}">
                         <div class="form-group">
-                          <input type="text" name="username" class="form-control form-control-user" placeholder="Username" autofocus="autofocus" required="required">
+                          <input type="text" maxlength="32" name="code" class="form-control form-control-user" placeholder="Code" autofocus="autofocus" required="required">
                         </div>
-                        <div class="form-group">
-                          <input type="password" name="password" class="form-control form-control-user" placeholder="Password" required="required">
-                        </div>
-                        <input type="submit" class="btn btn-primary btn-block pt-8" value="Login">
+                        <input type="submit" class="btn btn-primary btn-block pt-8" value="Verify">
                       </form>
                     </div>
                   </div>

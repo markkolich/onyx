@@ -24,28 +24,14 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.config.authentication;
+package onyx.components.authentication.twofactor;
 
-import com.typesafe.config.ConfigList;
+import onyx.entities.authentication.User;
 
-import java.util.concurrent.TimeUnit;
+public interface TwoFactorAuthCodeManager {
 
-public interface OnyxSessionConfig {
-
-    String SESSION_CONFIG_PATH = "session";
-
-    String SESSION_USERS_PROP = "users";
-    String SESSION_DURATION_PROP = "duration";
-    String SESSION_SIGNER_SECRET_PROP = "signer-secret";
-    String SESSION_HTTPS_PROP = "https";
-
-    ConfigList getUsers();
-
-    long getSessionDuration(
-            final TimeUnit timeUnit);
-
-    String getSessionSignerSecret();
-
-    boolean isSessionUsingHttps();
+    void sendVerificationCodeToUser(
+            final User user,
+            final String code);
 
 }

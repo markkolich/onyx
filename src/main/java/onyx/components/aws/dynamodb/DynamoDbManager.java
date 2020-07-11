@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws.dynamodb;
+package onyx.components.aws.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -33,7 +33,7 @@ import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.ResourceManager;
-import onyx.components.storage.aws.dynamodb.queries.*;
+import onyx.components.aws.dynamodb.queries.*;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
 import javax.annotation.Nonnull;

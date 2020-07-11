@@ -36,7 +36,7 @@ import onyx.components.config.OnyxConfig;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public final class OnyxTypesafeAwsConfig implements OnyxAwsConfig {
+public final class OnyxTypesafeAwsConfig implements AwsConfig {
 
     private final Config config_;
 
@@ -56,19 +56,24 @@ public final class OnyxTypesafeAwsConfig implements OnyxAwsConfig {
         return config_.getString(AWS_SECRET_KEY_PROP);
     }
 
-    @Override
-    public Regions getAwsRegion() {
-        return Regions.fromName(config_.getString(AWS_REGION_PROP));
-    }
+    // DynamoDB config
 
-    // AWS DynamoDB
+    @Override
+    public Regions getAwsDynamoDbRegion() {
+        return Regions.fromName(config_.getString(AWS_DYNAMO_DB_REGION_PROP));
+    }
 
     @Override
     public String getAwsDynamoDbTableName() {
         return config_.getString(AWS_DYNAMO_DB_TABLE_NAME_PROP);
     }
 
-    // AWS S3
+    // S3 config
+
+    @Override
+    public Regions getAwsS3Region() {
+        return Regions.fromName(config_.getString(AWS_S3_REGION_PROP));
+    }
 
     @Override
     public String getAwsS3BucketName() {
@@ -84,6 +89,13 @@ public final class OnyxTypesafeAwsConfig implements OnyxAwsConfig {
     @Override
     public StorageClass getAwsS3DefaultStorageClass() {
         return StorageClass.fromValue(config_.getString(AWS_S3_DEFAULT_STORAGE_CLASS_PROP));
+    }
+
+    // SNS config
+
+    @Override
+    public Regions getAwsSnsRegion() {
+        return Regions.fromName(config_.getString(AWS_SNS_REGION_PROP));
     }
 
 }

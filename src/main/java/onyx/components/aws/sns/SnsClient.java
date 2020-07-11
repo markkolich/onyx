@@ -24,21 +24,41 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.mappers.request.api;
+package onyx.components.aws.sns;
 
+import com.amazonaws.services.sns.AmazonSNS;
+import com.amazonaws.services.sns.AmazonSNSClientBuilder;
+import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.annotations.Mapper;
-import onyx.components.OnyxJacksonObjectMapper;
-import onyx.entities.api.request.UpdateDirectoryRequest;
+import curacao.components.ComponentDestroyable;
+import onyx.components.aws.AwsClientConfiguration;
+import onyx.components.aws.AwsCredentials;
+import onyx.components.config.aws.AwsConfig;
 
-@Mapper
-public final class UpdateDirectoryRequestArgumentRequestMapper
-        extends AbstractApiArgumentRequestMapper<UpdateDirectoryRequest> {
+@Component
+public final class SnsClient implements ComponentDestroyable {
+
+    private final AmazonSNS sns_;
 
     @Injectable
-    public UpdateDirectoryRequestArgumentRequestMapper(
-            final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(UpdateDirectoryRequest.class, onyxJacksonObjectMapper.getObjectMapper());
+    public SnsClient(
+            final AwsConfig awsConfig,
+            final AwsCredentials awsCredentials,
+            final AwsClientConfiguration awsClientConfiguration) {
+        sns_ = AmazonSNSClientBuilder.standard()
+                .withCredentials(awsCredentials.getCredentialsProvider())
+                .withClientConfiguration(awsClientConfiguration.getClientConfiguration())
+                .withRegion(awsConfig.getAwsSnsRegion())
+                .build();
+    }
+
+    public AmazonSNS getSnsClient() {
+        return sns_;
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        sns_.shutdown();
     }
 
 }

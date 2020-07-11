@@ -27,7 +27,7 @@
 package onyx;
 
 import com.google.common.base.Splitter;
-import onyx.components.config.cache.OnyxLocalCacheConfig;
+import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.cache.CachedResourceSigner;
 import onyx.entities.storage.cache.CachedResourceToken;
@@ -63,10 +63,10 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
         final ServletContext context = getServletContext();
 
         // If the local cache is not enabled, immediately bail.
-        final OnyxLocalCacheConfig onyxLocalCacheConfig =
-                componentFromContext(context, OnyxLocalCacheConfig.class);
-        checkNotNull(onyxLocalCacheConfig, "Local cache config cannot be null; context not initialized?");
-        final boolean localCacheEnabled = onyxLocalCacheConfig.localCacheEnabled();
+        final LocalCacheConfig localCacheConfig =
+                componentFromContext(context, LocalCacheConfig.class);
+        checkNotNull(localCacheConfig, "Local cache config cannot be null; context not initialized?");
+        final boolean localCacheEnabled = localCacheConfig.localCacheEnabled();
         if (!localCacheEnabled) {
             LOG.debug("Local resource cache not enabled; bye.");
             return null;

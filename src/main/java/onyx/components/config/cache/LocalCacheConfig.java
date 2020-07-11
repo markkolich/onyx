@@ -24,44 +24,27 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.config.aws;
+package onyx.components.config.cache;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.model.StorageClass;
-
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
-public interface OnyxAwsConfig {
+public interface LocalCacheConfig {
 
-    String AWS_CONFIG_PATH = "aws";
+    String LOCAL_CACHE_CONFIG_PATH = "local-cache";
 
-    String AWS_ACCESS_KEY_PROP = "access-key";
-    String AWS_SECRET_KEY_PROP = "secret-key";
-    String AWS_REGION_PROP = "region";
+    String LOCAL_CACHE_ENABLED_PROP = "enabled";
+    String LOCAL_CACHE_DIRECTORY_PROP = "directory";
+    String LOCAL_CACHE_TOKEN_SIGNER_SECRET_PROP = "token-signer-secret";
+    String LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP = "token-validity-duration";
 
-    String AWS_DYNAMO_DB_TABLE_NAME_PROP = "dynamo-db.table-name";
+    boolean localCacheEnabled();
 
-    String AWS_S3_BUCKET_NAME_PROP = "s3.bucket-name";
-    String AWS_S3_ASSET_URL_VALIDITY_DURATION_PROP = "s3.asset-url-validity-duration";
-    String AWS_S3_DEFAULT_STORAGE_CLASS_PROP = "s3.default-storage-class";
+    Path getLocalCacheDirectory();
 
-    String getAwsAccessKey();
+    String getLocalCacheTokenSignerSecret();
 
-    String getAwsSecretKey();
-
-    Regions getAwsRegion();
-
-    // DynamoDB config
-
-    String getAwsDynamoDbTableName();
-
-    // S3 config
-
-    String getAwsS3BucketName();
-
-    long getAwsS3PresignedAssetUrlValidityDuration(
+    long getLocalCacheTokenValidityDuration(
             final TimeUnit timeUnit);
-
-    StorageClass getAwsS3DefaultStorageClass();
 
 }

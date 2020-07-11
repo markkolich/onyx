@@ -24,41 +24,29 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws.s3;
+package onyx.components.aws.dynamodb.queries;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import curacao.annotations.Component;
-import curacao.annotations.Injectable;
-import curacao.components.ComponentDestroyable;
-import onyx.components.config.aws.OnyxAwsConfig;
-import onyx.components.storage.aws.AwsClientConfiguration;
-import onyx.components.storage.aws.AwsCredentials;
+import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
+import onyx.entities.storage.aws.dynamodb.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Component
-public final class S3Client implements ComponentDestroyable {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    private final AmazonS3 s3_;
+public final class CreateResource {
 
-    @Injectable
-    public S3Client(
-            final OnyxAwsConfig onyxAwsConfig,
-            final AwsCredentials awsCredentials,
-            final AwsClientConfiguration awsClientConfiguration) {
-        s3_ = AmazonS3ClientBuilder.standard()
-                .withCredentials(awsCredentials.getCredentialsProvider())
-                .withClientConfiguration(awsClientConfiguration.getClientConfiguration())
-                .withRegion(onyxAwsConfig.getAwsRegion())
-                .build();
+    private static final Logger LOG = LoggerFactory.getLogger(CreateResource.class);
+
+    private final Resource resource_;
+
+    public CreateResource(
+            final Resource resource) {
+        resource_ = checkNotNull(resource, "Resource cannot be null.");
     }
 
-    public AmazonS3 getS3Client() {
-        return s3_;
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        s3_.shutdown();
+    public void run(
+            final IDynamoDBMapper dbMapper) {
+        dbMapper.save(resource_);
     }
 
 }

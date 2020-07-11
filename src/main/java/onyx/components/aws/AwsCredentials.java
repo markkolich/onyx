@@ -24,27 +24,36 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.config.cache;
+package onyx.components.aws;
 
-import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import curacao.annotations.Component;
+import curacao.annotations.Injectable;
+import onyx.components.config.aws.AwsConfig;
 
-public interface OnyxLocalCacheConfig {
+@Component
+public final class AwsCredentials {
 
-    String LOCAL_CACHE_CONFIG_PATH = "local-cache";
+    private final AWSCredentials awsCredentials_;
+    private final AWSCredentialsProvider awsCredentialsProvider_;
 
-    String LOCAL_CACHE_ENABLED_PROP = "enabled";
-    String LOCAL_CACHE_DIRECTORY_PROP = "directory";
-    String LOCAL_CACHE_TOKEN_SIGNER_SECRET_PROP = "token-signer-secret";
-    String LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP = "token-validity-duration";
+    @Injectable
+    public AwsCredentials(
+            final AwsConfig awsConfig) {
+        awsCredentials_ = new BasicAWSCredentials(awsConfig.getAwsAccessKey(),
+                awsConfig.getAwsSecretKey());
+        awsCredentialsProvider_ = new AWSStaticCredentialsProvider(awsCredentials_);
+    }
 
-    boolean localCacheEnabled();
+    public AWSCredentials getCredentials() {
+        return awsCredentials_;
+    }
 
-    Path getLocalCacheDirectory();
-
-    String getLocalCacheTokenSignerSecret();
-
-    long getLocalCacheTokenValidityDuration(
-            final TimeUnit timeUnit);
+    public AWSCredentialsProvider getCredentialsProvider() {
+        return awsCredentialsProvider_;
+    }
 
 }

@@ -35,15 +35,17 @@ import com.typesafe.config.ConfigValueType;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentInitializable;
-import onyx.components.config.authentication.OnyxSessionConfig;
-import onyx.components.config.aws.OnyxAwsConfig;
+import onyx.components.aws.dynamodb.DynamoDbMapper;
+import onyx.components.config.authentication.SessionConfig;
+import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.ResourceManager;
-import onyx.components.storage.aws.dynamodb.DynamoDbMapper;
 import onyx.entities.authentication.Session;
+import onyx.entities.authentication.User;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.OnyxException;
 import onyx.util.PasswordHasher;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,25 +63,26 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
 
     private static final String USERS_USERNAME_PROP = "username";
     private static final String USERS_PASSWORD_PROP = "password";
+    private static final String USERS_MOBILE_NUMBER_PROP = "mobileNumber";
 
-    private final OnyxSessionConfig onyxSessionConfig_;
-    private final OnyxAwsConfig onyxAwsConfig_;
+    private final SessionConfig sessionConfig_;
+    private final AwsConfig awsConfig_;
 
     private final ResourceManager resourceManager_;
 
     private final IDynamoDBMapper dbMapper_;
 
     private final PasswordHasher pwHasher_;
-    private final Map<String, String> userCredentials_;
+    private final Map<String, User> userCredentials_;
 
     @Injectable
     public OnyxConfigUserAuthenticator(
-            final OnyxSessionConfig onyxSessionConfig,
-            final OnyxAwsConfig onyxAwsConfig,
+            final SessionConfig sessionConfig,
+            final AwsConfig awsConfig,
             final ResourceManager resourceManager,
             final DynamoDbMapper dynamoDbMapper) {
-        onyxSessionConfig_ = onyxSessionConfig;
-        onyxAwsConfig_ = onyxAwsConfig;
+        sessionConfig_ = sessionConfig;
+        awsConfig_ = awsConfig;
         resourceManager_ = resourceManager;
         dbMapper_ = dynamoDbMapper.getDbMapper();
 
@@ -87,11 +90,11 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
         userCredentials_ = buildUserCredentialsFromConfig();
     }
 
-    private Map<String, String> buildUserCredentialsFromConfig() {
-        final ImmutableMap.Builder<String, String> userCredentialsBuilder =
+    private Map<String, User> buildUserCredentialsFromConfig() {
+        final ImmutableMap.Builder<String, User> userCredentialsBuilder =
                 ImmutableMap.builder();
 
-        final ConfigList userCredentialsInConfig = onyxSessionConfig_.getUsers();
+        final ConfigList userCredentialsInConfig = sessionConfig_.getUsers();
         for (final ConfigValue configValue : userCredentialsInConfig) {
             if (!ConfigValueType.OBJECT.equals(configValue.valueType())) {
                 continue;
@@ -102,17 +105,26 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
 
             final String username = configUser.get(USERS_USERNAME_PROP);
             if (StringUtils.isBlank(username)) {
-                throw new OnyxException("Blank or null user-authenticator config key: "
-                        + USERS_USERNAME_PROP);
+                throw missingConfigKey(USERS_USERNAME_PROP);
             }
 
             final String password = configUser.get(USERS_PASSWORD_PROP);
             if (StringUtils.isBlank(password)) {
-                throw new OnyxException("Blank or null user-authenticator config key: "
-                        + USERS_PASSWORD_PROP);
+                throw missingConfigKey(USERS_PASSWORD_PROP);
             }
 
-            userCredentialsBuilder.put(username, password);
+            final String mobileNumber = configUser.get(USERS_MOBILE_NUMBER_PROP);
+            if (StringUtils.isBlank(mobileNumber)) {
+                throw missingConfigKey(USERS_MOBILE_NUMBER_PROP);
+            }
+
+            final User user = new User.Builder()
+                    .setUsername(username)
+                    .setPassword(password)
+                    .setMobileNumber(mobileNumber)
+                    .build();
+
+            userCredentialsBuilder.put(username, user);
         }
 
         return userCredentialsBuilder.build();
@@ -120,38 +132,41 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
 
     @Nullable
     @Override
-    public Session getSession(
+    public Pair<User, Session> getSession(
             final String username,
             final String password) {
         // Lookup the password from configuration.
-        final String passwordFromConfig = userCredentials_.get(username);
-        if (passwordFromConfig == null) {
+        final User userFromConfig = userCredentials_.get(username);
+        if (userFromConfig == null) {
             return null;
         }
 
         // Check if the provided password matches configuration.
+        final String passwordFromConfig = userFromConfig.getPassword();
         final boolean matches = pwHasher_.verify(password, passwordFromConfig);
         if (!matches) {
             return null;
         }
 
         final long sessionDurationInSeconds =
-                onyxSessionConfig_.getSessionDuration(TimeUnit.SECONDS);
+                sessionConfig_.getSessionDuration(TimeUnit.SECONDS);
         final Date sessionExpiry =
                 new Date(Instant.now().plusSeconds(sessionDurationInSeconds).toEpochMilli());
 
-        return new Session.Builder()
+        final Session session = new Session.Builder()
                 .setId(UUID.randomUUID().toString())
                 .setUsername(username)
                 .setExpiry(sessionExpiry)
                 .build();
+
+        return Pair.of(userFromConfig, session);
     }
 
     @Override
     public Session refreshSession(
             final Session session) {
         final long sessionDurationInSeconds =
-                onyxSessionConfig_.getSessionDuration(TimeUnit.SECONDS);
+                sessionConfig_.getSessionDuration(TimeUnit.SECONDS);
         final Date sessionExpiry =
                 new Date(Instant.now().plusSeconds(sessionDurationInSeconds).toEpochMilli());
 
@@ -177,8 +192,8 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
                         .setVisibility(Resource.Visibility.PUBLIC)
                         .setOwner(username)
                         .setCreatedAt(new Date()) // now
-                        .withS3BucketRegion(Region.fromValue(onyxAwsConfig_.getAwsRegion().getName()))
-                        .withS3Bucket(onyxAwsConfig_.getAwsS3BucketName())
+                        .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region().getName()))
+                        .withS3Bucket(awsConfig_.getAwsS3BucketName())
                         .withDbMapper(dbMapper_)
                         .build();
 
@@ -189,6 +204,11 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
                         userDirectoryPath);
             }
         }
+    }
+
+    private static OnyxException missingConfigKey(
+            final String key) {
+        return new OnyxException("Blank or null user-authenticator config key: " + key);
     }
 
 }

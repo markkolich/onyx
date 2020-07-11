@@ -26,15 +26,19 @@
 
 package onyx.mappers.request.api;
 
+import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
+import onyx.components.OnyxJacksonObjectMapper;
 import onyx.entities.api.request.UpdateFileRequest;
 
 @Mapper
 public final class UpdateFileRequestArgumentRequestMapper
         extends AbstractApiArgumentRequestMapper<UpdateFileRequest> {
 
-    public UpdateFileRequestArgumentRequestMapper() {
-        super(UpdateFileRequest.class);
+    @Injectable
+    public UpdateFileRequestArgumentRequestMapper(
+            final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
+        super(UpdateFileRequest.class, onyxJacksonObjectMapper.getObjectMapper());
     }
 
 }

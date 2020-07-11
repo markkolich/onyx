@@ -24,27 +24,36 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws;
+package onyx.components.aws.dynamodb;
 
-import com.amazonaws.ClientConfiguration;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
+import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import onyx.components.config.aws.AwsConfig;
+import onyx.components.aws.AwsCredentials;
 
 @Component
-public final class AwsClientConfiguration {
+public final class DynamoDbMapper {
 
-    private static final String USER_AGENT_PREFIX = "Onyx/1.0";
-
-    private final ClientConfiguration clientConfiguration_;
+    private final IDynamoDBMapper dbMapper_;
 
     @Injectable
-    public AwsClientConfiguration() {
-        clientConfiguration_ = new ClientConfiguration()
-                .withUserAgentPrefix(USER_AGENT_PREFIX);
+    public DynamoDbMapper(
+            final AwsConfig awsConfig,
+            final AwsCredentials awsCredentials,
+            final DynamoDbClient dynamoDbClient) {
+        final DynamoDBMapperConfig dbMapperConfig = DynamoDBMapperConfig.builder()
+                .withTableNameResolver((clazz, config) -> awsConfig.getAwsDynamoDbTableName())
+                .build();
+
+        dbMapper_ = new DynamoDBMapper(dynamoDbClient.getDbClient(), dbMapperConfig,
+                awsCredentials.getCredentialsProvider());
     }
 
-    public ClientConfiguration getClientConfiguration() {
-        return clientConfiguration_;
+    public IDynamoDBMapper getDbMapper() {
+        return dbMapper_;
     }
 
 }

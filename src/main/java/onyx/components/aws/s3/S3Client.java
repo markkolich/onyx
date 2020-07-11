@@ -24,36 +24,41 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws.dynamodb;
+package onyx.components.aws.s3;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.config.aws.OnyxAwsConfig;
-import onyx.components.storage.aws.AwsCredentials;
+import curacao.components.ComponentDestroyable;
+import onyx.components.aws.AwsClientConfiguration;
+import onyx.components.aws.AwsCredentials;
+import onyx.components.config.aws.AwsConfig;
 
 @Component
-public final class DynamoDbMapper {
+public final class S3Client implements ComponentDestroyable {
 
-    private final IDynamoDBMapper dbMapper_;
+    private final AmazonS3 s3_;
 
     @Injectable
-    public DynamoDbMapper(
-            final OnyxAwsConfig onyxAwsConfig,
+    public S3Client(
+            final AwsConfig awsConfig,
             final AwsCredentials awsCredentials,
-            final DynamoDbClient dynamoDbClient) {
-        final DynamoDBMapperConfig dbMapperConfig = DynamoDBMapperConfig.builder()
-                .withTableNameResolver((clazz, config) -> onyxAwsConfig.getAwsDynamoDbTableName())
+            final AwsClientConfiguration awsClientConfiguration) {
+        s3_ = AmazonS3ClientBuilder.standard()
+                .withCredentials(awsCredentials.getCredentialsProvider())
+                .withClientConfiguration(awsClientConfiguration.getClientConfiguration())
+                .withRegion(awsConfig.getAwsS3Region())
                 .build();
-
-        dbMapper_ = new DynamoDBMapper(dynamoDbClient.getDbClient(), dbMapperConfig,
-                awsCredentials.getCredentialsProvider());
     }
 
-    public IDynamoDBMapper getDbMapper() {
-        return dbMapper_;
+    public AmazonS3 getS3Client() {
+        return s3_;
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        s3_.shutdown();
     }
 
 }

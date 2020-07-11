@@ -35,7 +35,7 @@ import onyx.components.config.OnyxConfig;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public final class OnyxTypesafeSessionConfig implements OnyxSessionConfig {
+public final class OnyxTypesafeSessionConfig implements SessionConfig {
 
     private final Config config_;
 

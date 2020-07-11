@@ -24,21 +24,26 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.mappers.request.api;
+package onyx.components.config.authentication.twofactor;
 
-import curacao.annotations.Injectable;
-import curacao.annotations.Mapper;
-import onyx.components.OnyxJacksonObjectMapper;
-import onyx.entities.api.request.UpdateDirectoryRequest;
+import java.util.concurrent.TimeUnit;
 
-@Mapper
-public final class UpdateDirectoryRequestArgumentRequestMapper
-        extends AbstractApiArgumentRequestMapper<UpdateDirectoryRequest> {
+public interface TwoFactorAuthConfig {
 
-    @Injectable
-    public UpdateDirectoryRequestArgumentRequestMapper(
-            final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(UpdateDirectoryRequest.class, onyxJacksonObjectMapper.getObjectMapper());
-    }
+    String TWO_FACTOR_AUTH_CONFIG_PATH = "two-factor-auth";
+
+    String ENABLED_PROP = "enabled";
+    String RANDOM_CODE_LENGTH_PROP = "random-code-length";
+    String TOKEN_DURATION_PROP = "token-duration";
+    String TOKEN_SIGNER_SECRET_PROP = "token-signer-secret";
+
+    boolean twoFactorAuthEnabled();
+
+    int getRandomCodeLength();
+
+    long getTokenDuration(
+            final TimeUnit timeUnit);
+
+    String getTokenSignerSecret();
 
 }

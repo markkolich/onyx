@@ -24,36 +24,29 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws;
+package onyx.components.aws.dynamodb.queries;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import curacao.annotations.Component;
-import curacao.annotations.Injectable;
-import onyx.components.config.aws.OnyxAwsConfig;
+import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
+import onyx.entities.storage.aws.dynamodb.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Component
-public final class AwsCredentials {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    private final AWSCredentials awsCredentials_;
-    private final AWSCredentialsProvider awsCredentialsProvider_;
+public final class UpdateResource {
 
-    @Injectable
-    public AwsCredentials(
-            final OnyxAwsConfig onyxAwsConfig) {
-        awsCredentials_ = new BasicAWSCredentials(onyxAwsConfig.getAwsAccessKey(),
-                onyxAwsConfig.getAwsSecretKey());
-        awsCredentialsProvider_ = new AWSStaticCredentialsProvider(awsCredentials_);
+    private static final Logger LOG = LoggerFactory.getLogger(UpdateResource.class);
+
+    private final Resource resource_;
+
+    public UpdateResource(
+            final Resource resource) {
+        resource_ = checkNotNull(resource, "Resource cannot be null.");
     }
 
-    public AWSCredentials getCredentials() {
-        return awsCredentials_;
-    }
-
-    public AWSCredentialsProvider getCredentialsProvider() {
-        return awsCredentialsProvider_;
+    public void run(
+            final IDynamoDBMapper dbMapper) {
+        dbMapper.save(resource_);
     }
 
 }

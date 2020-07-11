@@ -24,29 +24,45 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.aws.dynamodb.queries;
+package onyx.components.config.authentication.twofactor;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import onyx.entities.storage.aws.dynamodb.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.typesafe.config.Config;
+import curacao.annotations.Component;
+import curacao.annotations.Injectable;
+import onyx.components.config.OnyxConfig;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.concurrent.TimeUnit;
 
-public final class CreateResource {
+@Component
+public final class OnyxTypesafeTwoFactorAuthConfig implements TwoFactorAuthConfig {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CreateResource.class);
+    private final Config config_;
 
-    private final Resource resource_;
-
-    public CreateResource(
-            final Resource resource) {
-        resource_ = checkNotNull(resource, "Resource cannot be null.");
+    @Injectable
+    public OnyxTypesafeTwoFactorAuthConfig(
+            final OnyxConfig onyxConfig) {
+        config_ = onyxConfig.getOnyxConfig().getConfig(TWO_FACTOR_AUTH_CONFIG_PATH);
     }
 
-    public void run(
-            final IDynamoDBMapper dbMapper) {
-        dbMapper.save(resource_);
+    @Override
+    public boolean twoFactorAuthEnabled() {
+        return config_.getBoolean(ENABLED_PROP);
+    }
+
+    @Override
+    public int getRandomCodeLength() {
+        return config_.getInt(RANDOM_CODE_LENGTH_PROP);
+    }
+
+    @Override
+    public long getTokenDuration(
+            final TimeUnit timeUnit) {
+        return config_.getDuration(TOKEN_DURATION_PROP, timeUnit);
+    }
+
+    @Override
+    public String getTokenSignerSecret() {
+        return config_.getString(TOKEN_SIGNER_SECRET_PROP);
     }
 
 }
