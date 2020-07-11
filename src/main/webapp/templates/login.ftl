@@ -22,7 +22,7 @@
                         <h3 class="text-dark mb-4">Onyx</h3>
 
                       </div>
-                      <form action="${contextPath}login" method="post">
+                      <form action="${contextPath}/login" method="post">
                         <div class="form-group">
                           <input type="text" name="username" class="form-control form-control-user" placeholder="Username" autofocus="autofocus">
                         </div>

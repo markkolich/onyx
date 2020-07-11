@@ -89,7 +89,7 @@ public final class FreeMarkerContentToString {
         map.put(BUILD_VERSION_ATTR, buildVersion);
 
         // Shared application/service properties
-        map.put(CONTEXT_PATH_ATTR, onyxConfig_.getContextPath());
+        map.put(CONTEXT_PATH_ATTR, onyxConfig_.getViewSafeContentPath());
         map.put(DEV_MODE_ATTR, onyxConfig_.isDevMode());
 
         return map.build();

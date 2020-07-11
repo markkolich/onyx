@@ -45,11 +45,11 @@
                                     </td>
                                     <td class="align-middle">
                                         <#if child.getType() == "DIRECTORY">
-                                            <a href="${contextPath}browse${child.getPath()}">${child.getHtmlName()}</a>
+                                            <a href="${contextPath}/browse${child.getPath()}">${child.getHtmlName()}</a>
                                         <#elseif child.getType() == "FILE">
-                                            <a href="${contextPath}file${child.getPath()}">${child.getHtmlName()}</a>
+                                            <a href="${contextPath}/file${child.getPath()}">${child.getHtmlName()}</a>
                                         <#elseif child.getType() == "LINK">
-                                            <a href="${contextPath}link${child.getPath()}">${child.getHtmlName()}</a>
+                                            <a href="${contextPath}/link${child.getPath()}">${child.getHtmlName()}</a>
                                         </#if>
                                     </td>
                                     <td class="align-middle d-none d-lg-table-cell">

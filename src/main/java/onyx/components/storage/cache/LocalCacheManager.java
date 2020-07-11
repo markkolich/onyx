@@ -96,7 +96,7 @@ public final class LocalCacheManager implements CacheManager {
 
         final String urlSafeSignedToken = cachedResourceSigner_.signCachedResourceToken(cachedResourceToken);
 
-        final String signedTokenUrl = String.format("%sstatic/cache/%s/%s", onyxConfig_.getFullUri(),
+        final String signedTokenUrl = String.format("%s/static/cache/%s/%s", onyxConfig_.getViewSafeFullUri(),
                 urlSafeSignedToken, resource.getName());
         return new URL(signedTokenUrl);
     }

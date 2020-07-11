@@ -27,6 +27,7 @@
 package onyx.components.config;
 
 import com.typesafe.config.Config;
+import org.apache.commons.lang3.StringUtils;
 
 public interface OnyxConfig {
 
@@ -39,9 +40,46 @@ public interface OnyxConfig {
 
     String getContextPath();
 
+    /**
+     * Returns the "view" safe context path.
+     *
+     * Special method for views to account for when the visible context path
+     * is "/" (the root context). With this method views & templates should not
+     * worry about concatenating two slashes together resulting in a malformed
+     * resource path such as <code>//static/img.png</code> when the app is deployed
+     * under the root context. If the visible context path is just a single slash
+     * <code>/</code> this methods returns <code>""</code> (empty string) to
+     * avoid this double slash concatenation problem, so the return value from this
+     * method can be used safely in templates that need the context path to fetch resources:
+     *
+     * <code>&lt;img src="${contextPath}/some/image.png"&gt;</code>
+     */
+    default String getViewSafeContentPath() {
+        if ("/".equals(getContextPath())) {
+            return "";
+        }
+
+        return getContextPath();
+    }
+
     String getBaseUri();
 
     String getFullUri();
+
+    /**
+     * Returns the "view" safe full URI.
+     *
+     * Similar to {@link #getViewSafeContentPath()} in that this method returns
+     * the full application URI as visible, just without the trailing "/".
+     */
+    default String getViewSafeFullUri() {
+        final String fullUri = getFullUri();
+        if (fullUri.endsWith("/")) {
+            return StringUtils.chop(fullUri);
+        }
+
+        return fullUri;
+    }
 
     boolean isDevMode();
 

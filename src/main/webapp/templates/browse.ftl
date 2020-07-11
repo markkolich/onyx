@@ -24,7 +24,7 @@
           <div class="card shadow mb-4">
               <!-- Card Header - Dropdown -->
               <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h4 class="m-0 card-title"><span class="mr-1">/</span><#list breadcrumbs as crumb><a href="${contextPath}browse${crumb.getMiddle()}" class="mr-1">${crumb.getRight()}</a><#sep><span class="mr-1">/</span></#sep></#list></h4>
+                <h4 class="m-0 card-title"><span class="mr-1">/</span><#list breadcrumbs as crumb><a href="${contextPath}/browse${crumb.getMiddle()}" class="mr-1">${crumb.getRight()}</a><#sep><span class="mr-1">/</span></#sep></#list></h4>
                 <#if session?has_content>
                     <#-- Controls are only visible if the authenticated user is the owner of the resource. -->
                     <#if directory.getOwner() == session.getUsername()>
@@ -98,9 +98,9 @@
                                     </td>
                                     <td class="align-middle">
                                         <#if child.getType() == "DIRECTORY">
-                                            <a href="${contextPath}browse${child.getPath()}" data-resource-type="DIRECTORY">${child.getHtmlName()?truncate(40, '...')}</a>
+                                            <a href="${contextPath}/browse${child.getPath()}" data-resource-type="DIRECTORY">${child.getHtmlName()?truncate(40, '...')}</a>
                                         <#elseif child.getType() == "FILE">
-                                            <a href="${contextPath}file${child.getPath()}" data-resource-type="FILE">${child.getHtmlName()?truncate(40, '...')}</a>
+                                            <a href="${contextPath}/file${child.getPath()}" data-resource-type="FILE">${child.getHtmlName()?truncate(40, '...')}</a>
                                         </#if>
                                     </td>
                                     <td class="align-middle d-none d-lg-table-cell">

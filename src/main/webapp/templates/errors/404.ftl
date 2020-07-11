@@ -23,7 +23,7 @@
 
           <h2>404 Not Found</h2>
 
-          <p>Do you need to <a href="${contextPath}login">login</a>?</p>
+          <p>Do you need to <a href="${contextPath}/login">login</a>?</p>
 
         </div>
         <!-- /.container-fluid -->

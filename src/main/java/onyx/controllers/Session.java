@@ -98,7 +98,7 @@ public final class Session extends AbstractOnyxController {
         final String signedSession = sessionManager_.signSession(session);
         setCookie(SessionManager.SESSION_NAME, signedSession,
                 onyxSessionConfig_.isSessionUsingHttps(), response);
-        response.sendRedirect(onyxConfig_.getFullUri() + "browse/" + session.getUsername());
+        response.sendRedirect(onyxConfig_.getViewSafeFullUri() + "/browse/" + session.getUsername());
         context.complete();
 
         return null;
@@ -109,7 +109,7 @@ public final class Session extends AbstractOnyxController {
             final HttpServletResponse response,
             final AsyncContext context) throws Exception {
         unsetCookie(SessionManager.SESSION_NAME, onyxSessionConfig_.isSessionUsingHttps(), response);
-        response.sendRedirect(onyxConfig_.getFullUri());
+        response.sendRedirect(onyxConfig_.getViewSafeFullUri());
         context.complete();
     }
 
