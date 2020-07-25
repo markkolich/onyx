@@ -86,7 +86,7 @@ public final class OnyxTwoFactorSmsAuthCodeManager implements TwoFactorAuthCodeM
 
             final PublishRequest publishRequest = new PublishRequest()
                     .withMessageAttributes(smsAttributes)
-                    .withPhoneNumber(user.getMobileNumber()) // E164 formatted phone number
+                    .withPhoneNumber(user.getMobileNumber()) // E.164 formatted phone number
                     .withMessage(smsMessage);
 
             // Send the text-message!
