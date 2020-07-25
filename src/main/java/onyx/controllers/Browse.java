@@ -51,6 +51,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
 import java.util.List;
 
+import static onyx.util.PathUtils.normalizePath;
+import static onyx.util.PathUtils.splitNormalizedPathToElements;
+
 @Controller
 public final class Browse extends AbstractOnyxController {
 
@@ -108,19 +111,23 @@ public final class Browse extends AbstractOnyxController {
             }
         }
 
+        // Whether or not the user is authenticated (has a valid session).
         final boolean userAuthenticated = (session != null);
+        // Whether or not the user is authenticated (has a valid session) AND is
+        // the directory resource owner.
+        final boolean userIsOwner = (userAuthenticated && session.getUsername().equals(directory.getOwner()));
 
         final ImmutableSet.Builder<Resource.Visibility> visibility = ImmutableSet.builder();
         visibility.add(Resource.Visibility.PUBLIC);
         // Only show private resources inside of the directory if the authenticated user is
         // the directory resource owner.
-        if (userAuthenticated && session.getUsername().equals(directory.getOwner())) {
+        if (userIsOwner) {
             visibility.add(Resource.Visibility.PRIVATE);
         }
 
         final List<Resource> children = resourceManager_.listDirectory(directory, visibility.build(),
-                // Sort only if the user is authenticated.
-                userAuthenticated ? Extensions.Sort.FAVORITE : Extensions.Sort.NONE);
+                // Sort only if the user is the directory resource owner.
+                userIsOwner ? Extensions.Sort.FAVORITE : Extensions.Sort.NONE);
         final List<Triple<String, String, String>> breadcrumbs = splitNormalizedPathToElements(directory.getPath());
 
         final long directoryCount = children.stream()

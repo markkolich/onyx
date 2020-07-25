@@ -1,0 +1,10 @@
+{
+  "path": "/foobar/secret-stuff/kewl.txt",
+  "parent": "/foobar/secret-stuff",
+  "size": 9914,
+  "description": "Kewl stuff",
+  "type": "FILE",
+  "visibility": "PUBLIC",
+  "owner": "foobar",
+  "favorite": true
+}

@@ -31,7 +31,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentDestroyable;
-import onyx.components.aws.AwsClientConfiguration;
+import onyx.components.aws.AwsClientConfig;
 import onyx.components.aws.AwsCredentials;
 import onyx.components.config.aws.AwsConfig;
 
@@ -44,10 +44,10 @@ public final class S3Client implements ComponentDestroyable {
     public S3Client(
             final AwsConfig awsConfig,
             final AwsCredentials awsCredentials,
-            final AwsClientConfiguration awsClientConfiguration) {
+            final AwsClientConfig awsClientConfig) {
         s3_ = AmazonS3ClientBuilder.standard()
                 .withCredentials(awsCredentials.getCredentialsProvider())
-                .withClientConfiguration(awsClientConfiguration.getClientConfiguration())
+                .withClientConfiguration(awsClientConfig.getClientConfiguration())
                 .withRegion(awsConfig.getAwsS3Region())
                 .build();
     }

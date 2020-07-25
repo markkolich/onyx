@@ -1,0 +1,42 @@
+[
+  {
+    "path": "/foobar/baz",
+    "parent": "/foobar",
+    "size": 34511,
+    "description": "Baz",
+    "type": "FILE",
+    "visibility": "PUBLIC",
+    "owner": "foobar",
+    "favorite": false
+  },
+  {
+    "path": "/foobar/cat",
+    "parent": "/foobar",
+    "size": 561,
+    "description": "Cat",
+    "type": "FILE",
+    "visibility": "PUBLIC",
+    "owner": "foobar",
+    "favorite": false
+  },
+  {
+    "path": "/foobar/dog",
+    "parent": "/foobar",
+    "size": 0,
+    "description": "Dog",
+    "type": "DIRECTORY",
+    "visibility": "PUBLIC",
+    "owner": "foobar",
+    "favorite": true
+  },
+  {
+    "path": "/foobar/lion",
+    "parent": "/foobar",
+    "size": 0,
+    "description": "Lion",
+    "type": "DIRECTORY",
+    "visibility": "PRIVATE",
+    "owner": "foobar",
+    "favorite": true
+  }
+]

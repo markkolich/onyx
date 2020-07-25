@@ -143,7 +143,7 @@ public final class Application {
     }
 
     @Nullable
-    private Resource getBaseResourceForRuntime() throws Exception {
+    private static Resource getBaseResourceForRuntime() throws Exception {
         // In dev, the base resource will be something like "src/main/webapp".
         final Resource srcMainWebApp = Resource.newResource("src/main/webapp");
         if (srcMainWebApp.exists()) {

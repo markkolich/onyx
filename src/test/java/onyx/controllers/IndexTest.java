@@ -26,41 +26,47 @@
 
 package onyx.controllers;
 
-import curacao.annotations.Controller;
-import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
-import onyx.components.config.OnyxConfig;
+import com.fasterxml.jackson.core.type.TypeReference;
 import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.entities.storage.aws.dynamodb.Resource;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
-@Controller
-public final class Index extends AbstractOnyxController {
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    private final ResourceManager resourceManager_;
+public final class IndexTest extends AbstractOnyxControllerTest {
 
-    @Injectable
-    public Index(
-            final OnyxConfig onyxConfig,
-            final AsynchronousResourcePool asynchronousResourcePool,
-            final ResourceManager resourceManager) {
-        super(onyxConfig, asynchronousResourcePool);
-        resourceManager_ = resourceManager;
+    private final AsynchronousResourcePool asyncResourcePool_;
+
+    public IndexTest() throws Exception {
+        final ExecutorService executorService = Mockito.mock(ExecutorService.class);
+        asyncResourcePool_ = new AsynchronousResourcePool(executorService);
     }
 
-    @RequestMapping(value = "^/$")
-    public FreeMarkerContent index(
-            final Session session) {
-        final List<Resource> homeDirectories = resourceManager_.listHomeDirectories();
+    @Test
+    public void indexTest() throws Exception {
+        final List<Resource> homeDirectories =
+                resourceJsonToObject("mock/index.json", new TypeReference<>() {});
 
-        return new FreeMarkerContent.Builder("templates/index.ftl")
-                .withSession(session)
-                .withAttr("children", homeDirectories)
-                .build();
+        final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
+        Mockito.when(resourceManager.listHomeDirectories()).thenReturn(homeDirectories);
+
+        final Index controller = new Index(onyxConfig_, asyncResourcePool_, resourceManager);
+
+        final Session session = generateNewSession("foobar");
+        final FreeMarkerContent responseEntity = controller.index(session);
+        assertNotNull(responseEntity);
+
+        final String renderedHtml = fmcToString_.contentToString(responseEntity);
+        assertTrue(StringUtils.isNotBlank(renderedHtml));
     }
 
 }

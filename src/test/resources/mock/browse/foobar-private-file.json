@@ -1,0 +1,10 @@
+{
+  "path": "/foobar/secret-stuff/cool.txt",
+  "parent": "/foobar/secret-stuff",
+  "size": 771,
+  "description": "Cool stuff",
+  "type": "FILE",
+  "visibility": "PRIVATE",
+  "owner": "foobar",
+  "favorite": true
+}

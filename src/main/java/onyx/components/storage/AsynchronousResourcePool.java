@@ -54,7 +54,7 @@ public final class AsynchronousResourcePool implements ComponentDestroyable {
     }
 
     @VisibleForTesting
-    protected AsynchronousResourcePool(
+    public AsynchronousResourcePool(
             final ExecutorService executorService) {
         executorService_ = executorService;
     }

@@ -62,6 +62,8 @@ import java.util.Date;
 import java.util.List;
 
 import static curacao.annotations.RequestMapping.Method.*;
+import static onyx.util.PathUtils.normalizePath;
+import static onyx.util.PathUtils.splitNormalizedPathToElements;
 
 @Controller
 public final class File extends AbstractOnyxApiController {

@@ -1,0 +1,10 @@
+{
+  "path": "/foobar/secret-stuff",
+  "parent": "/foobar",
+  "size": 0,
+  "description": "Super Secret stuff",
+  "type": "DIRECTORY",
+  "visibility": "PRIVATE",
+  "owner": "foobar",
+  "favorite": true
+}

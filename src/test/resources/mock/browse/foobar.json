@@ -1,0 +1,10 @@
+{
+  "path": "/foobar",
+  "parent": "/",
+  "size": 0,
+  "description": "Home directory",
+  "type": "DIRECTORY",
+  "visibility": "PUBLIC",
+  "owner": "foobar",
+  "favorite": false
+}

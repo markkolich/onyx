@@ -65,7 +65,7 @@
                             </#list>
                         <#else>
                             <tr>
-                                <td><i class="far fa-folder-open"></i> No recent files</td>
+                                <td><i class="far fa-smile-wink"></i> Move along, nothing to see here.</td>
                             </tr>
                         </#if>
                     </tbody>

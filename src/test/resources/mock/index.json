@@ -1,0 +1,32 @@
+[
+  {
+    "path": "/foo",
+    "parent": "/",
+    "size": 0,
+    "description": "",
+    "type": "DIRECTORY",
+    "visibility": "PUBLIC",
+    "owner": "foo",
+    "favorite": false
+  },
+  {
+    "path": "/bar",
+    "parent": "/",
+    "size": 0,
+    "description": "",
+    "type": "DIRECTORY",
+    "visibility": "PUBLIC",
+    "owner": "bar",
+    "favorite": false
+  },
+  {
+    "path": "/baz",
+    "parent": "/",
+    "size": 0,
+    "description": "",
+    "type": "DIRECTORY",
+    "visibility": "PUBLIC",
+    "owner": "baz",
+    "favorite": false
+  }
+]

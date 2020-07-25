@@ -33,14 +33,14 @@ import onyx.BuildVersion;
 import onyx.components.config.OnyxConfig;
 
 @Component
-public final class AwsClientConfiguration {
+public final class AwsClientConfig {
 
     private static final String USER_AGENT_PREFIX_FORMAT = "Onyx/%s (+%s)";
 
     private final ClientConfiguration clientConfiguration_;
 
     @Injectable
-    public AwsClientConfiguration(
+    public AwsClientConfig(
             final OnyxConfig onyxConfig) {
         final BuildVersion buildVersion = BuildVersion.getInstance();
 

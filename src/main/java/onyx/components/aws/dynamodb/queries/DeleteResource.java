@@ -26,6 +26,7 @@
 
 package onyx.components.aws.dynamodb.queries;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper.FailedBatch;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
@@ -33,9 +34,11 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.google.common.collect.ImmutableMap;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -67,8 +70,11 @@ public final class DeleteResource {
                     .withExpressionAttributeValues(buildExpressionAttributeValues())
                     .withFilterExpression(buildFilterExpression());
             final PaginatedScanList<Resource> scanResult = dbMapper.scan(Resource.class, se);
-            for (final Resource child : scanResult) {
-                dbMapper.delete(child);
+
+            final List<FailedBatch> failedBatches = dbMapper.batchDelete(scanResult);
+            if (CollectionUtils.isNotEmpty(failedBatches)) {
+                LOG.error("Failed to delete one or more resource batches in backing store: {}",
+                        failedBatches.size());
             }
         }
     }

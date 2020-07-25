@@ -32,7 +32,7 @@ import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentDestroyable;
 import onyx.components.config.aws.AwsConfig;
-import onyx.components.aws.AwsClientConfiguration;
+import onyx.components.aws.AwsClientConfig;
 import onyx.components.aws.AwsCredentials;
 
 @Component
@@ -44,10 +44,10 @@ public final class DynamoDbClient implements ComponentDestroyable {
     public DynamoDbClient(
             final AwsConfig awsConfig,
             final AwsCredentials awsCredentials,
-            final AwsClientConfiguration awsClientConfiguration) {
+            final AwsClientConfig awsClientConfig) {
         dynamoDb_ = AmazonDynamoDBClientBuilder.standard()
                 .withCredentials(awsCredentials.getCredentialsProvider())
-                .withClientConfiguration(awsClientConfiguration.getClientConfiguration())
+                .withClientConfiguration(awsClientConfig.getClientConfiguration())
                 .withRegion(awsConfig.getAwsDynamoDbRegion())
                 .build();
     }

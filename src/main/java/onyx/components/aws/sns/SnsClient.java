@@ -31,7 +31,7 @@ import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentDestroyable;
-import onyx.components.aws.AwsClientConfiguration;
+import onyx.components.aws.AwsClientConfig;
 import onyx.components.aws.AwsCredentials;
 import onyx.components.config.aws.AwsConfig;
 
@@ -44,10 +44,10 @@ public final class SnsClient implements ComponentDestroyable {
     public SnsClient(
             final AwsConfig awsConfig,
             final AwsCredentials awsCredentials,
-            final AwsClientConfiguration awsClientConfiguration) {
+            final AwsClientConfig awsClientConfig) {
         sns_ = AmazonSNSClientBuilder.standard()
                 .withCredentials(awsCredentials.getCredentialsProvider())
-                .withClientConfiguration(awsClientConfiguration.getClientConfiguration())
+                .withClientConfiguration(awsClientConfig.getClientConfiguration())
                 .withRegion(awsConfig.getAwsSnsRegion())
                 .build();
     }

@@ -177,8 +177,8 @@ public final class Resource {
     // Derived fields
 
     /**
-     * Returns the complete path of a resource, properly HTML escaped safe for injection
-     * into an HTML template.
+     * Returns the complete path of a resource, properly URL decoded and HTML escaped,
+     * safe for injection into an HTML template.
      */
     @DynamoDBIgnore
     public String getHtmlPath() {

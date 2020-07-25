@@ -32,6 +32,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.*;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.net.MediaType;
 import curacao.CuracaoConfigLoader;
 import curacao.annotations.Component;
@@ -50,6 +51,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -142,9 +144,17 @@ public final class S3Manager implements AssetManager {
             final ObjectListing objectList = s3_.listObjects(s3Link.getBucketName(),
                     s3Link.getKey() + SLASH_STRING);
             final List<S3ObjectSummary> objectsToDelete = objectList.getObjectSummaries();
-            for (final S3ObjectSummary objectToDelete : objectsToDelete) {
-                s3_.deleteObject(objectToDelete.getBucketName(), objectToDelete.getKey());
-            }
+            final Set<String> keys = objectsToDelete.stream()
+                    .map(S3ObjectSummary::getKey)
+                    .collect(ImmutableSet.toImmutableSet());
+
+            // Attempt to recursively delete all of the keys within the
+            // directory in a single shot.
+            final DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(s3Link.getBucketName())
+                    .withKeys(keys.toArray(new String[0]))
+                    .withQuiet(true);
+
+            s3_.deleteObjects(deleteObjectsRequest);
         }
     }
 
