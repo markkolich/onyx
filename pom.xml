@@ -33,7 +33,7 @@
 
         <kolich-common.version>0.5</kolich-common.version>
 
-        <jetty.version>9.4.30.v20200611</jetty.version>
+        <jetty.version>9.4.31.v20200723</jetty.version>
 
         <typesafe-config.version>1.4.0</typesafe-config.version>
 
@@ -42,7 +42,7 @@
         <commons-io.version>2.7</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
 
-        <aws-sdk.version>1.11.827</aws-sdk.version>
+        <aws-sdk.version>1.11.832</aws-sdk.version>
 
         <guava.version>29.0-jre</guava.version>
 
@@ -56,14 +56,14 @@
 
         <async-http-client.version>2.12.1</async-http-client.version>
 
-        <picocli.version>4.4.0</picocli.version>
+        <picocli.version>4.5.0</picocli.version>
 
-        <checkstyle.version>8.34</checkstyle.version>
+        <checkstyle.version>8.35</checkstyle.version>
 
         <!-- Test dependency versions -->
 
         <junit.jupiter.version>5.6.2</junit.jupiter.version>
-        <mockito-core.version>3.4.4</mockito-core.version>
+        <mockito-core.version>3.4.6</mockito-core.version>
     </properties>
 
     <issueManagement>
