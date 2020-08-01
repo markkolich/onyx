@@ -35,7 +35,7 @@
 
                                 $.ajax({
                                     type: 'POST',
-                                    url: parent.baseApiUrl + 'v1/file' + resource,
+                                    url: parent.baseApiUrl + '/v1/file' + resource,
                                     contentType: 'application/json',
                                     data: JSON.stringify({
                                         size: size,
@@ -98,7 +98,7 @@
 
                     $.ajax({
                         type: 'PUT',
-                        url: parent.baseApiUrl + 'v1/file' + resource,
+                        url: parent.baseApiUrl + '/v1/file' + resource,
                         contentType: 'application/json',
                         data: JSON.stringify({
                             visibility: newVisibility
@@ -114,7 +114,7 @@
 
                     $.ajax({
                         type: 'PUT',
-                        url: parent.baseApiUrl + 'v1/file' + resource,
+                        url: parent.baseApiUrl + '/v1/file' + resource,
                         contentType: 'application/json',
                         data: JSON.stringify({
                             favorite: newFavorite
@@ -145,7 +145,7 @@
                         modal.find('button[type="submit"]').unbind().click(function() {
                             $.ajax({
                                 type: 'DELETE',
-                                url: parent.baseApiUrl + 'v1/file' + resource,
+                                url: parent.baseApiUrl + '/v1/file' + resource,
                                 success: function(res, status, xhr) {
                                     modal.modal('hide');
 

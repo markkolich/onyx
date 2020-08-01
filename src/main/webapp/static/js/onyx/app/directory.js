@@ -30,7 +30,7 @@
 
                             $.ajax({
                                 type: 'POST',
-                                url: parent.baseApiUrl + 'v1/directory' + resource,
+                                url: parent.baseApiUrl + '/v1/directory' + resource,
                                 contentType: 'application/json',
                                 data: JSON.stringify({
                                     description: description,
@@ -62,7 +62,7 @@
 
                     $.ajax({
                         type: 'PUT',
-                        url: parent.baseApiUrl + 'v1/directory' + resource,
+                        url: parent.baseApiUrl + '/v1/directory' + resource,
                         contentType: 'application/json',
                         data: JSON.stringify({
                             visibility: newVisibility
@@ -78,7 +78,7 @@
 
                     $.ajax({
                         type: 'PUT',
-                        url: parent.baseApiUrl + 'v1/directory' + resource,
+                        url: parent.baseApiUrl + '/v1/directory' + resource,
                         contentType: 'application/json',
                         data: JSON.stringify({
                             favorite: newFavorite
@@ -109,7 +109,7 @@
                         modal.find('button[type="submit"]').unbind().click(function() {
                             $.ajax({
                                 type: 'DELETE',
-                                url: parent.baseApiUrl + 'v1/directory' + resource,
+                                url: parent.baseApiUrl + '/v1/directory' + resource,
                                 success: function(res, status, xhr) {
                                     modal.modal('hide');
 

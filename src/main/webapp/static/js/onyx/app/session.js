@@ -14,7 +14,7 @@
         refresh = function() {
             $.ajax({
                 type: 'GET',
-                url: Onyx.baseAppUrl + 'keepalive',
+                url: Onyx.baseAppUrl + '/keepalive',
                 success: function(res, status, xhr) {
                     // Reset the error counter, on success.
                     data.errorCount = 0;

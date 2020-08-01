@@ -17,7 +17,7 @@ this['Onyx'] = this['Onyx'] || {};
         devMode = (hostname === 'localhost'),
 
         appPath = (function() {
-            var path = (devMode ? '/onyx/' : '/'),
+            var path = (devMode ? '/onyx' : ''),
                 port = (devMode ? '8080' : location.port);
             return {
                 'path': path,
@@ -29,7 +29,7 @@ this['Onyx'] = this['Onyx'] || {};
             return 'v1';
         }()),
         apiPath = (function() {
-            var path = (devMode ? '/onyx/api/' : '/api/'),
+            var path = (appPath.path + '/api'),
                 port = (devMode ? '8080' : location.port);
             return {
                 'path': path,
@@ -38,9 +38,9 @@ this['Onyx'] = this['Onyx'] || {};
         }()),
 
         // Dynamically build the base app URL.
-        baseUrl = protocol + '//' + hostname,
-        baseAppUrl = baseUrl + ((appPath.port !== '') ? ':' + appPath.port : '') + appPath.path,
-        baseApiUrl = baseUrl + ((apiPath.port !== '') ? ':' + apiPath.port : '') + apiPath.path,
+        baseUrl = protocol + '//' + hostname + ((appPath.port !== '') ? ':' + appPath.port : ''),
+        baseAppUrl = baseUrl + appPath.path,
+        baseApiUrl = baseUrl + apiPath.path,
         baseApiVersion = apiVersion;
 
     // Exports
