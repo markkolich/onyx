@@ -66,4 +66,9 @@ public final class OnyxTypesafeSessionConfig implements SessionConfig {
         return config_.getBoolean(SESSION_HTTPS_PROP);
     }
 
+    @Override
+    public boolean shouldRefreshSessionAutomatically() {
+        return config_.getBoolean(SESSION_REFRESH_AUTOMATICALLY_PROP);
+    }
+
 }

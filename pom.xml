@@ -42,7 +42,7 @@
         <commons-io.version>2.7</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
 
-        <aws-sdk.version>1.11.832</aws-sdk.version>
+        <aws-sdk.version>1.11.842</aws-sdk.version>
 
         <guava.version>29.0-jre</guava.version>
 
@@ -63,7 +63,7 @@
         <!-- Test dependency versions -->
 
         <junit.jupiter.version>5.6.2</junit.jupiter.version>
-        <mockito-core.version>3.4.6</mockito-core.version>
+        <mockito-core.version>3.5.0</mockito-core.version>
     </properties>
 
     <issueManagement>

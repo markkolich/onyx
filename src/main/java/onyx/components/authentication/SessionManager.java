@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
 
 public interface SessionManager {
 
-    String SESSION_NAME = "_onyx";
+    String SESSION_COOKIE_NAME = "_onyx";
 
     @Nullable
     String signSession(

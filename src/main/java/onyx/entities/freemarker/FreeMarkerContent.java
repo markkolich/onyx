@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.Utf8TextEntity.EntityType;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 
@@ -47,9 +48,18 @@ public interface FreeMarkerContent {
 
     int getStatus();
 
-    @Nullable
+    @Nonnull
     default Map<String, Object> getDataMap() {
         return ImmutableMap.of();
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    default <T> T getAttribute(
+            final String name) {
+        checkNotNull(name, "Attribute name cannot be null.");
+
+        return (T) getDataMap().get(name);
     }
 
     final class Builder {
@@ -126,7 +136,7 @@ public interface FreeMarkerContent {
                     return status_;
                 }
 
-                @Nullable
+                @Nonnull
                 @Override
                 public Map<String, Object> getDataMap() {
                     return dataMap_.build();

@@ -39,13 +39,20 @@ public interface SessionConfig {
     String SESSION_SIGNER_SECRET_PROP = "signer-secret";
     String SESSION_HTTPS_PROP = "https";
 
+    String SESSION_REFRESH_AUTOMATICALLY_PROP = "refresh-automatically";
+
     ConfigList getUsers();
 
+    /**
+     * Once generated, a user-session will remain valid for this long.
+     */
     long getSessionDuration(
             final TimeUnit timeUnit);
 
     String getSessionSignerSecret();
 
     boolean isSessionUsingHttps();
+
+    boolean shouldRefreshSessionAutomatically();
 
 }

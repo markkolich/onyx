@@ -29,6 +29,11 @@ package onyx.mappers.response.freemarker;
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import onyx.components.FreeMarkerContentToString;
+import onyx.components.authentication.SessionManager;
+import onyx.components.authentication.UserAuthenticator;
+import onyx.components.config.OnyxConfig;
+import onyx.components.config.authentication.SessionConfig;
+import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
 
@@ -36,14 +41,31 @@ import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
+import static onyx.util.CookieBaker.setCookie;
+
 @Mapper
 public final class FreeMarkerContentResponseMapper
         extends AbstractFreeMarkerContentAwareResponseMapper<FreeMarkerContent> {
 
+    private final OnyxConfig onyxConfig_;
+
+    private final UserAuthenticator userAuthenticator_;
+
+    private final SessionConfig sessionConfig_;
+    private final SessionManager sessionManager_;
+
     @Injectable
     public FreeMarkerContentResponseMapper(
-            @Nonnull final FreeMarkerContentToString fmContentToString) {
+            @Nonnull final FreeMarkerContentToString fmContentToString,
+            @Nonnull final OnyxConfig onyxConfig,
+            @Nonnull final UserAuthenticator userAuthenticator,
+            @Nonnull final SessionConfig sessionConfig,
+            @Nonnull final SessionManager sessionManager) {
         super(fmContentToString);
+        onyxConfig_ = onyxConfig;
+        userAuthenticator_ = userAuthenticator;
+        sessionConfig_ = sessionConfig;
+        sessionManager_ = sessionManager;
     }
 
     @Override
@@ -51,6 +73,15 @@ public final class FreeMarkerContentResponseMapper
             final AsyncContext context,
             final HttpServletResponse response,
             @Nonnull final FreeMarkerContent content) throws Exception {
+        final boolean shouldRefreshSessionAutomatically = sessionConfig_.shouldRefreshSessionAutomatically();
+        final Session session = content.getAttribute(FreeMarkerContent.DATA_MAP_SESSION_ATTR);
+        if (shouldRefreshSessionAutomatically && session != null) {
+            final Session refreshed = userAuthenticator_.refreshSession(session);
+            final String signedRefreshedSession = sessionManager_.signSession(refreshed);
+            setCookie(SessionManager.SESSION_COOKIE_NAME, signedRefreshedSession, onyxConfig_.getContextPath(),
+                    sessionConfig_.isSessionUsingHttps(), response);
+        }
+
         renderFreeMarkerContent(response, content);
     }
 

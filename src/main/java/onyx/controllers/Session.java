@@ -190,7 +190,7 @@ public final class Session extends AbstractOnyxController {
     public CuracaoEntity logout(
             final HttpServletResponse response,
             final AsyncContext context) throws Exception {
-        unsetCookie(SessionManager.SESSION_NAME, onyxConfig_.getContextPath(),
+        unsetCookie(SessionManager.SESSION_COOKIE_NAME, onyxConfig_.getContextPath(),
                 sessionConfig_.isSessionUsingHttps(), response);
         response.sendRedirect(onyxConfig_.getViewSafeFullUri());
         context.complete();
@@ -198,30 +198,12 @@ public final class Session extends AbstractOnyxController {
         return null;
     }
 
-    @RequestMapping(value = "^/keepalive$")
-    public CuracaoEntity keepalive(
-            final onyx.entities.authentication.Session session,
-            final HttpServletResponse response) {
-        if (session == null) {
-            return badRequest();
-        }
-
-        // Refresh any existing & valid session attached to the user context.
-        final onyx.entities.authentication.Session refreshed =
-                userAuthenticator_.refreshSession(session);
-        final String signedRefreshedSession = sessionManager_.signSession(refreshed);
-        setCookie(SessionManager.SESSION_NAME, signedRefreshedSession, onyxConfig_.getContextPath(),
-                sessionConfig_.isSessionUsingHttps(), response);
-
-        return noContent();
-    }
-
     private void processLogin(
             final onyx.entities.authentication.Session session,
             final HttpServletResponse response,
             final AsyncContext context) throws Exception {
         final String signedSession = sessionManager_.signSession(session);
-        setCookie(SessionManager.SESSION_NAME, signedSession, onyxConfig_.getContextPath(),
+        setCookie(SessionManager.SESSION_COOKIE_NAME, signedSession, onyxConfig_.getContextPath(),
                 sessionConfig_.isSessionUsingHttps(), response);
         response.sendRedirect(onyxConfig_.getViewSafeFullUri() + "/browse/" + session.getUsername());
         context.complete();

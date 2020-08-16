@@ -59,11 +59,11 @@ public final class SessionArgumentRequestMapper
             @Nonnull final CuracaoContext context) throws Exception {
         final Cookie[] cookies = context.getRequest().getCookies();
         if (ArrayUtils.isNotEmpty(cookies)) {
-            final Cookie sessionCookie = getFirstCookieByName(cookies, SessionManager.SESSION_NAME);
+            final Cookie sessionCookie = getFirstCookieByName(cookies, SessionManager.SESSION_COOKIE_NAME);
             if (sessionCookie != null) {
                 final Session session = sessionManager_.extractSignedSession(sessionCookie.getValue());
                 if (session != null) {
-                    context.setProperty(SessionManager.SESSION_NAME, session);
+                    context.setProperty(SessionManager.SESSION_COOKIE_NAME, session);
                     return session;
                 }
             }

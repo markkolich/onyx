@@ -56,7 +56,6 @@ gulp.task('concat-js', ['eslint-js'], function() {
         'js/sb-admin-2.js',
         'js/onyx/onyx.js',
         'js/onyx/app/app.js',
-        'js/onyx/app/session.js',
         'js/onyx/app/file.js',
         'js/onyx/app/image-viewer.js',
         'js/onyx/app/directory.js'
