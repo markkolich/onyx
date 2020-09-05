@@ -22,7 +22,7 @@
         <maven-frontend-npm.version>6.4.1</maven-frontend-npm.version>
         <maven-checkstyle-plugin.version>3.1.1</maven-checkstyle-plugin.version>
         <maven-pmd-plugin.version>3.13.0</maven-pmd-plugin.version>
-        <maven-pmd-plugin.pmd.version>6.26.0</maven-pmd-plugin.pmd.version>
+        <maven-pmd-plugin.pmd.version>6.27.0</maven-pmd-plugin.pmd.version>
         <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
 
@@ -42,7 +42,7 @@
         <commons-io.version>2.7</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
 
-        <aws-sdk.version>1.11.842</aws-sdk.version>
+        <aws-sdk.version>1.11.856</aws-sdk.version>
 
         <guava.version>29.0-jre</guava.version>
 
@@ -56,14 +56,14 @@
 
         <async-http-client.version>2.12.1</async-http-client.version>
 
-        <picocli.version>4.5.0</picocli.version>
+        <picocli.version>4.5.1</picocli.version>
 
-        <checkstyle.version>8.35</checkstyle.version>
+        <checkstyle.version>8.36</checkstyle.version>
 
         <!-- Test dependency versions -->
 
         <junit.jupiter.version>5.6.2</junit.jupiter.version>
-        <mockito-core.version>3.5.0</mockito-core.version>
+        <mockito-core.version>3.5.10</mockito-core.version>
     </properties>
 
     <issueManagement>
