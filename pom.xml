@@ -42,7 +42,7 @@
         <commons-io.version>2.8.0</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
 
-        <aws-sdk.version>1.11.858</aws-sdk.version>
+        <aws-sdk.version>1.11.860</aws-sdk.version>
 
         <guava.version>29.0-jre</guava.version>
 
@@ -58,11 +58,11 @@
 
         <picocli.version>4.5.1</picocli.version>
 
-        <checkstyle.version>8.36</checkstyle.version>
+        <checkstyle.version>8.36.1</checkstyle.version>
 
         <!-- Test dependency versions -->
 
-        <junit.jupiter.version>5.6.2</junit.jupiter.version>
+        <junit.jupiter.version>5.7.0</junit.jupiter.version>
         <mockito-core.version>3.5.10</mockito-core.version>
     </properties>
 
