@@ -33,7 +33,7 @@
 
         <kolich-common.version>0.5</kolich-common.version>
 
-        <jetty.version>9.4.31.v20200723</jetty.version>
+        <jetty.version>9.4.32.v20200930</jetty.version>
 
         <typesafe-config.version>1.4.0</typesafe-config.version>
 
