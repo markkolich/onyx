@@ -27,73 +27,109 @@
 package onyx.components.aws.dynamodb.queries;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper.FailedBatch;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.google.common.collect.ImmutableMap;
-import onyx.components.storage.ResourceManager;
+import com.google.common.collect.*;
+import onyx.components.config.aws.AwsConfig;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static onyx.components.storage.ResourceManager.ROOT_PATH;
 
 public final class DeleteResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(DeleteResource.class);
 
+    private final AwsConfig awsConfig_;
+
     private final Resource resource_;
 
+    private final String parentIndexName_;
+
     public DeleteResource(
+            final AwsConfig awsConfig,
             final Resource resource) {
+        awsConfig_ = checkNotNull(awsConfig, "AWS config cannot be null.");
         resource_ = checkNotNull(resource, "Resource cannot be null.");
+
+        parentIndexName_ = awsConfig_.getAwsDynamoDbParentIndexName();
     }
 
     public void run(
             final IDynamoDBMapper dbMapper) {
-        final Resource.Type resourceType = resource_.getType();
-
-        if (Resource.Type.FILE.equals(resourceType)) {
-            dbMapper.delete(resource_);
-        } else if (Resource.Type.DIRECTORY.equals(resourceType)) {
-            // First, delete the parent directory itself.
-            dbMapper.delete(resource_);
-
-            // Then, delete any of the children recursively.
-            final DynamoDBScanExpression se = new DynamoDBScanExpression()
-                    .withExpressionAttributeNames(buildExpressionAttributes())
-                    .withExpressionAttributeValues(buildExpressionAttributeValues())
-                    .withFilterExpression(buildFilterExpression());
-            final PaginatedScanList<Resource> scanResult = dbMapper.scan(Resource.class, se);
-
-            final List<FailedBatch> failedBatches = dbMapper.batchDelete(scanResult);
-            if (CollectionUtils.isNotEmpty(failedBatches)) {
-                LOG.error("Failed to delete one or more resource batches in backing store: {}",
-                        failedBatches.size());
-            }
+        final List<FailedBatch> failedBatches = deleteResource(resource_, dbMapper);
+        if (CollectionUtils.isNotEmpty(failedBatches)) {
+            LOG.error("Failed to delete one or more resource batches in backing store: {}",
+                    failedBatches.size());
         }
     }
 
-    private Map<String, String> buildExpressionAttributes() {
-        return ImmutableMap.of("#name0", "path");
+    private List<FailedBatch> deleteResource(
+            final Resource resource,
+            final IDynamoDBMapper dbMapper) {
+        final ImmutableList.Builder<FailedBatch> failedBatches = ImmutableList.builder();
+
+        final Resource.Type resourceType = resource.getType();
+        if (Resource.Type.FILE.equals(resourceType)) {
+            dbMapper.delete(resource);
+        } else if (Resource.Type.DIRECTORY.equals(resourceType)) {
+            // First, delete the parent directory itself.
+            dbMapper.delete(resource);
+
+            final DynamoDBQueryExpression<Resource> qe = new DynamoDBQueryExpression<Resource>()
+                    .withIndexName(parentIndexName_)
+                    .withConsistentRead(false)
+                    .withExpressionAttributeNames(buildExpressionAttributes())
+                    .withExpressionAttributeValues(buildExpressionAttributeValues(resource.getPath()))
+                    .withKeyConditionExpression(buildKeyConditionExpression());
+            final PaginatedQueryList<Resource> queryResult = dbMapper.query(Resource.class, qe);
+
+            final ListMultimap<Resource.Type, Resource> resources = queryResult.stream()
+                    // Intentionally always skip the root "/" directory.
+                    .filter(r -> !ROOT_PATH.equals(r.getPath()))
+                    // Sort the results alphabetically based on path.
+                    .sorted(Comparator.comparing(Resource::getPath))
+                    .collect(Multimaps.toMultimap(Resource::getType, r -> r,
+                    MultimapBuilder.ListMultimapBuilder.treeKeys().arrayListValues()::build));
+
+            // Then, batch delete any files.
+            final List<Resource> files = resources.get(Resource.Type.FILE);
+            if (CollectionUtils.isNotEmpty(files)) {
+                failedBatches.addAll(dbMapper.batchDelete(files));
+            }
+
+            // Lastly, recursively delete any directories.
+            final List<Resource> directories = resources.get(Resource.Type.DIRECTORY);
+            if (CollectionUtils.isNotEmpty(directories)) {
+                for (final Resource directory : directories) {
+                    failedBatches.addAll(deleteResource(directory, dbMapper));
+                }
+            }
+        }
+
+        return failedBatches.build();
     }
 
-    private Map<String, AttributeValue> buildExpressionAttributeValues() {
-        // IMPORTANT: note the trailing slash on the value, which is to scan for any children
-        // of the directory. For example, if the path to delete was "/foo/bar/baz" we add the
-        // trailing slash so a resource with a similar begins-with path of "/foo/bar/baz.txt"
-        // isn't deleted by mistake.
-        return ImmutableMap.of(":value0",
-                new AttributeValue().withS(resource_.getPath() + ResourceManager.ROOT_PATH));
+    private static Map<String, String> buildExpressionAttributes() {
+        return ImmutableMap.of("#name0", "parent");
     }
 
-    private String buildFilterExpression() {
-        return "begins_with(#name0, :value0)";
+    private static Map<String, AttributeValue> buildExpressionAttributeValues(
+            final String path) {
+        return ImmutableMap.of(":value0", new AttributeValue().withS(path));
+    }
+
+    private static String buildKeyConditionExpression() {
+        return "#name0 = :value0";
     }
 
 }

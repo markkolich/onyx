@@ -54,7 +54,7 @@ public final class GetResource {
             final IDynamoDBMapper dbMapper) {
         final DynamoDBQueryExpression<Resource> qe = new DynamoDBQueryExpression<Resource>()
                 .withExpressionAttributeNames(buildExpressionAttributes())
-                .withExpressionAttributeValues(buildExpressionAttributeValues())
+                .withExpressionAttributeValues(buildExpressionAttributeValues(path_))
                 .withKeyConditionExpression(buildKeyConditionExpression());
 
         final PaginatedQueryList<Resource> resources = dbMapper.query(Resource.class, qe);
@@ -69,15 +69,16 @@ public final class GetResource {
         return resources.iterator().next();
     }
 
-    private Map<String, String> buildExpressionAttributes() {
+    private static Map<String, String> buildExpressionAttributes() {
         return ImmutableMap.of("#name0", "path");
     }
 
-    private Map<String, AttributeValue> buildExpressionAttributeValues() {
-        return ImmutableMap.of(":value0", new AttributeValue().withS(path_));
+    private static Map<String, AttributeValue> buildExpressionAttributeValues(
+            final String path) {
+        return ImmutableMap.of(":value0", new AttributeValue().withS(path));
     }
 
-    private String buildKeyConditionExpression() {
+    private static String buildKeyConditionExpression() {
         return "#name0 = :value0";
     }
 

@@ -230,9 +230,10 @@ public final class Directory extends AbstractOnyxApiController {
                     + normalizedPath);
         }
 
+        // Recursively delete the directory and all of its children.
         resourceManager_.deleteResource(directory);
 
-        // Recursively delete any assets asynchronously.
+        // Recursively delete all assets under the directory, asynchronously.
         assetManager_.deleteResourceAsync(directory, executorService_);
 
         return noContent();

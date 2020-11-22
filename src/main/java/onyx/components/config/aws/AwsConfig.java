@@ -40,6 +40,7 @@ public interface AwsConfig {
 
     String AWS_DYNAMO_DB_REGION_PROP = "dynamo-db.region";
     String AWS_DYNAMO_DB_TABLE_NAME_PROP = "dynamo-db.table-name";
+    String AWS_DYNAMO_DB_PARENT_INDEX_NAME_PROP = "dynamo-db.parent-index-name";
 
     String AWS_S3_REGION_PROP = "s3.region";
     String AWS_S3_BUCKET_NAME_PROP = "s3.bucket-name";
@@ -57,6 +58,8 @@ public interface AwsConfig {
     Regions getAwsDynamoDbRegion();
 
     String getAwsDynamoDbTableName();
+
+    String getAwsDynamoDbParentIndexName();
 
     // S3 config
 

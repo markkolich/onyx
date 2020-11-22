@@ -257,6 +257,7 @@ public final class File extends AbstractOnyxApiController {
                     + normalizedPath);
         }
 
+        // Delete the file.
         resourceManager_.deleteResource(file);
 
         // Delete the asset asynchronously.

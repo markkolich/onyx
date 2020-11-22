@@ -41,7 +41,6 @@ public interface ResourceManager {
     final class Extensions {
 
         public enum Sort {
-            NONE,
             FAVORITE;
         }
 

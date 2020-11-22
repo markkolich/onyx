@@ -26,13 +26,12 @@
 
 package onyx.components.aws.dynamodb.queries;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.*;
+import onyx.components.config.aws.AwsConfig;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,57 +48,69 @@ public final class ListDirectory {
 
     private static final Logger LOG = LoggerFactory.getLogger(ListDirectory.class);
 
+    private final AwsConfig awsConfig_;
+
     private final Resource directory_;
     private final Set<Resource.Visibility> visibility_;
 
+    private final String parentIndexName_;
+
     public ListDirectory(
+            final AwsConfig awsConfig,
             final Resource directory,
             final Set<Resource.Visibility> visibility) {
+        awsConfig_ = checkNotNull(awsConfig, "AWS config cannot be null.");
         directory_ = checkNotNull(directory, "Resource directory cannot be null.");
         visibility_ = checkNotNull(visibility, "Resource directory child visibility cannot be null.");
+
+        parentIndexName_ = awsConfig.getAwsDynamoDbParentIndexName();
     }
 
     public List<Resource> run(
             final IDynamoDBMapper dbMapper) {
-        final DynamoDBScanExpression se = new DynamoDBScanExpression()
-                .withExpressionAttributeNames(buildExpressionAttributes())
-                .withExpressionAttributeValues(buildExpressionAttributeValues())
-                .withFilterExpression(buildFilterExpression());
+        final DynamoDBQueryExpression<Resource> qe = new DynamoDBQueryExpression<Resource>()
+                .withIndexName(parentIndexName_)
+                .withConsistentRead(false)
+                .withExpressionAttributeNames(buildExpressionAttributes(visibility_))
+                .withExpressionAttributeValues(buildExpressionAttributeValues(directory_.getPath(), visibility_))
+                .withKeyConditionExpression(buildKeyConditionExpression())
+                .withFilterExpression(buildFilterExpression(visibility_));
 
-        final PaginatedScanList<Resource> scanResult = dbMapper.scan(Resource.class, se);
+        final PaginatedQueryList<Resource> queryResult = dbMapper.query(Resource.class, qe);
 
-        final List<Resource> directories = scanResult.stream()
+        final ListMultimap<Resource.Type, Resource> resources = queryResult.stream()
                 // Intentionally keep the root "/" out of the listing.
                 .filter(resource -> !ROOT_PATH.equals(resource.getPath()))
-                .filter(resource -> Resource.Type.DIRECTORY.equals(resource.getType()))
                 // Sort the results alphabetically based on path.
                 .sorted(Comparator.comparing(Resource::getPath))
-                .collect(ImmutableList.toImmutableList());
-        final List<Resource> files = scanResult.stream()
-                .filter(resource -> Resource.Type.FILE.equals(resource.getType()))
-                // Sort the results alphabetically based on path.
-                .sorted(Comparator.comparing(Resource::getPath))
-                .collect(ImmutableList.toImmutableList());
+                .collect(Multimaps.toMultimap(Resource::getType, r -> r,
+                MultimapBuilder.ListMultimapBuilder.treeKeys().arrayListValues()::build));
+
+        final List<Resource> directories = resources.get(Resource.Type.DIRECTORY);
+        final List<Resource> files = resources.get(Resource.Type.FILE);
 
         // Directories go first, then files and links sorted alphabetically.
         return ImmutableList.copyOf(Iterables.concat(directories, files));
     }
 
-    private Map<String, String> buildExpressionAttributes() {
+    private static Map<String, String> buildExpressionAttributes(
+            final Set<Resource.Visibility> visibility) {
         final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
         builder.put("#name0", "parent");
-        for (int i = 0, l = visibility_.size(); i < l; i++) {
+        for (int i = 0, l = visibility.size(); i < l; i++) {
             builder.put("#name" + (i + 1), "visibility");
         }
 
         return builder.build();
     }
 
-    private Map<String, AttributeValue> buildExpressionAttributeValues() {
+    private static Map<String, AttributeValue> buildExpressionAttributeValues(
+            final String path,
+            final Set<Resource.Visibility> visibility) {
         final ImmutableMap.Builder<String, AttributeValue> builder = ImmutableMap.builder();
-        builder.put(":value0", new AttributeValue().withS(directory_.getPath()));
+        builder.put(":value0", new AttributeValue().withS(path));
         int idx = 0;
-        for (final Resource.Visibility v : visibility_) {
+        for (final Resource.Visibility v : visibility) {
             builder.put(":value" + (idx + 1), new AttributeValue().withS(v.toString()));
             idx++;
         }
@@ -107,15 +118,16 @@ public final class ListDirectory {
         return builder.build();
     }
 
-    private String buildFilterExpression() {
-        final StringBuilder builder = new StringBuilder("#name0 = :value0");
-        if (!visibility_.isEmpty()) {
-            builder.append(" AND (");
-            for (int i = 0, l = visibility_.size(); i < l; i++) {
-                builder.append("#name" + (i + 1) + " = :value" + (i + 1));
-                builder.append((i < l - 1) ? " OR " : "");
-            }
-            builder.append(")");
+    private static String buildKeyConditionExpression() {
+        return "#name0 = :value0";
+    }
+
+    private static String buildFilterExpression(
+            final Set<Resource.Visibility> visibility) {
+        final StringBuilder builder = new StringBuilder();
+        for (int i = 0, l = visibility.size(); i < l; i++) {
+            builder.append("#name").append(i + 1).append(" = :value").append(i + 1);
+            builder.append((i < l - 1) ? " OR " : "");
         }
 
         return builder.toString();

@@ -68,6 +68,11 @@ public final class OnyxTypesafeAwsConfig implements AwsConfig {
         return config_.getString(AWS_DYNAMO_DB_TABLE_NAME_PROP);
     }
 
+    @Override
+    public String getAwsDynamoDbParentIndexName() {
+        return config_.getString(AWS_DYNAMO_DB_PARENT_INDEX_NAME_PROP);
+    }
+
     // S3 config
 
     @Override

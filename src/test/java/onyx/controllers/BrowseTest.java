@@ -131,8 +131,7 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
 
         assertEquals(ImmutableSet.of(Resource.Visibility.PUBLIC),
                 visibilityCaptor.getValue());
-        assertEquals(ResourceManager.Extensions.Sort.NONE,
-                sortCapture.getValue());
+        assertNull(sortCapture.getValue());
 
         final String renderedHtml = fmcToString_.contentToString(responseEntity);
         assertTrue(StringUtils.isNotBlank(renderedHtml));

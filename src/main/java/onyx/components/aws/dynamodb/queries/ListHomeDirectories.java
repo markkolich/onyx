@@ -26,12 +26,13 @@
 
 package onyx.components.aws.dynamodb.queries;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.slf4j.Logger;
@@ -41,39 +42,59 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public final class ListHomeDirectories {
 
     private static final Logger LOG = LoggerFactory.getLogger(ListHomeDirectories.class);
 
+    private final AwsConfig awsConfig_;
+
+    private final String parentIndexName_;
+
+    public ListHomeDirectories(
+            final AwsConfig awsConfig) {
+        awsConfig_ = checkNotNull(awsConfig, "AWS config cannot be null.");
+
+        parentIndexName_ = awsConfig.getAwsDynamoDbParentIndexName();
+    }
+
     public List<Resource> run(
             final IDynamoDBMapper dbMapper) {
-        final DynamoDBScanExpression se = new DynamoDBScanExpression()
+        final DynamoDBQueryExpression<Resource> qe = new DynamoDBQueryExpression<Resource>()
+                .withIndexName(parentIndexName_)
+                .withConsistentRead(false)
                 .withExpressionAttributeNames(buildExpressionAttributes())
                 .withExpressionAttributeValues(buildExpressionAttributeValues())
+                .withKeyConditionExpression(buildKeyConditionExpression())
                 .withFilterExpression(buildFilterExpression());
 
-        final PaginatedScanList<Resource> scanResult = dbMapper.scan(Resource.class, se);
+        final PaginatedQueryList<Resource> queryResult = dbMapper.query(Resource.class, qe);
 
-        return scanResult.stream()
+        return queryResult.stream()
                 // Sort the results alphabetically based on path.
                 .sorted(Comparator.comparing(Resource::getPath))
                 .collect(ImmutableList.toImmutableList());
     }
 
-    private Map<String, String> buildExpressionAttributes() {
+    private static Map<String, String> buildExpressionAttributes() {
         return ImmutableMap.of(
                 "#name0", "parent",
                 "#name1", "type");
     }
 
-    private Map<String, AttributeValue> buildExpressionAttributeValues() {
+    private static Map<String, AttributeValue> buildExpressionAttributeValues() {
         return ImmutableMap.of(
                 ":value0", new AttributeValue().withS(ResourceManager.ROOT_PATH),
                 ":value1", new AttributeValue().withS(Resource.Type.DIRECTORY.toString()));
     }
 
-    private String buildFilterExpression() {
-        return "#name0 = :value0 AND #name1 = :value1";
+    private static String buildKeyConditionExpression() {
+        return "#name0 = :value0";
+    }
+
+    private static String buildFilterExpression() {
+        return "#name1 = :value1";
     }
 
 }

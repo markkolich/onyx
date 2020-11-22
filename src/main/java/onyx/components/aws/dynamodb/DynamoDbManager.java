@@ -31,9 +31,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.config.OnyxConfig;
-import onyx.components.storage.ResourceManager;
 import onyx.components.aws.dynamodb.queries.*;
+import onyx.components.config.aws.AwsConfig;
+import onyx.components.storage.ResourceManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
 import javax.annotation.Nonnull;
@@ -45,22 +45,22 @@ import java.util.concurrent.ExecutorService;
 @Component
 public final class DynamoDbManager implements ResourceManager {
 
-    private final OnyxConfig onyxConfig_;
+    private final AwsConfig awsConfig_;
 
     private final IDynamoDBMapper dbMapper_;
 
     @Injectable
     public DynamoDbManager(
-            final OnyxConfig onyxConfig,
+            final AwsConfig awsConfig,
             final DynamoDbMapper dynamoDbMapper) {
-        this(onyxConfig, dynamoDbMapper.getDbMapper());
+        this(awsConfig, dynamoDbMapper.getDbMapper());
     }
 
     @VisibleForTesting
     protected DynamoDbManager(
-            final OnyxConfig onyxConfig,
+            final AwsConfig awsConfig,
             final IDynamoDBMapper dbMapper) {
-        onyxConfig_ = onyxConfig;
+        awsConfig_ = awsConfig;
         dbMapper_ = dbMapper;
     }
 
@@ -86,7 +86,7 @@ public final class DynamoDbManager implements ResourceManager {
     @Override
     public void deleteResource(
             final Resource resource) {
-        new DeleteResource(resource).run(dbMapper_);
+        new DeleteResource(awsConfig_, resource).run(dbMapper_);
     }
 
     @Override
@@ -102,7 +102,7 @@ public final class DynamoDbManager implements ResourceManager {
             final Resource directory,
             final Set<Resource.Visibility> visibility,
             @Nullable final Extensions.Sort sort) {
-        final List<Resource> resources = new ListDirectory(directory, visibility).run(dbMapper_);
+        final List<Resource> resources = new ListDirectory(awsConfig_, directory, visibility).run(dbMapper_);
 
         final List<Resource> sorted;
         if (Extensions.Sort.FAVORITE.equals(sort)) {
@@ -134,7 +134,7 @@ public final class DynamoDbManager implements ResourceManager {
     @Nonnull
     @Override
     public List<Resource> listHomeDirectories() {
-        return new ListHomeDirectories().run(dbMapper_);
+        return new ListHomeDirectories(awsConfig_).run(dbMapper_);
     }
 
 }

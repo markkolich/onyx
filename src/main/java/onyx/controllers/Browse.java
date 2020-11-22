@@ -127,7 +127,7 @@ public final class Browse extends AbstractOnyxController {
 
         final List<Resource> children = resourceManager_.listDirectory(directory, visibility.build(),
                 // Sort only if the user is the directory resource owner.
-                userIsOwner ? Extensions.Sort.FAVORITE : Extensions.Sort.NONE);
+                userIsOwner ? Extensions.Sort.FAVORITE : null);
         final List<Triple<String, String, String>> breadcrumbs = splitNormalizedPathToElements(directory.getPath());
 
         final long directoryCount = children.stream()
