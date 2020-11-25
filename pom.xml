@@ -33,7 +33,7 @@
 
         <kolich-common.version>0.5</kolich-common.version>
 
-        <jetty.version>9.4.33.v20201020</jetty.version>
+        <jetty.version>9.4.35.v20201120</jetty.version>
 
         <typesafe-config.version>1.4.1</typesafe-config.version>
 
@@ -63,7 +63,7 @@
         <!-- Test dependency versions -->
 
         <junit.jupiter.version>5.7.0</junit.jupiter.version>
-        <mockito-core.version>3.6.0</mockito-core.version>
+        <mockito-core.version>3.6.28</mockito-core.version>
     </properties>
 
     <issueManagement>
