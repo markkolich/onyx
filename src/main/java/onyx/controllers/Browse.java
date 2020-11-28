@@ -94,11 +94,13 @@ public final class Browse extends AbstractOnyxController {
 
         final Resource directory = resourceManager_.getResourceAtPath(normalizedPath);
         if (directory == null) {
-            throw new ResourceNotFoundException("Found no directory resource at path: " + normalizedPath);
+            throw new ResourceNotFoundException("Found no directory resource at path: "
+                    + normalizedPath);
         }
 
         if (!Resource.Type.DIRECTORY.equals(directory.getType())) {
-            throw new ResourceNotFoundException("Found no directory resource at path: " + path);
+            throw new ResourceNotFoundException("Found no directory resource at path: "
+                    + normalizedPath);
         } else if (Resource.Visibility.PRIVATE.equals(directory.getVisibility())) {
             // If the directory is a private directory, we have to ensure that the
             // authenticated user is the owner.
@@ -125,10 +127,12 @@ public final class Browse extends AbstractOnyxController {
             visibility.add(Resource.Visibility.PRIVATE);
         }
 
-        final List<Resource> children = resourceManager_.listDirectory(directory, visibility.build(),
+        final List<Resource> children = resourceManager_.listDirectory(directory,
+                visibility.build(),
                 // Sort only if the user is the directory resource owner.
                 userIsOwner ? Extensions.Sort.FAVORITE : null);
-        final List<Triple<String, String, String>> breadcrumbs = splitNormalizedPathToElements(directory.getPath());
+        final List<Triple<String, String, String>> breadcrumbs =
+                splitNormalizedPathToElements(directory.getPath());
 
         final long directoryCount = children.stream()
                 .filter(c -> Resource.Type.DIRECTORY.equals(c.getType()))
@@ -166,11 +170,13 @@ public final class Browse extends AbstractOnyxController {
 
         final Resource file = resourceManager_.getResourceAtPath(normalizedPath);
         if (file == null) {
-            throw new ResourceNotFoundException("Found no file resource at path: " + normalizedPath);
+            throw new ResourceNotFoundException("Found no file resource at path: "
+                    + normalizedPath);
         }
 
         if (!Resource.Type.FILE.equals(file.getType())) {
-            throw new ResourceNotFoundException("Found no file resource at path: " + normalizedPath);
+            throw new ResourceNotFoundException("Found no file resource at path: "
+                    + normalizedPath);
         } else if (Resource.Visibility.PRIVATE.equals(file.getVisibility())) {
             // If the file is a private file, we have to ensure that the authenticated user is the owner.
             if (session == null) {

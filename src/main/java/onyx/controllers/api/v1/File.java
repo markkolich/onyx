@@ -119,7 +119,8 @@ public final class File extends AbstractOnyxApiController {
 
         // Recursively create the parent directories, only if asked.
         if (BooleanUtils.isTrue(recursive)) {
-            final List<Triple<String, String, String>> elements = splitNormalizedPathToElements(parentPath);
+            final List<Triple<String, String, String>> elements =
+                    splitNormalizedPathToElements(parentPath);
 
             for (final Triple<String, String, String> element : elements) {
                 final String elementParentPath = element.getLeft();
