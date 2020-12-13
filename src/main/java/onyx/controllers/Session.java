@@ -26,11 +26,12 @@
 
 package onyx.controllers;
 
+import com.google.common.primitives.Ints;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.RequestBody;
-import curacao.entities.CuracaoEntity;
+import curacao.annotations.parameters.convenience.Cookie;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.authentication.twofactor.TwoFactorAuthCodeManager;
@@ -40,8 +41,10 @@ import onyx.components.config.authentication.SessionConfig;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
 import onyx.components.storage.AsynchronousResourcePool;
 import onyx.entities.authentication.User;
+import onyx.entities.authentication.twofactor.TrustedDeviceToken;
 import onyx.entities.authentication.twofactor.TwoFactorAuthToken;
 import onyx.entities.freemarker.FreeMarkerContent;
+import onyx.util.CookieBaker;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -56,8 +59,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static curacao.annotations.RequestMapping.Method.POST;
-import static onyx.util.CookieBaker.setCookie;
-import static onyx.util.CookieBaker.unsetCookie;
+import static onyx.components.authentication.SessionManager.SESSION_COOKIE_NAME;
+import static onyx.components.authentication.twofactor.TwoFactorAuthTokenManager.TRUSTED_DEVICE_COOKIE_NAME;
 
 @Controller
 public final class Session extends AbstractOnyxController {
@@ -68,6 +71,7 @@ public final class Session extends AbstractOnyxController {
     private static final String PASSWORD_FIELD = "password";
     private static final String TOKEN_FIELD = "token";
     private static final String CODE_FIELD = "code";
+    private static final String TRUST_DEVICE_FIELD = "trustDevice";
 
     private final SessionConfig sessionConfig_;
     private final SessionManager sessionManager_;
@@ -105,6 +109,7 @@ public final class Session extends AbstractOnyxController {
 
     @RequestMapping(value = "^/login$", methods = POST)
     public FreeMarkerContent doLogin(
+            @Cookie(TRUSTED_DEVICE_COOKIE_NAME) final String trustedDeviceCookie,
             @RequestBody(USERNAME_FIELD) final String username,
             @RequestBody(PASSWORD_FIELD) final String password,
             final HttpServletResponse response,
@@ -113,60 +118,61 @@ public final class Session extends AbstractOnyxController {
             return login();
         }
 
-        final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
-
-        final Pair<User, onyx.entities.authentication.Session> session =
+        final Pair<User, onyx.entities.authentication.Session> sessionPair =
                 userAuthenticator_.getSession(username, password);
-        if (session == null) {
+        if (sessionPair == null) {
             return login();
-        } else if (!twoFactorAuthEnabled) {
-            processLogin(session.getRight(), response, context);
+        }
+
+        final User user = sessionPair.getLeft();
+        final onyx.entities.authentication.Session session = sessionPair.getRight();
+
+        final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
+        if (!twoFactorAuthEnabled) {
+            // If 2FA is not enabled, process the login and let the user in.
+            processLogin(session, response, context);
             return null;
         }
 
-        final int randomCodeLength = twoFactorAuthConfig_.getRandomCodeLength();
-        final String randomCode = RandomStringUtils.randomNumeric(randomCodeLength);
+        // Check for the presence of a trusted device token. If a trusted device token
+        // is present and valid, then there is no need to prompt the user for 2FA - process
+        // the login and let the user in.
+        if (StringUtils.isNotBlank(trustedDeviceCookie)) {
+            final TrustedDeviceToken trustedDeviceToken =
+                    twoFactorAuthTokenManager_.extractTrustedDeviceToken(trustedDeviceCookie);
+            if (trustedDeviceToken == null) {
+                LOG.warn("Failed to validate trusted device token from cookie: {}",
+                        trustedDeviceCookie);
+            } else if (user.getUsername().equals(trustedDeviceToken.getUsername())) {
+                // Validate that the username on the 2FA trusted device token matches
+                // that of the user attempting to authenticate.
+                processLogin(session, response, context);
+                return null;
+            }
+        }
 
-        final String tokenHash = twoFactorAuthTokenManager_.generateTokenHash(username, randomCode);
-
-        final long tokenDurationInSeconds =
-                twoFactorAuthConfig_.getTokenDuration(TimeUnit.SECONDS);
-        final Date tokenExpiry =
-                new Date(Instant.now().plusSeconds(tokenDurationInSeconds).toEpochMilli());
-        final TwoFactorAuthToken token = new TwoFactorAuthToken.Builder()
-                .setId(UUID.randomUUID().toString())
-                .setHash(tokenHash)
-                .setSession(session.getRight())
-                .setExpiry(tokenExpiry)
-                .build();
-
-        // Send 2FA verification code!
-        twoFactorAuthCodeManager_.sendVerificationCodeToUser(session.getLeft(), randomCode);
-
-        final String signedToken = twoFactorAuthTokenManager_.signToken(token);
-        return new FreeMarkerContent.Builder("templates/login-verification.ftl")
-                .withAttr(TOKEN_FIELD, signedToken)
-                .build();
+        return processTwoFactorLogin(user, session);
     }
 
     @RequestMapping(value = "^/login/verify$", methods = POST)
-    public CuracaoEntity doLoginVerify(
+    public void doLoginVerify(
             @RequestBody(TOKEN_FIELD) final String signedToken,
             @RequestBody(CODE_FIELD) final String code,
+            @RequestBody(TRUST_DEVICE_FIELD) final String trustDevice,
             final HttpServletResponse response,
             final AsyncContext context) throws Exception {
         final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
         if (!twoFactorAuthEnabled) {
-            return logout(response, context);
+            logout(response, context);
         } else if (StringUtils.isBlank(signedToken) || StringUtils.isBlank(code)) {
-            return logout(response, context);
+            logout(response, context);
         }
 
         // Extract the signed 2FA token on the request.
         final TwoFactorAuthToken token = twoFactorAuthTokenManager_.extractSignedToken(signedToken);
         if (token == null) {
             LOG.warn("Failed to extract valid 2FA token from request: {}", signedToken);
-            return logout(response, context);
+            logout(response, context);
         }
 
         final onyx.entities.authentication.Session session = token.getSession();
@@ -176,26 +182,48 @@ public final class Session extends AbstractOnyxController {
         if (!token.getHash().equals(generatedTokenHash)) {
             LOG.warn("Provided 2FA token hash on request did not match generated 2FA token hash: "
                     + "provided={}, generated={}", token.getHash(), generatedTokenHash);
-            return logout(response, context);
+            logout(response, context);
         }
 
-        // If we get here, then the provided 2FA verification code was valid and the session extracted
-        // from the 2FA token is good to go - let the user in!
-        processLogin(session, response, context);
+        final boolean trustThisDevice = StringUtils.isNotBlank(trustDevice);
+        if (trustThisDevice) {
+            final long trustedDeviceTokenDurationInSeconds =
+                    twoFactorAuthConfig_.getTrustedDeviceTokenDuration(TimeUnit.SECONDS);
+            final Date trustedDeviceTokenExpiry =
+                    new Date(Instant.now().plusSeconds(trustedDeviceTokenDurationInSeconds).toEpochMilli());
 
-        return null;
+            final TrustedDeviceToken trustedDeviceToken = new TrustedDeviceToken.Builder()
+                    .setId(UUID.randomUUID().toString())
+                    .setUsername(session.getUsername())
+                    .setExpiry(trustedDeviceTokenExpiry)
+                    .build();
+            final String signedTrustedDeviceToken =
+                    twoFactorAuthTokenManager_.signTrustedDeviceToken(trustedDeviceToken);
+
+            final long trustedDeviceTokenCookieMaxAgeInSeconds =
+                    twoFactorAuthConfig_.getTrustedDeviceTokenCookieMaxAge(TimeUnit.SECONDS);
+
+            final CookieBaker trustedDeviceCookieBaker = new CookieBaker.Builder()
+                    .setName(TRUSTED_DEVICE_COOKIE_NAME)
+                    .setValue(signedTrustedDeviceToken)
+                    .setDomain(sessionConfig_.getSessionDomain())
+                    .setContextPath(onyxConfig_.getContextPath())
+                    .setMaxAge(Ints.checkedCast(trustedDeviceTokenCookieMaxAgeInSeconds))
+                    .setSecure(sessionConfig_.isSessionUsingHttps())
+                    .build();
+            trustedDeviceCookieBaker.bake(response);
+        }
+
+        // If we get here, then the provided 2FA verification code was valid and the
+        // session extracted from the 2FA token is good to go - let the user in!
+        processLogin(session, response, context);
     }
 
     @RequestMapping(value = "^/logout$")
-    public CuracaoEntity logout(
+    public void logout(
             final HttpServletResponse response,
             final AsyncContext context) throws Exception {
-        unsetCookie(SessionManager.SESSION_COOKIE_NAME, onyxConfig_.getContextPath(),
-                sessionConfig_.isSessionUsingHttps(), response);
-        response.sendRedirect(onyxConfig_.getViewSafeFullUri());
-        context.complete();
-
-        return null;
+        processLogout(response, context);
     }
 
     private void processLogin(
@@ -203,9 +231,73 @@ public final class Session extends AbstractOnyxController {
             final HttpServletResponse response,
             final AsyncContext context) throws Exception {
         final String signedSession = sessionManager_.signSession(session);
-        setCookie(SessionManager.SESSION_COOKIE_NAME, signedSession, onyxConfig_.getContextPath(),
-                sessionConfig_.isSessionUsingHttps(), response);
+
+        final CookieBaker sessionCookieBaker = new CookieBaker.Builder()
+                .setName(SESSION_COOKIE_NAME)
+                .setValue(signedSession)
+                .setDomain(sessionConfig_.getSessionDomain())
+                .setContextPath(onyxConfig_.getContextPath())
+                .setSecure(sessionConfig_.isSessionUsingHttps())
+                .build();
+        sessionCookieBaker.bake(response);
+
         response.sendRedirect(onyxConfig_.getViewSafeFullUri() + "/browse/" + session.getUsername());
+        context.complete();
+    }
+
+    private FreeMarkerContent processTwoFactorLogin(
+            final User user,
+            final onyx.entities.authentication.Session session) {
+        final int randomCodeLength = twoFactorAuthConfig_.getRandomCodeLength();
+        final String randomCode = RandomStringUtils.randomNumeric(randomCodeLength);
+
+        final String tokenHash = twoFactorAuthTokenManager_.generateTokenHash(user.getUsername(), randomCode);
+
+        final long tokenDurationInSeconds =
+                twoFactorAuthConfig_.getTokenDuration(TimeUnit.SECONDS);
+        final Date tokenExpiry =
+                new Date(Instant.now().plusSeconds(tokenDurationInSeconds).toEpochMilli());
+        final TwoFactorAuthToken token = new TwoFactorAuthToken.Builder()
+                .setId(UUID.randomUUID().toString())
+                .setHash(tokenHash)
+                .setSession(session)
+                .setExpiry(tokenExpiry)
+                .build();
+
+        // Send 2FA verification code!
+        twoFactorAuthCodeManager_.sendVerificationCodeToUser(user, randomCode);
+
+        final String signedToken = twoFactorAuthTokenManager_.signToken(token);
+        return new FreeMarkerContent.Builder("templates/login-verification.ftl")
+                .withAttr(TOKEN_FIELD, signedToken)
+                .build();
+    }
+
+    private void processLogout(
+            final HttpServletResponse response,
+            final AsyncContext context) throws Exception {
+        final CookieBaker sessionCookieBaker = new CookieBaker.Builder()
+                .setName(SESSION_COOKIE_NAME)
+                .setDomain(sessionConfig_.getSessionDomain())
+                .setContextPath(onyxConfig_.getContextPath())
+                .setMaxAge(0) // unset!
+                .setSecure(sessionConfig_.isSessionUsingHttps())
+                .build();
+        sessionCookieBaker.bake(response);
+
+        final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
+        if (twoFactorAuthEnabled) {
+            final CookieBaker trustedDeviceCookieBaker = new CookieBaker.Builder()
+                    .setName(TRUSTED_DEVICE_COOKIE_NAME)
+                    .setDomain(sessionConfig_.getSessionDomain())
+                    .setContextPath(onyxConfig_.getContextPath())
+                    .setMaxAge(0) // unset!
+                    .setSecure(sessionConfig_.isSessionUsingHttps())
+                    .build();
+            trustedDeviceCookieBaker.bake(response);
+        }
+
+        response.sendRedirect(onyxConfig_.getViewSafeFullUri());
         context.complete();
     }
 

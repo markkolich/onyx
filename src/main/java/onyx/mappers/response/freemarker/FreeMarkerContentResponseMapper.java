@@ -36,12 +36,11 @@ import onyx.components.config.authentication.SessionConfig;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
+import onyx.util.CookieBaker;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
-
-import static onyx.util.CookieBaker.setCookie;
 
 @Mapper
 public final class FreeMarkerContentResponseMapper
@@ -78,8 +77,15 @@ public final class FreeMarkerContentResponseMapper
         if (shouldRefreshSessionAutomatically && session != null) {
             final Session refreshed = userAuthenticator_.refreshSession(session);
             final String signedRefreshedSession = sessionManager_.signSession(refreshed);
-            setCookie(SessionManager.SESSION_COOKIE_NAME, signedRefreshedSession, onyxConfig_.getContextPath(),
-                    sessionConfig_.isSessionUsingHttps(), response);
+
+            final CookieBaker refreshedSessionCookieBaker = new CookieBaker.Builder()
+                    .setName(SessionManager.SESSION_COOKIE_NAME)
+                    .setValue(signedRefreshedSession)
+                    .setDomain(sessionConfig_.getSessionDomain())
+                    .setContextPath(onyxConfig_.getContextPath())
+                    .setSecure(sessionConfig_.isSessionUsingHttps())
+                    .build();
+            refreshedSessionCookieBaker.bake(response);
         }
 
         renderFreeMarkerContent(response, content);

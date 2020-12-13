@@ -51,6 +51,11 @@ public final class OnyxTypesafeSessionConfig implements SessionConfig {
     }
 
     @Override
+    public String getSessionDomain() {
+        return config_.getString(SESSION_DOMAIN_PROP);
+    }
+
+    @Override
     public long getSessionDuration(
             final TimeUnit timeUnit) {
         return config_.getDuration(SESSION_DURATION_PROP, timeUnit);

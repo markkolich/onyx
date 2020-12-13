@@ -36,74 +36,121 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
-import static com.google.common.primitives.Ints.checkedCast;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class CookieBaker {
 
-    // Cannot instantiate
-    private CookieBaker() {
+    private final String name_;
+    private final String value_;
+
+    private final String domain_;
+    private final String contextPath_;
+
+    private final Integer maxAge_;
+
+    private final Boolean isSecure_;
+
+    private CookieBaker(
+            final String name,
+            @Nullable final String value,
+            @Nullable final String domain,
+            @Nullable final String contextPath,
+            @Nullable final Integer maxAge,
+            @Nullable final Boolean isSecure) {
+        name_ = checkNotNull(name, "Cookie name cannot be null.");
+        value_ = value;
+
+        domain_ = domain;
+        contextPath_ = contextPath;
+
+        maxAge_ = maxAge;
+        isSecure_ = isSecure;
     }
 
-    public static void setCookie(
-            final String cookieName,
-            final String value,
-            @Nullable final Long validityMs,
-            @Nullable final String contextPath,
-            final boolean isSecure,
+    public void bake(
             final HttpServletResponse response) {
-        final Cookie cookie = new Cookie(cookieName, value);
+        checkNotNull(response, "HTTP response cannot be null.");
+
+        final Cookie cookie = new Cookie(name_, value_);
         cookie.setHttpOnly(true);
-        if (validityMs != null) {
-            // Sigh -- "safely" convert the token validity from a long to int.
-            // The max-age of a cookie is specified in seconds.
-            cookie.setMaxAge(checkedCast(validityMs / 1000L));
+
+        if (maxAge_ != null) {
+            if (maxAge_ <= 0) {
+                cookie.setMaxAge(0);
+            } else {
+                cookie.setMaxAge(maxAge_);
+            }
         }
-        if (contextPath != null) {
-            cookie.setPath(contextPath);
+
+        if (domain_ != null) {
+            cookie.setDomain(domain_);
         }
-        cookie.setSecure(isSecure);
+        if (contextPath_ != null) {
+            cookie.setPath(contextPath_);
+        }
+        if (isSecure_ != null) {
+            cookie.setSecure(isSecure_);
+        }
+
         // Attach the cookie to the Servlet response.
         response.addCookie(cookie);
     }
 
-    public static void setCookie(
-            final String cookieName,
-            final String value,
-            @Nullable final String contextPath,
-            final boolean isSecure,
-            final HttpServletResponse response) {
-        setCookie(cookieName, value, null, contextPath, isSecure, response);
-    }
+    public static final class Builder {
 
-    public static void setCookie(
-            final String cookieName,
-            final String value,
-            final boolean isSecure,
-            final HttpServletResponse response) {
-        setCookie(cookieName, value, null, null, isSecure, response);
-    }
+        private String name_;
+        private String value_;
 
-    public static void unsetCookie(
-            final String cookieName,
-            @Nullable final String contextPath,
-            final boolean isSecure,
-            final HttpServletResponse response) {
-        final Cookie cookie = new Cookie(cookieName, null);
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(0); // Tells the browser to forget this cookie.
-        if (contextPath != null) {
-            cookie.setPath(contextPath);
+        private String domain_;
+        private String contextPath_;
+
+        private Integer maxAge_;
+
+        private Boolean isSecure_;
+
+        public Builder setName(
+                final String name) {
+            name_ = checkNotNull(name, "Cookie name cannot be null.");
+            return this;
         }
-        cookie.setSecure(isSecure);
-        // Attach the cookie to the Servlet response.
-        response.addCookie(cookie);
-    }
 
-    public static void unsetCookie(
-            final String cookieName,
-            final boolean isSecure,
-            final HttpServletResponse response) {
-        unsetCookie(cookieName, null, isSecure, response);
+        public Builder setValue(
+                @Nullable final String value) {
+            value_ = value;
+            return this;
+        }
+
+        public Builder setDomain(
+                @Nullable final String domain) {
+            domain_ = domain;
+            return this;
+        }
+
+        public Builder setContextPath(
+                @Nullable final String contextPath) {
+            contextPath_ = contextPath;
+            return this;
+        }
+
+        public Builder setMaxAge(
+                @Nullable final Integer maxAge) {
+            maxAge_ = maxAge;
+            return this;
+        }
+
+        public Builder setSecure(
+                final Boolean isSecure) {
+            isSecure_ = isSecure;
+            return this;
+        }
+
+        public CookieBaker build() {
+            checkNotNull(name_, "Cookie name cannot be null.");
+
+            return new CookieBaker(name_, value_, domain_, contextPath_,
+                    maxAge_, isSecure_);
+        }
+
     }
 
     @Nonnull

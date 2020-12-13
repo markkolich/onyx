@@ -32,6 +32,7 @@ import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
+import onyx.entities.authentication.twofactor.TrustedDeviceToken;
 import onyx.entities.authentication.twofactor.TwoFactorAuthToken;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -49,6 +50,7 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
     private final ObjectMapper objectMapper_;
 
     private final String tokenSignerSecret_;
+    private final String trustedDeviceSignerSecret_;
 
     @Injectable
     public OnyxTwoFactorAuthTokenManager(
@@ -56,6 +58,7 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
         tokenSignerSecret_ = onyxTwoFactorAuthConfig.getTokenSignerSecret();
+        trustedDeviceSignerSecret_ = onyxTwoFactorAuthConfig.getTrustedDeviceTokenSignerSecret();
     }
 
     @Nullable
@@ -69,6 +72,21 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
             return new KolichStringSigner(tokenSignerSecret_).sign(serializedSession);
         } catch (final Exception e) {
             LOG.warn("Failed to sign 2FA token for session ID: " + token.getSession().getId(), e);
+            return null;
+        }
+    }
+
+    @Nullable
+    @Override
+    public String signTrustedDeviceToken(
+            final TrustedDeviceToken trustedDeviceToken) {
+        checkNotNull(trustedDeviceToken, "Trusted device token cannot be null.");
+
+        try {
+            final String serializedTrustedDevice = objectMapper_.writeValueAsString(trustedDeviceToken);
+            return new KolichStringSigner(trustedDeviceSignerSecret_).sign(serializedTrustedDevice);
+        } catch (final Exception e) {
+            LOG.warn("Failed to sign trusted device token by ID: " + trustedDeviceToken.getId(), e);
             return null;
         }
     }
@@ -93,6 +111,33 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
             return token;
         } catch (final Exception e) {
             LOG.warn("Failed to get 2FA token from signed token string: " + signedToken, e);
+            return null;
+        }
+    }
+
+    @Nullable
+    @Override
+    public TrustedDeviceToken extractTrustedDeviceToken(
+            final String signedTrustedDeviceToken) {
+        checkNotNull(signedTrustedDeviceToken, "Trusted device token cannot be null.");
+
+        try {
+            final String trustedDeviceString =
+                    new KolichStringSigner(trustedDeviceSignerSecret_).isValid(signedTrustedDeviceToken);
+            final TrustedDeviceToken trustedDeviceToken =
+                    objectMapper_.readValue(trustedDeviceString, TrustedDeviceToken.class);
+
+            final long now = System.currentTimeMillis();
+            if (now > trustedDeviceToken.getExpiry().getTime()) {
+                LOG.debug("Trusted device token expired for token ID: {}",
+                        trustedDeviceToken.getId());
+                return null;
+            }
+
+            return trustedDeviceToken;
+        } catch (final Exception e) {
+            LOG.warn("Failed to get trusted device token from signed string: "
+                    + signedTrustedDeviceToken, e);
             return null;
         }
     }

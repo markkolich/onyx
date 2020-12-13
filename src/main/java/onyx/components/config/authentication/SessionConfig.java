@@ -35,6 +35,7 @@ public interface SessionConfig {
     String SESSION_CONFIG_PATH = "session";
 
     String SESSION_USERS_PROP = "users";
+    String SESSION_DOMAIN_PROP = "domain";
     String SESSION_DURATION_PROP = "duration";
     String SESSION_SIGNER_SECRET_PROP = "signer-secret";
     String SESSION_HTTPS_PROP = "https";
@@ -42,6 +43,8 @@ public interface SessionConfig {
     String SESSION_REFRESH_AUTOMATICALLY_PROP = "refresh-automatically";
 
     ConfigList getUsers();
+
+    String getSessionDomain();
 
     /**
      * Once generated, a user-session will remain valid for this long.

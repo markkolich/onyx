@@ -26,19 +26,30 @@
 
 package onyx.components.authentication.twofactor;
 
+import onyx.entities.authentication.twofactor.TrustedDeviceToken;
 import onyx.entities.authentication.twofactor.TwoFactorAuthToken;
 
 import javax.annotation.Nullable;
 
 public interface TwoFactorAuthTokenManager {
 
+    String TRUSTED_DEVICE_COOKIE_NAME = "_onyx_td";
+
     @Nullable
     String signToken(
             final TwoFactorAuthToken token);
 
     @Nullable
+    String signTrustedDeviceToken(
+            final TrustedDeviceToken trustedDeviceToken);
+
+    @Nullable
     TwoFactorAuthToken extractSignedToken(
             final String signedToken);
+
+    @Nullable
+    TrustedDeviceToken extractTrustedDeviceToken(
+            final String signedTrustedDeviceToken);
 
     String generateTokenHash(
             final String username,

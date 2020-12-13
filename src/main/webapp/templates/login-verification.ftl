@@ -28,6 +28,12 @@
                         <div class="form-group">
                           <input type="text" maxlength="32" name="code" class="form-control form-control-user" placeholder="Code" autofocus="autofocus" required="required">
                         </div>
+                        <div class="form-group">
+                          <div class="custom-control custom-checkbox text-center">
+                            <input type="checkbox" class="custom-control-input" id="trustDevice" name="trustDevice">
+                            <label class="custom-control-label" for="trustDevice">Trust this device</label>
+                          </div>
+                        </div>
                         <input type="submit" class="btn btn-primary btn-block pt-8" value="Verify">
                       </form>
                     </div>
