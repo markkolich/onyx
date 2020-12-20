@@ -59,7 +59,7 @@
                                         <i class="pl-2 far fa-folder-open"></i>
                                     </#if>
                                 </td>
-                                <td class="align-middle" colspan="6">
+                                <td class="align-middle" colspan="5">
                                     <span>${directory.getHtmlName()}</span>
                                     <#if (directoryCount+fileCount > 0)>
                                         <p class="text-muted small mb-0">
@@ -110,13 +110,12 @@
                                             &nbsp;
                                         </#if>
                                     </td>
-                                    <td class="align-middle d-none d-lg-table-cell">${child.getOwner()}</td>
                                     <td class="align-middle d-none d-lg-table-cell">${child.getCreatedAt()?datetime?string["MMM dd, yyyy, h:mm a"]}</td>
                                     <td class="align-middle d-none d-lg-table-cell">
                                         <#if child.getType() == "FILE">
                                             ${child.getHtmlSize()}
                                         <#else>
-                                            &ndash;
+                                            &nbsp;
                                         </#if>
                                     </td>
 
