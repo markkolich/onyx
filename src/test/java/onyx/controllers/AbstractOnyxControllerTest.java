@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -32,7 +32,6 @@ import onyx.components.OnyxFreeMarkerConfig;
 import onyx.entities.authentication.Session;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,22 +52,25 @@ public abstract class AbstractOnyxControllerTest extends AbstractOnyxTest {
             final String username) {
         checkNotNull(username, "Username cannot be null.");
 
-        final Date sessionExpiry =
-                new Date(Instant.now().plusSeconds(60).toEpochMilli());
+        final Instant sessionExpiry = Instant.now().plusSeconds(60);
+        final Instant refreshAfter = Instant.now().plusSeconds(60);
 
-        return generateNewSession(username, sessionExpiry);
+        return generateNewSession(username, sessionExpiry, refreshAfter);
     }
 
     protected static Session generateNewSession(
             final String username,
-            final Date expiry) {
+            final Instant expiry,
+            final Instant refreshAfter) {
         checkNotNull(username, "Username cannot be null.");
-        checkNotNull(username, "Expiry cannot be null.");
+        checkNotNull(expiry, "Expiry instant cannot be null.");
+        checkNotNull(refreshAfter, "Refresh after instant cannot be null.");
 
         return new Session.Builder()
                 .setId(UUID.randomUUID().toString())
                 .setUsername(username)
                 .setExpiry(expiry)
+                .setRefreshAfter(refreshAfter)
                 .build();
     }
 

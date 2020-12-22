@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.kolich</groupId>
+    <groupId>onyx</groupId>
     <artifactId>onyx</artifactId>
     <version>0.1</version>
     <packaging>jar</packaging>
@@ -12,6 +12,7 @@
         <project.java-source.version>11</project.java-source.version>
         <project.java-runtime.version>[11,)</project.java-runtime.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.maven.version>3.6.3</project.maven.version>
 
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <maven-buildnumber-plugin.version>1.4</maven-buildnumber-plugin.version>
@@ -22,48 +23,56 @@
         <maven-frontend-npm.version>6.4.1</maven-frontend-npm.version>
         <maven-checkstyle-plugin.version>3.1.1</maven-checkstyle-plugin.version>
         <maven-pmd-plugin.version>3.13.0</maven-pmd-plugin.version>
-        <maven-pmd-plugin.pmd.version>6.30.0</maven-pmd-plugin.pmd.version>
+        <maven-pmd-plugin.pmd.version>6.36.0</maven-pmd-plugin.pmd.version>
+        <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
         <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
-        <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
+        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
+        <maven-duplicate-finder-plugin.version>1.4.0</maven-duplicate-finder-plugin.version>
 
-        <slf4j-api.version>1.7.30</slf4j-api.version>
+        <slf4j-api.version>1.7.31</slf4j-api.version>
         <logback.version>1.2.3</logback.version>
 
-        <curacao.version>6.2.2</curacao.version>
+        <curacao.version>6.3.0</curacao.version>
 
         <kolich-common.version>0.5</kolich-common.version>
 
-        <jetty.version>9.4.35.v20201120</jetty.version>
+        <jetty.version>9.4.42.v20210604</jetty.version>
 
         <typesafe-config.version>1.4.1</typesafe-config.version>
 
-        <commons-lang3.version>3.11</commons-lang3.version>
+        <jackson.version>2.12.3</jackson.version>
+
+        <commons-lang3.version>3.12.0</commons-lang3.version>
         <commons-text.version>1.9</commons-text.version>
-        <commons-io.version>2.8.0</commons-io.version>
+        <commons-io.version>2.10.0</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
 
-        <aws-sdk.version>1.11.920</aws-sdk.version>
+        <aws-sdk.version>1.12.13</aws-sdk.version>
 
-        <guava.version>30.1-jre</guava.version>
+        <guava.version>30.1.1-jre</guava.version>
 
-        <freemarker.version>2.3.30</freemarker.version>
+        <freemarker.version>2.3.31</freemarker.version>
 
         <htmlcompressor.version>1.5.2</htmlcompressor.version>
         <yuicompressor.version>2.4.8</yuicompressor.version>
 
-        <bcprov-ext-jdk15on.version>1.66</bcprov-ext-jdk15on.version>
+        <bcprov-ext-jdk15on.version>1.69</bcprov-ext-jdk15on.version>
         <jbcrypt.version>0.4</jbcrypt.version>
 
-        <async-http-client.version>2.12.1</async-http-client.version>
+        <async-http-client.version>2.12.3</async-http-client.version>
 
-        <picocli.version>4.5.2</picocli.version>
+        <picocli.version>4.6.1</picocli.version>
 
-        <checkstyle.version>8.38</checkstyle.version>
+        <solr.version>8.9.0</solr.version>
+
+        <quartz.version>2.3.2</quartz.version>
+
+        <checkstyle.version>8.43</checkstyle.version>
 
         <!-- Test dependency versions -->
 
-        <junit.jupiter.version>5.7.0</junit.jupiter.version>
-        <mockito-core.version>3.6.28</mockito-core.version>
+        <junit.jupiter.version>5.7.1</junit.jupiter.version>
+        <mockito-core.version>3.11.2</mockito-core.version>
     </properties>
 
     <issueManagement>
@@ -93,6 +102,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
             <version>${slf4j-api.version}</version>
         </dependency>
 
@@ -147,6 +161,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
@@ -171,6 +191,16 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
             <version>${aws-sdk.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
@@ -240,7 +270,72 @@
                 <!-- https://github.com/AsyncHttpClient/async-http-client/issues/1589 -->
                 <exclusion>
                     <groupId>com.sun.activation</groupId>
-                    <artifactId>javax.activation</artifactId>
+                    <artifactId>jakarta.activation</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-solrj</artifactId>
+            <version>${solr.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-core</artifactId>
+            <version>${solr.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.kerby</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.curator</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>${quartz.version}</version>
+            <exclusions>
+                <!-- WTF is up with the 'c3p0' and 'HikariCP' dependencies in the compile scope? -->
+                <!-- https://github.com/quartz-scheduler/quartz/issues/306 -->
+                <exclusion>
+                    <groupId>com.mchange</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.zaxxer</groupId>
+                    <artifactId>HikariCP-java7</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -322,7 +417,7 @@
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <!-- Keeps the Surefire "ForkedBooter" from popping up in the MacOS dock. -->
+                        <!-- Keeps the Surefire "ForkedBooter" from popping up in the macOS dock. -->
                         <java.awt.headless>true</java.awt.headless>
                         <!-- Forces unit tests to run in the context of a known timezone: PST/PDT. -->
                         <user.timezone>America/Los_Angeles</user.timezone>
@@ -469,6 +564,111 @@
                     </excludeRoots>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.basepom.maven</groupId>
+                <artifactId>duplicate-finder-maven-plugin</artifactId>
+                <version>${maven-duplicate-finder-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>duplicate-check</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <failBuildInCaseOfDifferentContentConflict>true</failBuildInCaseOfDifferentContentConflict>
+                    <failBuildInCaseOfEqualContentConflict>true</failBuildInCaseOfEqualContentConflict>
+                    <failBuildInCaseOfConflict>true</failBuildInCaseOfConflict>
+                    <ignoredResourcePatterns>
+                        <!-- Jetty loves their about.html pages -->
+                        <ignoredResourcePattern>.*about\.html$</ignoredResourcePattern>
+                    </ignoredResourcePatterns>
+                    <ignoredClassPatterns>
+                        <!--
+                                Found duplicate and different classes in
+                                [com.googlecode.htmlcompressor:htmlcompressor:1.5.2,
+                                com.yahoo.platform.yui:yuicompressor:2.4.8]
+                            -->
+                        <ignoredClassPattern>jargs\.gnu\.CmdLineParser</ignoredClassPattern>
+                        <!-- Jigsaw project (Java 9) and later module-info classes. -->
+                        <ignoredClassPattern>.*\.module-info$</ignoredClassPattern>
+                    </ignoredClassPatterns>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven-resources-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/classes/webapp</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/webapp</directory>
+                                    <includes>
+                                        <include>static/img/**</include>
+                                        <include>static/release/**</include>
+                                        <include>static/webfonts/**</include>
+
+                                        <include>templates/**</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven-shade-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/services/org.apache.lucene.codecs.Codec</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/services/org.apache.lucene.codecs.DocValuesFormat</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/services/org.apache.lucene.codecs.PostingsFormat</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>onyx.Application</mainClass>
+                                </transformer>
+                            </transformers>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>runnable</shadedClassifierName>
+                            <outputDirectory>dist</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- Copies the resulting JAR from into the dist/ directory. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -494,34 +694,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven-assembly-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>assemble-all</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <descriptors>
-                        <descriptor>assembly.xml</descriptor>
-                    </descriptors>
-                    <archive>
-                        <manifest>
-                            <mainClass>onyx.Application</mainClass>
-                        </manifest>
-                    </archive>
-                    <outputDirectory>dist</outputDirectory>
-                    <finalName>${project.artifactId}-${project.version}-runnable</finalName>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <attach>false</attach>
-                </configuration>
             </plugin>
         </plugins>
 

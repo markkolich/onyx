@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -51,7 +51,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
-import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -138,6 +137,7 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
         // Lookup the password from configuration.
         final User userFromConfig = userCredentials_.get(username);
         if (userFromConfig == null) {
+            LOG.warn("Found no user for username: {}", username);
             return null;
         }
 
@@ -145,18 +145,22 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
         final String passwordFromConfig = userFromConfig.getPassword();
         final boolean matches = pwHasher_.verify(password, passwordFromConfig);
         if (!matches) {
+            LOG.warn("Failed authentication attempt for user: {}", username);
             return null;
         }
 
         final long sessionDurationInSeconds =
                 sessionConfig_.getSessionDuration(TimeUnit.SECONDS);
-        final Date sessionExpiry =
-                new Date(Instant.now().plusSeconds(sessionDurationInSeconds).toEpochMilli());
+        final Instant sessionExpiry = Instant.now().plusSeconds(sessionDurationInSeconds);
+        final long refreshSessionAfterInSeconds =
+                sessionConfig_.getRefreshSessionAfter(TimeUnit.SECONDS);
+        final Instant refreshAfter = Instant.now().plusSeconds(refreshSessionAfterInSeconds);
 
         final Session session = new Session.Builder()
                 .setId(UUID.randomUUID().toString())
                 .setUsername(username)
                 .setExpiry(sessionExpiry)
+                .setRefreshAfter(refreshAfter)
                 .build();
 
         return Pair.of(userFromConfig, session);
@@ -167,11 +171,14 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
             final Session session) {
         final long sessionDurationInSeconds =
                 sessionConfig_.getSessionDuration(TimeUnit.SECONDS);
-        final Date sessionExpiry =
-                new Date(Instant.now().plusSeconds(sessionDurationInSeconds).toEpochMilli());
+        final Instant sessionExpiry = Instant.now().plusSeconds(sessionDurationInSeconds);
+        final long refreshSessionAfterInSeconds =
+                sessionConfig_.getRefreshSessionAfter(TimeUnit.SECONDS);
+        final Instant refreshAfter = Instant.now().plusSeconds(refreshSessionAfterInSeconds);
 
         return session.toBuilder()
                 .setExpiry(sessionExpiry)
+                .setRefreshAfter(refreshAfter)
                 .build();
     }
 
@@ -191,7 +198,7 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
                         .setType(Resource.Type.DIRECTORY)
                         .setVisibility(Resource.Visibility.PUBLIC)
                         .setOwner(username)
-                        .setCreatedAt(new Date()) // now
+                        .setCreatedAt(Instant.now()) // now
                         .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region().getName()))
                         .withS3Bucket(awsConfig_.getAwsS3BucketName())
                         .withDbMapper(dbMapper_)

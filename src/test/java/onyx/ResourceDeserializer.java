@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -39,7 +39,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * Used by Jackson in unit tests to convert JSON resources on the test-classpath
@@ -104,7 +104,7 @@ public final class ResourceDeserializer extends StdDeserializer<Resource> {
                 .setType(type)
                 .setVisibility(visibility)
                 .setOwner(owner)
-                .setCreatedAt(new Date()) // now
+                .setCreatedAt(Instant.now()) // now
                 .setFavorite(favorite)
                 .setS3Link(s3LinkFactory_.createS3Link(Region.US_West, "unit-test", path))
                 .build();

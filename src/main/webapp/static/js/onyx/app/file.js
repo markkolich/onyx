@@ -13,7 +13,7 @@
         upload = (function() {
 
             var
-                modal = $('#uploadFileModal'),
+                modal = $('#upload-file-modal'),
 
                 showModal = function() {
                     modal.on('shown.bs.modal', function() {
@@ -135,7 +135,7 @@
         del = (function() {
 
             var
-                modal = $('#deleteFileModal'),
+                modal = $('#delete-file-modal'),
 
                 showModal = function(resource) {
                     var name = decodeURIComponent(resource.split('/').pop());

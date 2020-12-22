@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -33,6 +33,7 @@ import onyx.components.authentication.twofactor.TwoFactorAuthTokenManager;
 import onyx.components.config.authentication.SessionConfig;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
 import onyx.components.storage.AsynchronousResourcePool;
+import onyx.components.storage.ResourceManager;
 import onyx.entities.freemarker.FreeMarkerContent;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,7 @@ public final class SessionTest extends AbstractOnyxControllerTest {
 
     @Test
     public void loginTest() throws Exception {
+        final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
         final SessionConfig sessionConfig = Mockito.mock(SessionConfig.class);
         final SessionManager sessionManager = Mockito.mock(SessionManager.class);
         final UserAuthenticator userAuthenticator = Mockito.mock(UserAuthenticator.class);
@@ -61,9 +63,9 @@ public final class SessionTest extends AbstractOnyxControllerTest {
         final TwoFactorAuthTokenManager twoFactorAuthTokenManager = Mockito.mock(TwoFactorAuthTokenManager.class);
         final TwoFactorAuthCodeManager twoFactorAuthCodeManager = Mockito.mock(TwoFactorAuthCodeManager.class);
 
-        final Session controller = new Session(onyxConfig_, asyncResourcePool_, sessionConfig,
-                sessionManager, userAuthenticator, twoFactorAuthConfig, twoFactorAuthTokenManager,
-                twoFactorAuthCodeManager);
+        final Session controller = new Session(onyxConfig_, asyncResourcePool_, resourceManager,
+                sessionConfig, sessionManager, userAuthenticator, twoFactorAuthConfig,
+                twoFactorAuthTokenManager, twoFactorAuthCodeManager);
 
         final FreeMarkerContent responseEntity = controller.login();
         assertNotNull(responseEntity);

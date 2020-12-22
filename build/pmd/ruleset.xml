@@ -7,11 +7,6 @@
     <description>The default Onyx PMD check ruleset.</description>
 
     <rule ref="category/java/bestpractices.xml/CheckResultSet" />
-    <!--
-        Checkstyle already checks for this, so we don't need PMD to do it. Also, PMD UnusedImports
-        erroneously flags wildcard imports, which are OK.
-    -->
-    <!--rule ref="category/java/bestpractices.xml/UnusedImports" /-->
     <rule ref="category/java/bestpractices.xml/UnusedFormalParameter" />
     <rule ref="category/java/bestpractices.xml/UnusedLocalVariable" />
     <rule ref="category/java/bestpractices.xml/AvoidPrintStackTrace" />
@@ -34,16 +29,15 @@
     <rule ref="category/java/codestyle.xml/ControlStatementBraces" />
     <rule ref="category/java/codestyle.xml/GenericsNaming" />
     <rule ref="category/java/codestyle.xml/NoPackage" />
-    <rule ref="category/java/codestyle.xml/DefaultPackage" />
     <rule ref="category/java/codestyle.xml/PackageCase" />
-    <rule ref="category/java/codestyle.xml/DontImportJavaLang" />
-    <rule ref="category/java/codestyle.xml/DuplicateImports" />
+    <rule ref="category/java/codestyle.xml/UnnecessaryImport" />
     <rule ref="category/java/codestyle.xml/ExtendsObject" />
     <rule ref="category/java/codestyle.xml/ForLoopShouldBeWhileLoop" />
     <!--
         This catches and complains of cases where we really do need to the FQCN.
     -->
     <!--rule ref="category/java/codestyle.xml/UnnecessaryFullyQualifiedName" /-->
+    <rule ref="category/java/codestyle.xml/CommentDefaultAccessModifier" />
     <rule ref="category/java/codestyle.xml/UnnecessaryModifier" />
     <rule ref="category/java/codestyle.xml/UnnecessaryReturn" />
     <rule ref="category/java/codestyle.xml/UselessQualifiedThis" />
@@ -97,7 +91,6 @@
     <rule ref="category/java/errorprone.xml/EmptySynchronizedBlock" />
     <rule ref="category/java/errorprone.xml/EmptyTryBlock" />
     <rule ref="category/java/errorprone.xml/EmptyWhileStmt" />
-    <rule ref="category/java/errorprone.xml/ImportFromSamePackage" />
     <rule ref="category/java/errorprone.xml/JumbledIncrementer" />
     <rule ref="category/java/errorprone.xml/MisplacedNullCheck" />
     <rule ref="category/java/errorprone.xml/OverrideBothEqualsAndHashcode" />

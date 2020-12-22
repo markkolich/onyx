@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -40,6 +40,7 @@ import org.asynchttpclient.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
@@ -47,10 +48,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.asynchttpclient.Dsl.asyncHttpClient;
 
 @Component
@@ -70,19 +71,55 @@ public final class LocalCacheManager implements CacheManager {
             final OnyxConfig onyxConfig,
             final LocalCacheConfig localCacheConfig,
             final AssetManager assetManager,
-            final CachedResourceSigner cachedResourceSigner) {
+            final CachedResourceSigner cachedResourceSigner) throws Exception {
         onyxConfig_ = onyxConfig;
         localCacheConfig_ = localCacheConfig;
         assetManager_ = assetManager;
         cachedResourceSigner_ = cachedResourceSigner;
+
+        // Create the local cache directory if it does not exist.
+        final Path localCacheDir = localCacheConfig_.getLocalCacheDirectory();
+        if (Files.notExists(localCacheDir)) {
+            Files.createDirectories(localCacheDir);
+        }
+    }
+
+    @Override
+    public boolean hasResourceInCache(
+            final Resource resource) {
+        checkNotNull(resource, "Resource cannot be null.");
+
+        return hasResourceInCache(resource.getPath());
+    }
+
+    @Override
+    public boolean hasResourceInCache(
+            final String resourcePath) {
+        checkNotNull(resourcePath, "Resource path cannot be null.");
+
+        final Path cachedResource = generateCachedResourcePath(resourcePath);
+        return Files.exists(cachedResource);
     }
 
     @Nullable
     @Override
     public URL getCachedDownloadUrlForResource(
             final Resource resource) throws Exception {
-        final Path cachedResource = getCachedResourceFileForPath(resource.getPath());
-        if (cachedResource == null) {
+        checkNotNull(resource, "Resource cannot be null.");
+
+        return getCachedDownloadUrlForResource(resource.getPath(), resource.getName());
+    }
+
+    @Nullable
+    @Override
+    public URL getCachedDownloadUrlForResource(
+            final String resourcePath,
+            final String resourceName) throws Exception {
+        checkNotNull(resourcePath, "Resource path cannot be null.");
+        checkNotNull(resourceName, "Resource name cannot be null.");
+
+        final boolean hasResourceInCache = hasResourceInCache(resourcePath);
+        if (!hasResourceInCache) {
             return null;
         }
 
@@ -90,33 +127,40 @@ public final class LocalCacheManager implements CacheManager {
                 localCacheConfig_.getLocalCacheTokenValidityDuration(TimeUnit.SECONDS);
 
         final CachedResourceToken cachedResourceToken = new CachedResourceToken.Builder()
-                .setPath(resource.getPath())
-                .setExpiry(new Date(Instant.now().plusSeconds(tokenValidityDurationInSeconds).toEpochMilli()))
+                .setPath(resourcePath)
+                .setExpiry(Instant.now().plusSeconds(tokenValidityDurationInSeconds))
                 .build();
 
         final String urlSafeSignedToken = cachedResourceSigner_.signCachedResourceToken(cachedResourceToken);
 
         final String signedTokenUrl = String.format("%s/static/cache/%s/%s", onyxConfig_.getViewSafeFullUri(),
-                urlSafeSignedToken, resource.getName());
+                urlSafeSignedToken, resourceName);
         return new URL(signedTokenUrl);
     }
 
-    @Nullable
+    @Nonnull
     @Override
-    public Path getCachedResourceFileForPath(
-            final String resourcePath) {
-        final Path cachedResource = generateCachedResourcePath(resourcePath);
-        if (!Files.exists(cachedResource)) {
-            LOG.debug("Found no cached resource for path: {}: {}", resourcePath, cachedResource);
-            return null;
-        }
+    public Path getCachedFileForResource(
+            final Resource resource) {
+        checkNotNull(resource, "Resource cannot be null.");
 
-        return cachedResource;
+        return getCachedFileForResource(resource.getPath());
+    }
+
+    @Nonnull
+    @Override
+    public Path getCachedFileForResource(
+            final String resourcePath) {
+        checkNotNull(resourcePath, "Resource path cannot be null.");
+
+        return generateCachedResourcePath(resourcePath);
     }
 
     @Override
     public void downloadResourceToCache(
             final Resource resource) {
+        checkNotNull(resource, "Resource cannot be null.");
+
         final URL downloadUrl = assetManager_.getPresignedDownloadUrlForResource(resource);
 
         final DefaultAsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder()
@@ -148,14 +192,18 @@ public final class LocalCacheManager implements CacheManager {
     public void downloadResourceToCacheAsync(
             final Resource resource,
             final ExecutorService executorService) {
+        checkNotNull(resource, "Resource cannot be null.");
+        checkNotNull(executorService, "Executor service cannot be null.");
+
         executorService.submit(() -> downloadResourceToCache(resource));
     }
 
     @Override
     public void deleteResourceFromCache(
             final Resource resource) {
-        final Path cachedResource = generateCachedResourcePath(resource.getPath());
+        checkNotNull(resource, "Resource cannot be null.");
 
+        final Path cachedResource = generateCachedResourcePath(resource.getPath());
         try {
             // Delete the file in the cache if it exists.
             if (Files.exists(cachedResource)) {
@@ -174,6 +222,9 @@ public final class LocalCacheManager implements CacheManager {
     public void deleteResourceFromCacheAsync(
             final Resource resource,
             final ExecutorService executorService) {
+        checkNotNull(resource, "Resource cannot be null.");
+        checkNotNull(executorService, "Executor service cannot be null.");
+
         executorService.submit(() -> deleteResourceFromCache(resource));
     }
 
@@ -183,12 +234,13 @@ public final class LocalCacheManager implements CacheManager {
      */
     private Path generateCachedResourcePath(
             final String resourcePath) {
-        final Path cacheDirectory = localCacheConfig_.getLocalCacheDirectory();
+        final Path localCacheDir = localCacheConfig_.getLocalCacheDirectory();
+
         // SHA-256 hash the resource path; this should provide enough URL-safe
         // uniqueness that there should not be any per-path conflicts when
         // used in a URL or in the name of a file on disk.
         final String hashedResourceName = DigestUtils.sha256Hex(resourcePath);
-        return cacheDirectory.resolve(hashedResourceName);
+        return localCacheDir.resolve(hashedResourceName);
     }
 
     /**
@@ -204,7 +256,7 @@ public final class LocalCacheManager implements CacheManager {
 
         private boolean failed_ = false;
 
-        StreamedFileDownloadAsyncHandler(
+        private StreamedFileDownloadAsyncHandler(
                 final Path filePath) throws Exception {
             filePath_ = filePath;
             os_ = Files.newOutputStream(filePath);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -38,9 +38,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static onyx.components.storage.ResourceManager.ROOT_PATH;
@@ -65,8 +67,9 @@ public final class DeleteResource {
     }
 
     public void run(
-            final IDynamoDBMapper dbMapper) {
-        final List<FailedBatch> failedBatches = deleteResource(resource_, dbMapper);
+            final IDynamoDBMapper dbMapper,
+            @Nullable final Consumer<Resource> callback) {
+        final List<FailedBatch> failedBatches = deleteResource(resource_, callback, dbMapper);
         if (CollectionUtils.isNotEmpty(failedBatches)) {
             LOG.error("Failed to delete one or more resource batches in backing store: {}",
                     failedBatches.size());
@@ -75,15 +78,22 @@ public final class DeleteResource {
 
     private List<FailedBatch> deleteResource(
             final Resource resource,
+            final Consumer<Resource> callback,
             final IDynamoDBMapper dbMapper) {
-        final ImmutableList.Builder<FailedBatch> failedBatches = ImmutableList.builder();
+        final ImmutableList.Builder<FailedBatch> failedBatchesBuilder = ImmutableList.builder();
 
         final Resource.Type resourceType = resource.getType();
         if (Resource.Type.FILE.equals(resourceType)) {
             dbMapper.delete(resource);
+            if (callback != null) {
+                callback.accept(resource);
+            }
         } else if (Resource.Type.DIRECTORY.equals(resourceType)) {
             // First, delete the parent directory itself.
             dbMapper.delete(resource);
+            if (callback != null) {
+                callback.accept(resource);
+            }
 
             final DynamoDBQueryExpression<Resource> qe = new DynamoDBQueryExpression<Resource>()
                     .withIndexName(parentIndexName_)
@@ -104,19 +114,22 @@ public final class DeleteResource {
             // Then, batch delete any files.
             final List<Resource> files = resources.get(Resource.Type.FILE);
             if (CollectionUtils.isNotEmpty(files)) {
-                failedBatches.addAll(dbMapper.batchDelete(files));
+                failedBatchesBuilder.addAll(dbMapper.batchDelete(files));
+                if (callback != null) {
+                    files.forEach(callback);
+                }
             }
 
             // Lastly, recursively delete any directories.
             final List<Resource> directories = resources.get(Resource.Type.DIRECTORY);
             if (CollectionUtils.isNotEmpty(directories)) {
                 for (final Resource directory : directories) {
-                    failedBatches.addAll(deleteResource(directory, dbMapper));
+                    failedBatchesBuilder.addAll(deleteResource(directory, callback, dbMapper));
                 }
             }
         }
 
-        return failedBatches.build();
+        return failedBatchesBuilder.build();
     }
 
     private static Map<String, String> buildExpressionAttributes() {

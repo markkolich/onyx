@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,6 +28,7 @@ package onyx.controllers.api.v1;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.amazonaws.services.s3.model.Region;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
@@ -35,6 +36,7 @@ import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.RequestBody;
 import curacao.entities.CuracaoEntity;
+import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.aws.dynamodb.DynamoDbMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.aws.AwsConfig;
@@ -58,7 +60,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.net.URL;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 import static curacao.annotations.RequestMapping.Method.*;
@@ -77,6 +79,8 @@ public final class File extends AbstractOnyxApiController {
 
     private final IDynamoDBMapper dbMapper_;
 
+    private final ObjectMapper objectMapper_;
+
     @Injectable
     public File(
             final OnyxConfig onyxConfig,
@@ -86,7 +90,8 @@ public final class File extends AbstractOnyxApiController {
             final AssetManager assetManager,
             final ResourceManager resourceManager,
             final CacheManager cacheManager,
-            final DynamoDbMapper dynamoDbMapper) {
+            final DynamoDbMapper dynamoDbMapper,
+            final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         super(onyxConfig, asynchronousResourcePool);
         awsConfig_ = awsConfig;
         localCacheConfig_ = localCacheConfig;
@@ -94,6 +99,7 @@ public final class File extends AbstractOnyxApiController {
         resourceManager_ = resourceManager;
         cacheManager_ = cacheManager;
         dbMapper_ = dynamoDbMapper.getDbMapper();
+        objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
     @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
@@ -135,7 +141,7 @@ public final class File extends AbstractOnyxApiController {
                             .setType(Resource.Type.DIRECTORY)
                             .setVisibility(request.getVisibility())
                             .setOwner(session.getUsername())
-                            .setCreatedAt(new Date()) // now
+                            .setCreatedAt(Instant.now()) // now
                             .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region().getName()))
                             .withS3Bucket(awsConfig_.getAwsS3BucketName())
                             .withDbMapper(dbMapper_)
@@ -169,7 +175,7 @@ public final class File extends AbstractOnyxApiController {
                 .setType(Resource.Type.FILE)
                 .setVisibility(request.getVisibility())
                 .setOwner(session.getUsername())
-                .setCreatedAt(new Date()) // now
+                .setCreatedAt(Instant.now()) // now
                 .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region().getName()))
                 .withS3Bucket(awsConfig_.getAwsS3BucketName())
                 .withDbMapper(dbMapper_)
@@ -179,7 +185,7 @@ public final class File extends AbstractOnyxApiController {
 
         final URL presignedUploadUrl = assetManager_.getPresignedUploadUrlForResource(newFile);
 
-        return new UploadFileResponse.Builder()
+        return new UploadFileResponse.Builder(objectMapper_)
                 .setPresignedUploadUrl(presignedUploadUrl.toString())
                 .build();
     }
@@ -255,6 +261,13 @@ public final class File extends AbstractOnyxApiController {
                     + normalizedPath);
         } else if (!file.getOwner().equals(session.getUsername())) {
             throw new ApiForbiddenException("Authenticated user is not the owner of file resource: "
+                    + normalizedPath);
+        }
+
+        // For safety, users cannot delete any file or resource that is marked as a "favorite".
+        // This ensures that someone does not accidentally delete an important (favorite) file.
+        if (file.getFavorite()) {
+            throw new ApiBadRequestException("Favorite files/resources cannot be deleted: "
                     + normalizedPath);
         }
 

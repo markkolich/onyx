@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,7 +27,6 @@
 package onyx.components.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kolich.common.util.secure.KolichStringSigner;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.OnyxJacksonObjectMapper;
@@ -37,8 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static onyx.util.StringSigner.newDefaultSigner;
 
 @Component
 public final class OnyxSignedSessionManager implements SessionManager {
@@ -65,7 +66,7 @@ public final class OnyxSignedSessionManager implements SessionManager {
 
         try {
             final String serializedSession = objectMapper_.writeValueAsString(session);
-            return new KolichStringSigner(sessionSignerSecret_).sign(serializedSession);
+            return newDefaultSigner(sessionSignerSecret_).sign(serializedSession);
         } catch (final Exception e) {
             LOG.warn("Failed to sign session: " + session.getId(), e);
             return null;
@@ -79,11 +80,11 @@ public final class OnyxSignedSessionManager implements SessionManager {
         checkNotNull(signedSession, "Signed session string cannot be null.");
 
         try {
-            final String sessionString = new KolichStringSigner(sessionSignerSecret_).isValid(signedSession);
+            final String sessionString = newDefaultSigner(sessionSignerSecret_).isValid(signedSession);
             final Session session = objectMapper_.readValue(sessionString, Session.class);
 
-            final long now = System.currentTimeMillis();
-            if (now > session.getExpiry().getTime()) {
+            final Instant now = Instant.now();
+            if (now.isAfter(session.getExpiry())) {
                 LOG.debug("Session expired: {}", session.getId());
                 return null;
             }

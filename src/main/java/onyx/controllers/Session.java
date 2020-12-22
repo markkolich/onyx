@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -40,6 +40,7 @@ import onyx.components.config.OnyxConfig;
 import onyx.components.config.authentication.SessionConfig;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
 import onyx.components.storage.AsynchronousResourcePool;
+import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.User;
 import onyx.entities.authentication.twofactor.TrustedDeviceToken;
 import onyx.entities.authentication.twofactor.TwoFactorAuthToken;
@@ -54,7 +55,6 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
-import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -63,7 +63,7 @@ import static onyx.components.authentication.SessionManager.SESSION_COOKIE_NAME;
 import static onyx.components.authentication.twofactor.TwoFactorAuthTokenManager.TRUSTED_DEVICE_COOKIE_NAME;
 
 @Controller
-public final class Session extends AbstractOnyxController {
+public final class Session extends AbstractOnyxFreeMarkerController {
 
     private static final Logger LOG = LoggerFactory.getLogger(Session.class);
 
@@ -86,13 +86,14 @@ public final class Session extends AbstractOnyxController {
     public Session(
             final OnyxConfig onyxConfig,
             final AsynchronousResourcePool asynchronousResourcePool,
+            final ResourceManager resourceManager,
             final SessionConfig sessionConfig,
             final SessionManager sessionManager,
             final UserAuthenticator userAuthenticator,
             final TwoFactorAuthConfig twoFactorAuthConfig,
             final TwoFactorAuthTokenManager twoFactorAuthTokenManager,
             final TwoFactorAuthCodeManager twoFactorAuthCodeManager) {
-        super(onyxConfig, asynchronousResourcePool);
+        super(onyxConfig, asynchronousResourcePool, resourceManager);
         sessionConfig_ = sessionConfig;
         sessionManager_ = sessionManager;
         userAuthenticator_ = userAuthenticator;
@@ -164,8 +165,10 @@ public final class Session extends AbstractOnyxController {
         final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
         if (!twoFactorAuthEnabled) {
             logout(response, context);
+            return;
         } else if (StringUtils.isBlank(signedToken) || StringUtils.isBlank(code)) {
             logout(response, context);
+            return;
         }
 
         // Extract the signed 2FA token on the request.
@@ -173,6 +176,7 @@ public final class Session extends AbstractOnyxController {
         if (token == null) {
             LOG.warn("Failed to extract valid 2FA token from request: {}", signedToken);
             logout(response, context);
+            return;
         }
 
         final onyx.entities.authentication.Session session = token.getSession();
@@ -183,14 +187,15 @@ public final class Session extends AbstractOnyxController {
             LOG.warn("Provided 2FA token hash on request did not match generated 2FA token hash: "
                     + "provided={}, generated={}", token.getHash(), generatedTokenHash);
             logout(response, context);
+            return;
         }
 
         final boolean trustThisDevice = StringUtils.isNotBlank(trustDevice);
         if (trustThisDevice) {
             final long trustedDeviceTokenDurationInSeconds =
                     twoFactorAuthConfig_.getTrustedDeviceTokenDuration(TimeUnit.SECONDS);
-            final Date trustedDeviceTokenExpiry =
-                    new Date(Instant.now().plusSeconds(trustedDeviceTokenDurationInSeconds).toEpochMilli());
+            final Instant trustedDeviceTokenExpiry =
+                    Instant.now().plusSeconds(trustedDeviceTokenDurationInSeconds);
 
             final TrustedDeviceToken trustedDeviceToken = new TrustedDeviceToken.Builder()
                     .setId(UUID.randomUUID().toString())
@@ -255,8 +260,8 @@ public final class Session extends AbstractOnyxController {
 
         final long tokenDurationInSeconds =
                 twoFactorAuthConfig_.getTokenDuration(TimeUnit.SECONDS);
-        final Date tokenExpiry =
-                new Date(Instant.now().plusSeconds(tokenDurationInSeconds).toEpochMilli());
+        final Instant tokenExpiry =
+                Instant.now().plusSeconds(tokenDurationInSeconds);
         final TwoFactorAuthToken token = new TwoFactorAuthToken.Builder()
                 .setId(UUID.randomUUID().toString())
                 .setHash(tokenHash)

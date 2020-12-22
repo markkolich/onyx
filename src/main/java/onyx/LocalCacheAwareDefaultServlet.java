@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -94,13 +94,14 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
         // Locate the cached asset/file for the resource token.
         final CacheManager cacheManager = componentFromContext(context, CacheManager.class);
         checkNotNull(cacheManager, "Cache manager cannot be null; context not initialized?");
-        final Path cachedResource = cacheManager.getCachedResourceFileForPath(cachedResourceToken.getPath());
-        if (cachedResource == null) {
+        final boolean hasResourceInCache = cacheManager.hasResourceInCache(cachedResourceToken.getPath());
+        if (!hasResourceInCache) {
             LOG.warn("Got valid token, but found no asset/file in cache for path: {}",
                     cachedResourceToken.getPath());
             return null;
         }
 
+        final Path cachedResource = cacheManager.getCachedFileForResource(cachedResourceToken.getPath());
         return new PathResource(cachedResource);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -54,7 +54,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.tuple.Triple;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 import static curacao.annotations.RequestMapping.Method.*;
@@ -125,7 +125,7 @@ public final class Directory extends AbstractOnyxApiController {
                             .setType(Resource.Type.DIRECTORY)
                             .setVisibility(request.getVisibility())
                             .setOwner(session.getUsername())
-                            .setCreatedAt(new Date()) // now
+                            .setCreatedAt(Instant.now()) // now
                             .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region().getName()))
                             .withS3Bucket(awsConfig_.getAwsS3BucketName())
                             .withDbMapper(dbMapper_)
@@ -158,7 +158,7 @@ public final class Directory extends AbstractOnyxApiController {
                 .setType(Resource.Type.DIRECTORY)
                 .setVisibility(request.getVisibility())
                 .setOwner(session.getUsername())
-                .setCreatedAt(new Date()) // now
+                .setCreatedAt(Instant.now()) // now
                 .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region().getName()))
                 .withS3Bucket(awsConfig_.getAwsS3BucketName())
                 .withDbMapper(dbMapper_)
@@ -228,6 +228,13 @@ public final class Directory extends AbstractOnyxApiController {
                     + normalizedPath);
         } else if (!directory.getOwner().equals(session.getUsername())) {
             throw new ApiForbiddenException("Authenticated user is not the owner of directory resource: "
+                    + normalizedPath);
+        }
+
+        // For safety, users cannot delete any directory or resource that is marked as a "favorite".
+        // This ensures that someone does not accidentally delete an important (favorite) directory.
+        if (directory.getFavorite()) {
+            throw new ApiBadRequestException("Favorite directories/resources cannot be deleted: "
                     + normalizedPath);
         }
 

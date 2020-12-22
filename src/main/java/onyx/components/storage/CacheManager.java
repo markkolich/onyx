@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,6 +28,7 @@ package onyx.components.storage;
 
 import onyx.entities.storage.aws.dynamodb.Resource;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.URL;
 import java.nio.file.Path;
@@ -35,12 +36,27 @@ import java.util.concurrent.ExecutorService;
 
 public interface CacheManager {
 
+    boolean hasResourceInCache(
+            final Resource resource);
+
+    boolean hasResourceInCache(
+            final String resourcePath);
+
     @Nullable
     URL getCachedDownloadUrlForResource(
             final Resource resource) throws Exception;
 
     @Nullable
-    Path getCachedResourceFileForPath(
+    URL getCachedDownloadUrlForResource(
+            final String resourcePath,
+            final String resourceName) throws Exception;
+
+    @Nonnull
+    Path getCachedFileForResource(
+            final Resource resource);
+
+    @Nonnull
+    Path getCachedFileForResource(
             final String resourcePath);
 
     void downloadResourceToCache(

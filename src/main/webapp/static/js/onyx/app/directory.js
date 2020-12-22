@@ -13,7 +13,7 @@
         create = (function() {
 
             var
-                modal = $('#createDirectoryModal'),
+                modal = $('#create-directory-modal'),
 
                 showModal = function() {
                     modal.on('shown.bs.modal', function() {
@@ -99,7 +99,7 @@
         del = (function() {
 
             var
-                modal = $('#deleteDirectoryModal'),
+                modal = $('#delete-directory-modal'),
 
                 showModal = function(resource) {
                     var name = decodeURIComponent(resource.split('/').pop());

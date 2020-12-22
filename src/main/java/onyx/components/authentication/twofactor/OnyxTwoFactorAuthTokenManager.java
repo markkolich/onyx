@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,7 +27,6 @@
 package onyx.components.authentication.twofactor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kolich.common.util.secure.KolichStringSigner;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.OnyxJacksonObjectMapper;
@@ -39,8 +38,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static onyx.util.StringSigner.newDefaultSigner;
 
 @Component
 public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenManager {
@@ -69,7 +70,7 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
 
         try {
             final String serializedSession = objectMapper_.writeValueAsString(token);
-            return new KolichStringSigner(tokenSignerSecret_).sign(serializedSession);
+            return newDefaultSigner(tokenSignerSecret_).sign(serializedSession);
         } catch (final Exception e) {
             LOG.warn("Failed to sign 2FA token for session ID: " + token.getSession().getId(), e);
             return null;
@@ -84,7 +85,7 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
 
         try {
             final String serializedTrustedDevice = objectMapper_.writeValueAsString(trustedDeviceToken);
-            return new KolichStringSigner(trustedDeviceSignerSecret_).sign(serializedTrustedDevice);
+            return newDefaultSigner(trustedDeviceSignerSecret_).sign(serializedTrustedDevice);
         } catch (final Exception e) {
             LOG.warn("Failed to sign trusted device token by ID: " + trustedDeviceToken.getId(), e);
             return null;
@@ -98,12 +99,12 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
         checkNotNull(signedToken, "Signed 2FA token string cannot be null.");
 
         try {
-            final String tokenString = new KolichStringSigner(tokenSignerSecret_).isValid(signedToken);
+            final String tokenString = newDefaultSigner(tokenSignerSecret_).isValid(signedToken);
             final TwoFactorAuthToken token =
                     objectMapper_.readValue(tokenString, TwoFactorAuthToken.class);
 
-            final long now = System.currentTimeMillis();
-            if (now > token.getExpiry().getTime()) {
+            final Instant now = Instant.now();
+            if (now.isAfter(token.getExpiry())) {
                 LOG.debug("2FA token expired for session ID: {}", token.getSession().getId());
                 return null;
             }
@@ -123,12 +124,12 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
 
         try {
             final String trustedDeviceString =
-                    new KolichStringSigner(trustedDeviceSignerSecret_).isValid(signedTrustedDeviceToken);
+                    newDefaultSigner(trustedDeviceSignerSecret_).isValid(signedTrustedDeviceToken);
             final TrustedDeviceToken trustedDeviceToken =
                     objectMapper_.readValue(trustedDeviceString, TrustedDeviceToken.class);
 
-            final long now = System.currentTimeMillis();
-            if (now > trustedDeviceToken.getExpiry().getTime()) {
+            final Instant now = Instant.now();
+            if (now.isAfter(trustedDeviceToken.getExpiry())) {
                 LOG.debug("Trusted device token expired for token ID: {}",
                         trustedDeviceToken.getId());
                 return null;

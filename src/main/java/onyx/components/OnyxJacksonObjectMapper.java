@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,6 +28,9 @@ package onyx.components;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import curacao.annotations.Component;
 
 @Component
@@ -36,8 +39,14 @@ public final class OnyxJacksonObjectMapper {
     private final ObjectMapper objectMapper_;
 
     public OnyxJacksonObjectMapper() {
-        objectMapper_ = new ObjectMapper()
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        objectMapper_ = JsonMapper.builder()
+                // Ignore unknown properties in anything Jackson deserializes.
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                // Write out Instants and Dates as human readable ISO-8601 strings.
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                // Required to support Instant annotated entity fields.
+                .addModule(new JavaTimeModule())
+                .build();
     }
 
     public ObjectMapper getObjectMapper() {

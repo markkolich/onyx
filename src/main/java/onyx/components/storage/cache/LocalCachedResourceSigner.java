@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,7 +27,6 @@
 package onyx.components.storage.cache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kolich.common.util.secure.KolichStringSigner;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.OnyxJacksonObjectMapper;
@@ -37,8 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static onyx.util.StringSigner.newDefaultSigner;
 
 @Component
 public final class LocalCachedResourceSigner implements CachedResourceSigner {
@@ -65,7 +66,7 @@ public final class LocalCachedResourceSigner implements CachedResourceSigner {
 
         try {
             final String serializedCachedResource = objectMapper_.writeValueAsString(cachedResourceToken);
-            return new KolichStringSigner(cacheTokenSignerSecret_).sign(serializedCachedResource);
+            return newDefaultSigner(cacheTokenSignerSecret_).sign(serializedCachedResource);
         } catch (final Exception e) {
             LOG.warn("Failed to sign cached resource token: " + cachedResourceToken.getPath(), e);
             return null;
@@ -79,12 +80,12 @@ public final class LocalCachedResourceSigner implements CachedResourceSigner {
         checkNotNull(signedToken, "Signed cached resource token string cannot be null.");
 
         try {
-            final String tokenString = new KolichStringSigner(cacheTokenSignerSecret_).isValid(signedToken);
+            final String tokenString = newDefaultSigner(cacheTokenSignerSecret_).isValid(signedToken);
             final CachedResourceToken cachedResource = objectMapper_.readValue(tokenString,
                     CachedResourceToken.class);
 
-            final long now = System.currentTimeMillis();
-            if (now > cachedResource.getExpiry().getTime()) {
+            final Instant now = Instant.now();
+            if (now.isAfter(cachedResource.getExpiry())) {
                 LOG.debug("Cached resource token expired: {}", cachedResource.getPath());
                 return null;
             }

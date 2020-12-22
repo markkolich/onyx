@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -39,17 +39,14 @@ import onyx.entities.storage.aws.dynamodb.Resource;
 import java.util.List;
 
 @Controller
-public final class Index extends AbstractOnyxController {
-
-    private final ResourceManager resourceManager_;
+public final class Index extends AbstractOnyxFreeMarkerController {
 
     @Injectable
     public Index(
             final OnyxConfig onyxConfig,
             final AsynchronousResourcePool asynchronousResourcePool,
             final ResourceManager resourceManager) {
-        super(onyxConfig, asynchronousResourcePool);
-        resourceManager_ = resourceManager;
+        super(onyxConfig, asynchronousResourcePool, resourceManager);
     }
 
     @RequestMapping(value = "^/$")

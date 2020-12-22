@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,12 +26,11 @@
 
 package onyx.entities.authentication;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import java.util.Date;
+import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -45,15 +44,18 @@ public interface Session {
     String getUsername();
 
     @JsonProperty("expiry")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    Date getExpiry();
+    Instant getExpiry();
+
+    @JsonProperty("refreshAfter")
+    Instant getRefreshAfter();
 
     @JsonIgnore
     default Builder toBuilder() {
         return new Builder()
                 .setId(getId())
                 .setUsername(getUsername())
-                .setExpiry(getExpiry());
+                .setExpiry(getExpiry())
+                .setRefreshAfter(getRefreshAfter());
     }
 
     final class Builder {
@@ -61,7 +63,8 @@ public interface Session {
         private String id_;
         private String username_;
 
-        private Date expiry_;
+        private Instant expiry_;
+        private Instant refreshAfter_;
 
         @JsonProperty("id")
         public Builder setId(
@@ -78,10 +81,16 @@ public interface Session {
         }
 
         @JsonProperty("expiry")
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
         public Builder setExpiry(
-                final Date expiry) {
+                final Instant expiry) {
             expiry_ = expiry;
+            return this;
+        }
+
+        @JsonProperty("refreshAfter")
+        public Builder setRefreshAfter(
+                final Instant refreshAfter) {
+            refreshAfter_ = refreshAfter;
             return this;
         }
 
@@ -89,6 +98,7 @@ public interface Session {
             checkNotNull(id_, "Session ID cannot be null.");
             checkNotNull(username_, "Session username cannot be null.");
             checkNotNull(expiry_, "Session expiry cannot be null.");
+            checkNotNull(refreshAfter_, "Session refresh after cannot be null.");
 
             return new Session() {
                 @Override
@@ -102,8 +112,13 @@ public interface Session {
                 }
 
                 @Override
-                public Date getExpiry() {
+                public Instant getExpiry() {
                     return expiry_;
+                }
+
+                @Override
+                public Instant getRefreshAfter() {
+                    return refreshAfter_;
                 }
             };
         }

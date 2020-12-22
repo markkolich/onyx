@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -31,6 +31,9 @@ import onyx.entities.storage.aws.dynamodb.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
+import java.util.function.Consumer;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class CreateResource {
@@ -45,8 +48,12 @@ public final class CreateResource {
     }
 
     public void run(
-            final IDynamoDBMapper dbMapper) {
+            final IDynamoDBMapper dbMapper,
+            @Nullable final Consumer<Resource> callback) {
         dbMapper.save(resource_);
+        if (callback != null) {
+            callback.accept(resource_);
+        }
     }
 
 }

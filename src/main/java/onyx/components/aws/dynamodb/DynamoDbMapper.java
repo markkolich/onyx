@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -31,8 +31,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.config.aws.AwsConfig;
 import onyx.components.aws.AwsCredentials;
+import onyx.components.config.aws.AwsConfig;
 
 @Component
 public final class DynamoDbMapper {

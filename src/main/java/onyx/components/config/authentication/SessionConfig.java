@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -41,6 +41,7 @@ public interface SessionConfig {
     String SESSION_HTTPS_PROP = "https";
 
     String SESSION_REFRESH_AUTOMATICALLY_PROP = "refresh-automatically";
+    String SESSION_REFRESH_AFTER_PROP = "refresh-after";
 
     ConfigList getUsers();
 
@@ -57,5 +58,8 @@ public interface SessionConfig {
     boolean isSessionUsingHttps();
 
     boolean shouldRefreshSessionAutomatically();
+
+    long getRefreshSessionAfter(
+            final TimeUnit timeUnit);
 
 }

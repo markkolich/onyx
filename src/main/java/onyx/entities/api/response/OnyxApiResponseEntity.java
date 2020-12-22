@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -36,6 +36,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.JSON_UTF_8;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
@@ -59,9 +60,7 @@ public interface OnyxApiResponseEntity extends CuracaoEntity {
     }
 
     @JsonIgnore
-    default ObjectMapper getMapper() {
-        return new ObjectMapper();
-    }
+    ObjectMapper getMapper();
 
     @JsonIgnore
     @Override
@@ -70,6 +69,17 @@ public interface OnyxApiResponseEntity extends CuracaoEntity {
         try (Writer w = new OutputStreamWriter(os, getCharset())) {
             getMapper().writeValue(w, this);
         }
+    }
+
+    abstract class AbstractOnyxApiResponseEntityBuilder {
+
+        protected final ObjectMapper objectMapper_;
+
+        public AbstractOnyxApiResponseEntityBuilder(
+                final ObjectMapper objectMapper) {
+            objectMapper_ = checkNotNull(objectMapper, "Object mapper cannot be null.");
+        }
+
     }
 
 }

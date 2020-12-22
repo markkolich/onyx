@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,12 +26,11 @@
 
 package onyx.entities.storage.cache;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import java.util.Date;
+import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,8 +41,7 @@ public interface CachedResourceToken {
     String getPath();
 
     @JsonProperty("expiry")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    Date getExpiry();
+    Instant getExpiry();
 
     @JsonIgnore
     default Builder toBuilder() {
@@ -56,7 +54,7 @@ public interface CachedResourceToken {
 
         private String path_;
 
-        private Date expiry_;
+        private Instant expiry_;
 
         @JsonProperty("path")
         public Builder setPath(
@@ -66,9 +64,8 @@ public interface CachedResourceToken {
         }
 
         @JsonProperty("expiry")
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
         public Builder setExpiry(
-                final Date expiry) {
+                final Instant expiry) {
             expiry_ = expiry;
             return this;
         }
@@ -84,7 +81,7 @@ public interface CachedResourceToken {
                 }
 
                 @Override
-                public Date getExpiry() {
+                public Instant getExpiry() {
                     return expiry_;
                 }
             };

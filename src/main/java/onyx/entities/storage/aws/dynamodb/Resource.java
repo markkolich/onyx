@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,10 +28,13 @@ package onyx.entities.storage.aws.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import com.amazonaws.services.s3.model.Region;
-import org.apache.commons.io.FileUtils;
+import onyx.components.aws.dynamodb.converters.InstantToStringTypeConverter;
+import onyx.util.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.time.Instant;
 import java.util.Date;
 
 import static com.amazonaws.util.SdkHttpUtils.urlDecode;
@@ -56,7 +59,7 @@ public final class Resource {
     private Type type_;
     private Visibility visibility_;
     private String owner_;
-    private Date createdAt_;
+    private Instant createdAt_;
     private Boolean favorite_;
 
     private S3Link s3Link_;
@@ -140,14 +143,14 @@ public final class Resource {
         return this;
     }
 
-    @DynamoDBTypeConvertedTimestamp
+    @DynamoDBTypeConverted(converter = InstantToStringTypeConverter.class)
     @DynamoDBAttribute(attributeName = "created")
-    public Date getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt_;
     }
 
     public Resource setCreatedAt(
-            final Date createdAt) {
+            final Instant createdAt) {
         createdAt_ = createdAt;
         return this;
     }
@@ -208,11 +211,11 @@ public final class Resource {
     }
 
     /**
-     * Returns a human readable/friendly size using {@link FileUtils#byteCountToDisplaySize}.
+     * Returns a human readable/friendly size of the resource.
      */
     @DynamoDBIgnore
     public String getHtmlSize() {
-        return FileUtils.byteCountToDisplaySize(size_);
+        return FileUtils.humanReadableByteCountBin(size_);
     }
 
     /**
@@ -224,6 +227,24 @@ public final class Resource {
         return escapeHtml4(description_);
     }
 
+    /**
+     * Returns a {@link Date} representing the instant at which this resource
+     * was created. This is really only useful for legacy APIs and libraries that
+     * don't understand or handle {@link Instant}. Modern callers should use
+     * {@link #getCreatedAt()} instead.
+     */
+    @Deprecated
+    @DynamoDBIgnore
+    public Date getCreatedDate() {
+        return new Date(getCreatedAt().toEpochMilli());
+    }
+
+    @Override
+    @DynamoDBIgnore
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+
     public static final class Builder {
 
         private String path_;
@@ -233,7 +254,7 @@ public final class Resource {
         private Type type_;
         private Visibility visibility_;
         private String owner_;
-        private Date createdAt_;
+        private Instant createdAt_;
         private Boolean favorite_;
 
         private S3Link s3Link_;
@@ -286,8 +307,8 @@ public final class Resource {
         }
 
         public Builder setCreatedAt(
-                final Date createdAt) {
-            createdAt_ = checkNotNull(createdAt, "Resource created at cannot be null.");
+                final Instant createdAt) {
+            createdAt_ = checkNotNull(createdAt, "Resource created instant cannot be null.");
             return this;
         }
 

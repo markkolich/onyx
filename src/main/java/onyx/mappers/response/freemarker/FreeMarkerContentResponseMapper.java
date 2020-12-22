@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -41,6 +41,9 @@ import onyx.util.CookieBaker;
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
+import java.time.Instant;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @Mapper
 public final class FreeMarkerContentResponseMapper
@@ -72,9 +75,24 @@ public final class FreeMarkerContentResponseMapper
             final AsyncContext context,
             final HttpServletResponse response,
             @Nonnull final FreeMarkerContent content) throws Exception {
-        final boolean shouldRefreshSessionAutomatically = sessionConfig_.shouldRefreshSessionAutomatically();
+        final boolean shouldRefreshSessionAutomatically =
+                sessionConfig_.shouldRefreshSessionAutomatically();
         final Session session = content.getAttribute(FreeMarkerContent.DATA_MAP_SESSION_ATTR);
         if (shouldRefreshSessionAutomatically && session != null) {
+            refreshSessionIfNeeded(session, response);
+        }
+
+        renderFreeMarkerContent(response, content);
+    }
+
+    private void refreshSessionIfNeeded(
+            final Session session,
+            final HttpServletResponse response) {
+        checkNotNull(session, "Session to refresh cannot be null.");
+        checkNotNull(response, "HTTP servlet response cannot be null.");
+
+        final Instant refreshAfter = session.getRefreshAfter();
+        if (Instant.now().isAfter(refreshAfter)) {
             final Session refreshed = userAuthenticator_.refreshSession(session);
             final String signedRefreshedSession = sessionManager_.signSession(refreshed);
 
@@ -87,8 +105,6 @@ public final class FreeMarkerContentResponseMapper
                     .build();
             refreshedSessionCookieBaker.bake(response);
         }
-
-        renderFreeMarkerContent(response, content);
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -33,6 +33,7 @@ import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.aws.dynamodb.queries.*;
 import onyx.components.config.aws.AwsConfig;
+import onyx.components.search.SearchManager;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
@@ -47,21 +48,26 @@ public final class DynamoDbManager implements ResourceManager {
 
     private final AwsConfig awsConfig_;
 
+    private final SearchManager searchManager_;
+
     private final IDynamoDBMapper dbMapper_;
 
     @Injectable
     public DynamoDbManager(
             final AwsConfig awsConfig,
-            final DynamoDbMapper dynamoDbMapper) {
-        this(awsConfig, dynamoDbMapper.getDbMapper());
+            final DynamoDbMapper dynamoDbMapper,
+            final SearchManager searchManager) {
+        this(awsConfig, dynamoDbMapper.getDbMapper(), searchManager);
     }
 
     @VisibleForTesting
     protected DynamoDbManager(
             final AwsConfig awsConfig,
-            final IDynamoDBMapper dbMapper) {
+            final IDynamoDBMapper dbMapper,
+            final SearchManager searchManager) {
         awsConfig_ = awsConfig;
         dbMapper_ = dbMapper;
+        searchManager_ = searchManager;
     }
 
     @Nullable
@@ -74,19 +80,19 @@ public final class DynamoDbManager implements ResourceManager {
     @Override
     public void createResource(
             final Resource resource) {
-        new CreateResource(resource).run(dbMapper_);
+        new CreateResource(resource).run(dbMapper_, searchManager_::addResourceToIndex);
     }
 
     @Override
     public void updateResource(
             final Resource resource) {
-        new UpdateResource(resource).run(dbMapper_);
+        new UpdateResource(resource).run(dbMapper_, searchManager_::addResourceToIndex);
     }
 
     @Override
     public void deleteResource(
             final Resource resource) {
-        new DeleteResource(awsConfig_, resource).run(dbMapper_);
+        new DeleteResource(awsConfig_, resource).run(dbMapper_, searchManager_::deleteResourceFromIndex);
     }
 
     @Override

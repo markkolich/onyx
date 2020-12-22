@@ -36,11 +36,9 @@
                                 <tr data-resource="${child.getPath()}">
                                     <td class="align-middle">
                                         <#if child.getType() == "DIRECTORY">
-                                            <i class="pl-2 fas fa-folder"></i>
+                                            <a href="${contextPath}/details${child.getPath()}"><i class="pl-2 far fa-folder text-body"></i></a>
                                         <#elseif child.getType() == "FILE">
-                                            <i class="pl-2 far fa-file-alt"></i>
-                                        <#elseif child.getType() == "LINK">
-                                            <i class="pl-2 fas fa-link"></i>
+                                            <a href="${contextPath}/details${child.getPath()}"><i class="pl-2 far fa-file text-body"></i></a>
                                         </#if>
                                     </td>
                                     <td class="align-middle">
@@ -48,8 +46,6 @@
                                             <a href="${contextPath}/browse${child.getPath()}">${child.getHtmlName()}</a>
                                         <#elseif child.getType() == "FILE">
                                             <a href="${contextPath}/file${child.getPath()}">${child.getHtmlName()}</a>
-                                        <#elseif child.getType() == "LINK">
-                                            <a href="${contextPath}/link${child.getPath()}">${child.getHtmlName()}</a>
                                         </#if>
                                     </td>
                                     <td class="align-middle d-none d-lg-table-cell">
@@ -59,8 +55,6 @@
                                             &nbsp;
                                         </#if>
                                     </td>
-                                    <td class="align-middle">${child.getOwner()}</td>
-                                    <td class="align-middle d-none d-lg-table-cell">${child.getCreatedAt()?datetime?string["MMM dd, yyyy, h:mm a"]}</td>
                                 </tr>
                             </#list>
                         <#else>

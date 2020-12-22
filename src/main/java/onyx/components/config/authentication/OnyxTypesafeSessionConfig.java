@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -74,6 +74,12 @@ public final class OnyxTypesafeSessionConfig implements SessionConfig {
     @Override
     public boolean shouldRefreshSessionAutomatically() {
         return config_.getBoolean(SESSION_REFRESH_AUTOMATICALLY_PROP);
+    }
+
+    @Override
+    public long getRefreshSessionAfter(
+            final TimeUnit timeUnit) {
+        return config_.getDuration(SESSION_REFRESH_AFTER_PROP, timeUnit);
     }
 
 }

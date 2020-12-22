@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Mark S. Kolich
+ * Copyright (c) 2021 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,6 +28,7 @@ package onyx.entities.api.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static javax.servlet.http.HttpServletResponse.SC_CREATED;
@@ -43,9 +44,14 @@ public interface UploadFileResponse extends OnyxApiResponseEntity {
         return SC_CREATED;
     }
 
-    final class Builder {
+    final class Builder extends AbstractOnyxApiResponseEntityBuilder {
 
         private String presignedUploadUrl_;
+
+        public Builder(
+                final ObjectMapper objectMapper) {
+            super(objectMapper);
+        }
 
         public Builder setPresignedUploadUrl(
                 final String presignedUploadUrl) {
@@ -56,7 +62,17 @@ public interface UploadFileResponse extends OnyxApiResponseEntity {
         public UploadFileResponse build() {
             checkNotNull(presignedUploadUrl_, "Presigned upload URL cannot be null.");
 
-            return () -> presignedUploadUrl_;
+            return new UploadFileResponse() {
+                @Override
+                public String getPresignedUploadUrl() {
+                    return presignedUploadUrl_;
+                }
+
+                @Override
+                public ObjectMapper getMapper() {
+                    return objectMapper_;
+                }
+            };
         }
 
     }

@@ -4,7 +4,7 @@
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.out</target>
         <encoder>
-            <pattern>%green(%date{"yyyy-MM-dd'T'HH:mm:ss,SSSXXX", UTC}) %highlight(%level) %yellow([%thread]) %cyan(%logger{1}:%line) - %msg%n
+            <pattern>%green(%date{"yyyy-MM-dd'T'HH:mm:ss,SSSXXX", UTC}) %highlight(%level) %yellow([%thread]) %cyan(%class{1}:%line) - %msg%n
             </pattern>
         </encoder>
     </appender>
@@ -16,6 +16,17 @@
         <appender-ref ref="STDOUT"/>
     </logger>
     <logger name="curacao.handlers.ReturnTypeMapperCallbackHandler" additivity="false" level="ERROR">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <!-- Squelch noisy Solr logging; enable if needed in dev. -->
+    <logger name="org.apache.solr.update.processor.LogUpdateProcessorFactory" additivity="false" level="ERROR">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.apache.solr.core.SolrCore.Request" additivity="false" level="ERROR">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.apache.solr.core.SolrCore" additivity="false" level="ERROR">
         <appender-ref ref="STDOUT"/>
     </logger>
 
