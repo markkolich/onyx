@@ -14,7 +14,7 @@
     </div>
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" type="submit">Delete</button>
+        <button class="btn btn-danger" type="submit">Delete</button>
     </div>
   </div>
 </div>

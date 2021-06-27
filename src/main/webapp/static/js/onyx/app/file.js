@@ -20,6 +20,14 @@
                         // Convenience
                         modal.find('input[data-file="description"]').focus();
 
+                        // Prevent the upload form from being submitted manually by the user,
+                        // only the file upload plugin should be able to "submit" the form
+                        // once a file has been selected.
+                        modal.find('form').unbind().on('submit', function(e) {
+                            e.preventDefault();
+                            return false;
+                        });
+
                         modal.find('input[data-upload="file"]').fileupload({
                             type: 'PUT',
                             singleFileUploads: true,
@@ -90,9 +98,46 @@
 
         }()),
 
-        update = (function() {
+        edit = (function() {
 
             var
+                modal = $('#edit-file-modal'),
+
+                showModal = function() {
+                    var description = $('body[data-description]').data('description');
+                    modal.find('input[data-file="description"]').val(description);
+
+                    modal.on('shown.bs.modal', function() {
+                        // Convenience
+                        modal.find('input[data-file="description"]').focus();
+
+                        modal.find('form').unbind().on('submit', function(e) {
+                            var resource = $('body[data-path]').data('path');
+
+                            var newDescription = modal.find('input[data-file="description"]').val();
+
+                            $.ajax({
+                                type: 'PUT',
+                                url: parent.baseApiUrl + '/v1/file' + resource,
+                                contentType: 'application/json',
+                                data: JSON.stringify({
+                                    description: newDescription
+                                }),
+                                success: function(res, status, xhr) {
+                                    modal.modal('hide');
+
+                                    window.location.reload(true);
+                                }
+                            });
+
+                            e.preventDefault();
+                            return false;
+                        });
+                    });
+
+                    modal.modal('show');
+                },
+
                 toggleVisibility = function(resource, visibility) {
                     var newVisibility = (visibility === 'PUBLIC') ? 'PRIVATE' : 'PUBLIC';
 
@@ -126,6 +171,7 @@
                 };
 
             return {
+                'showModal': showModal,
                 'toggleVisibility': toggleVisibility,
                 'toggleFavorite': toggleFavorite
             };
@@ -171,10 +217,16 @@
                 e.preventDefault();
                 return true;
             });
+            data.$contentDiv.find('[data-action="edit-file"]').unbind().click(function(e) {
+                edit.showModal();
+
+                e.preventDefault();
+                return true;
+            });
             data.$contentDiv.find('[data-action="toggle-file-visibility"]').unbind().click(function(e) {
                 var resource = $(this).closest('tr[data-resource]').data('resource');
                 var visibility = $(this).closest('tr[data-resource-visibility]').data('resource-visibility');
-                update.toggleVisibility(resource, visibility);
+                edit.toggleVisibility(resource, visibility);
 
                 e.preventDefault();
                 return true;
@@ -182,7 +234,7 @@
             data.$contentDiv.find('[data-action="toggle-file-favorite"]').unbind().click(function(e) {
                 var resource = $(this).closest('tr[data-resource]').data('resource');
                 var favorite = $(this).closest('tr[data-resource-favorite]').data('resource-favorite');
-                update.toggleFavorite(resource, favorite);
+                edit.toggleFavorite(resource, favorite);
 
                 e.preventDefault();
                 return true;

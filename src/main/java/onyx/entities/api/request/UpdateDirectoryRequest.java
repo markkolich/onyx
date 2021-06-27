@@ -37,6 +37,10 @@ import javax.annotation.Nullable;
 public interface UpdateDirectoryRequest {
 
     @Nullable
+    @JsonProperty("description")
+    String getDescription();
+
+    @Nullable
     @JsonProperty("visibility")
     Resource.Visibility getVisibility();
 
@@ -47,14 +51,24 @@ public interface UpdateDirectoryRequest {
     @JsonIgnore
     default Builder toBuilder() {
         return new Builder()
+                .setDescription(getDescription())
                 .setVisibility(getVisibility())
                 .setFavorite(getFavorite());
     }
 
     final class Builder {
 
+        private String description_;
+
         private Resource.Visibility visibility_;
         private Boolean favorite_;
+
+        @JsonProperty("description")
+        public Builder setDescription(
+                final String description) {
+            description_ = description;
+            return this;
+        }
 
         @JsonProperty("visibility")
         public Builder setVisibility(
@@ -72,6 +86,12 @@ public interface UpdateDirectoryRequest {
 
         public UpdateDirectoryRequest build() {
             return new UpdateDirectoryRequest() {
+                @Nullable
+                @Override
+                public String getDescription() {
+                    return description_;
+                }
+
                 @Nullable
                 @Override
                 public Resource.Visibility getVisibility() {

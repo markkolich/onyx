@@ -193,6 +193,11 @@ public final class Directory extends AbstractOnyxApiController {
                     + normalizedPath);
         }
 
+        final String description = request.getDescription();
+        if (description != null) {
+            directory.setDescription(description);
+        }
+
         final Resource.Visibility visibility = request.getVisibility();
         if (visibility != null) {
             directory.setVisibility(visibility);

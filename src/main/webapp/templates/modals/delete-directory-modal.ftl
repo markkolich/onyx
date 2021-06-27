@@ -1,4 +1,4 @@
-<!-- Delete File modal-->
+<!-- Delete Directory modal-->
 <div class="modal fade" id="delete-directory-modal" tabindex="-1" role="dialog" aria-hidden="true">
 <div class="modal-dialog" role="document">
   <div class="modal-content">
@@ -14,7 +14,7 @@
     </div>
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" type="submit">Delete</button>
+        <button class="btn btn-danger" type="submit">Delete</button>
     </div>
   </div>
 </div>

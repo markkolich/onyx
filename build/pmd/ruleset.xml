@@ -22,6 +22,7 @@
     <rule ref="category/java/bestpractices.xml/UseTryWithResources" />
     <rule ref="category/java/bestpractices.xml/UseVarargs" />
     <rule ref="category/java/bestpractices.xml/WhileLoopWithLiteralBoolean" />
+    <rule ref="category/java/bestpractices.xml/PrimitiveWrapperInstantiation" />
 
     <rule ref="category/java/codestyle.xml/UseDiamondOperator" />
     <rule ref="category/java/codestyle.xml/MethodArgumentCouldBeFinal" />
@@ -105,6 +106,5 @@
     <rule ref="category/java/multithreading.xml/DoubleCheckedLocking" />
 
     <rule ref="category/java/performance.xml/BigIntegerInstantiation" />
-    <rule ref="category/java/performance.xml/BooleanInstantiation" />
 
 </ruleset>

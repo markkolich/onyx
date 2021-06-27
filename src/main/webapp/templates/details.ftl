@@ -5,7 +5,7 @@
     <#include "common/css.ftl">
 </head>
 
-<body class="bg-gray-100" data-path="${resource.getPath()}"<#if session?has_content> data-session="${session.id}"</#if>>
+<body class="bg-gray-100" data-path="${resource.getPath()}" data-description="<#if resource.getHtmlDescription()?has_content>${resource.getHtmlDescription()}</#if>"<#if session?has_content> data-session="${session.id}"</#if>>
 
   <!-- Page Wrapper -->
   <div id="wrapper">
@@ -40,18 +40,21 @@
                    <#if session?has_content>
                      <#-- Controls are only visible if the authenticated user is the owner of the resource. -->
                      <#if userIsOwner>
-                       <#if resource.getType() == "DIRECTORY">
-                         <div class="dropdown no-arrow">
-                           <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                             <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                           </a>
-                           <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink" x-placement="bottom-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(17px, 19px, 0px);">
+                       <div class="dropdown no-arrow">
+                         <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                           <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                         </a>
+                         <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink" x-placement="bottom-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(17px, 19px, 0px);">
+                           <#if resource.getType() == "DIRECTORY">
                              <a class="dropdown-item" href="#" data-action="upload-file"><i class="fas fa-upload fa-sm fa-fw mr-2 text-gray-400"></i> Upload File</a>
+                             <div class="dropdown-divider"></div>
                              <a class="dropdown-item" href="#" data-action="create-directory"><i class="fas fa-folder-plus fa-sm fa-fw mr-2 text-gray-400"></i> Create Directory</a>
-                             <#--a class="dropdown-item" href="#" data-action="edit-description"><i class="fas fa-edit fa-sm fa-fw mr-2 text-gray-400"></i> Edit Description</a-->
-                           </div>
+                             <a class="dropdown-item" href="#" data-action="edit-directory"><i class="fas fa-edit fa-sm fa-fw mr-2 text-gray-400"></i> Edit Directory</a>
+                           <#elseif resource.getType() == "FILE">
+                             <a class="dropdown-item" href="#" data-action="edit-file"><i class="fas fa-edit fa-sm fa-fw mr-2 text-gray-400"></i> Edit File</a>
+                           </#if>
                          </div>
-                       </#if>
+                       </div>
                      </#if>
                    </#if>
                 </div>

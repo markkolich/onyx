@@ -214,6 +214,11 @@ public final class File extends AbstractOnyxApiController {
                     + normalizedPath);
         }
 
+        final String description = request.getDescription();
+        if (description != null) {
+            file.setDescription(description);
+        }
+
         final Resource.Visibility visibility = request.getVisibility();
         if (visibility != null) {
             file.setVisibility(visibility);
