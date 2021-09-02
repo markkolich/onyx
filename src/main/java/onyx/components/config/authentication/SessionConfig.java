@@ -37,7 +37,6 @@ public interface SessionConfig {
     String SESSION_USERS_PROP = "users";
     String SESSION_DOMAIN_PROP = "domain";
     String SESSION_DURATION_PROP = "duration";
-    String SESSION_SIGNER_SECRET_PROP = "signer-secret";
     String SESSION_HTTPS_PROP = "https";
 
     String SESSION_REFRESH_AUTOMATICALLY_PROP = "refresh-automatically";
@@ -52,8 +51,6 @@ public interface SessionConfig {
      */
     long getSessionDuration(
             final TimeUnit timeUnit);
-
-    String getSessionSignerSecret();
 
     boolean isSessionUsingHttps();
 

@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.OnyxJacksonObjectMapper;
-import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
+import onyx.components.security.StringSigner;
 import onyx.entities.authentication.twofactor.TrustedDeviceToken;
 import onyx.entities.authentication.twofactor.TwoFactorAuthToken;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -41,25 +41,22 @@ import javax.annotation.Nullable;
 import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static onyx.util.StringSigner.newDefaultSigner;
 
 @Component
 public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(OnyxTwoFactorAuthTokenManager.class);
 
-    private final ObjectMapper objectMapper_;
+    private final StringSigner stringSigner_;
 
-    private final String tokenSignerSecret_;
-    private final String trustedDeviceSignerSecret_;
+    private final ObjectMapper objectMapper_;
 
     @Injectable
     public OnyxTwoFactorAuthTokenManager(
-            final TwoFactorAuthConfig onyxTwoFactorAuthConfig,
+            final StringSigner stringSigner,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
+        stringSigner_ = stringSigner;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
-        tokenSignerSecret_ = onyxTwoFactorAuthConfig.getTokenSignerSecret();
-        trustedDeviceSignerSecret_ = onyxTwoFactorAuthConfig.getTrustedDeviceTokenSignerSecret();
     }
 
     @Nullable
@@ -69,10 +66,10 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
         checkNotNull(token, "2FA token cannot be null.");
 
         try {
-            final String serializedSession = objectMapper_.writeValueAsString(token);
-            return newDefaultSigner(tokenSignerSecret_).sign(serializedSession);
+            final String serializedToken = objectMapper_.writeValueAsString(token);
+            return stringSigner_.sign(serializedToken);
         } catch (final Exception e) {
-            LOG.warn("Failed to sign 2FA token for session ID: " + token.getSession().getId(), e);
+            LOG.warn("Failed to sign 2FA token for session ID: {}", token.getSession().getId(), e);
             return null;
         }
     }
@@ -84,10 +81,10 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
         checkNotNull(trustedDeviceToken, "Trusted device token cannot be null.");
 
         try {
-            final String serializedTrustedDevice = objectMapper_.writeValueAsString(trustedDeviceToken);
-            return newDefaultSigner(trustedDeviceSignerSecret_).sign(serializedTrustedDevice);
+            final String serializedTrustedDeviceToken = objectMapper_.writeValueAsString(trustedDeviceToken);
+            return stringSigner_.sign(serializedTrustedDeviceToken);
         } catch (final Exception e) {
-            LOG.warn("Failed to sign trusted device token by ID: " + trustedDeviceToken.getId(), e);
+            LOG.warn("Failed to sign trusted device token by ID: {}", trustedDeviceToken.getId(), e);
             return null;
         }
     }
@@ -99,7 +96,7 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
         checkNotNull(signedToken, "Signed 2FA token string cannot be null.");
 
         try {
-            final String tokenString = newDefaultSigner(tokenSignerSecret_).isValid(signedToken);
+            final String tokenString = stringSigner_.verifyAndGet(signedToken);
             final TwoFactorAuthToken token =
                     objectMapper_.readValue(tokenString, TwoFactorAuthToken.class);
 
@@ -111,7 +108,7 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
 
             return token;
         } catch (final Exception e) {
-            LOG.warn("Failed to get 2FA token from signed token string: " + signedToken, e);
+            LOG.warn("Failed to get 2FA token from signed token string: {}", signedToken, e);
             return null;
         }
     }
@@ -124,7 +121,7 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
 
         try {
             final String trustedDeviceString =
-                    newDefaultSigner(trustedDeviceSignerSecret_).isValid(signedTrustedDeviceToken);
+                    stringSigner_.verifyAndGet(signedTrustedDeviceToken);
             final TrustedDeviceToken trustedDeviceToken =
                     objectMapper_.readValue(trustedDeviceString, TrustedDeviceToken.class);
 
@@ -137,8 +134,8 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
 
             return trustedDeviceToken;
         } catch (final Exception e) {
-            LOG.warn("Failed to get trusted device token from signed string: "
-                    + signedTrustedDeviceToken, e);
+            LOG.warn("Failed to get trusted device token from signed string: {}",
+                    signedTrustedDeviceToken, e);
             return null;
         }
     }

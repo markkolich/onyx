@@ -28,9 +28,9 @@ package onyx.components.search.indexer;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import curacao.components.CuracaoComponent;
 import onyx.components.search.SearchConfig;
 import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
 
 import javax.annotation.Nonnull;
@@ -39,27 +39,44 @@ import java.util.Properties;
 import static org.quartz.impl.StdSchedulerFactory.PROP_THREAD_POOL_PREFIX;
 
 @Component
-public final class SimpleIndexerSchedulerFactory implements IndexerSchedulerFactory {
+public final class SimpleIndexerSchedulerFactory implements IndexerSchedulerFactory, CuracaoComponent {
 
     private static final String PROP_THREAD_POOL_COUNT = PROP_THREAD_POOL_PREFIX + ".threadCount";
     private static final String PROP_THREAD_POOL_USE_DAEMONS = PROP_THREAD_POOL_PREFIX + ".makeThreadsDaemons";
 
     private final SearchConfig searchConfig_;
 
+    private final Scheduler quartzScheduler_;
+
     @Injectable
     public SimpleIndexerSchedulerFactory(
-            final SearchConfig searchConfig) {
+            final SearchConfig searchConfig) throws Exception {
         searchConfig_ = searchConfig;
-    }
 
-    @Nonnull
-    @Override
-    public Scheduler getNewScheduler() throws SchedulerException {
         final Properties p = new Properties();
         p.put(PROP_THREAD_POOL_COUNT, Integer.toString(searchConfig_.getIndexerThreadPoolSize()));
         p.put(PROP_THREAD_POOL_USE_DAEMONS, Boolean.toString(searchConfig_.getIndexerUseDaemonThreads()));
 
-        return new StdSchedulerFactory(p).getScheduler();
+        quartzScheduler_ = new StdSchedulerFactory(p).getScheduler();
+    }
+
+    @Nonnull
+    @Override
+    public Scheduler getScheduler() {
+        return quartzScheduler_;
+    }
+
+    @Override
+    public void initialize() throws Exception {
+        // Starts the scheduler.
+        quartzScheduler_.start();
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        // Clears any pending jobs in prep for shutdown.
+        quartzScheduler_.clear();
+        quartzScheduler_.shutdown();
     }
 
 }

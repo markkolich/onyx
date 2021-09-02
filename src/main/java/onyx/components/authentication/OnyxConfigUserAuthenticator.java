@@ -43,7 +43,7 @@ import onyx.entities.authentication.Session;
 import onyx.entities.authentication.User;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.OnyxException;
-import onyx.util.PasswordHasher;
+import onyx.util.security.PasswordHasher;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;

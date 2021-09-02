@@ -34,8 +34,6 @@
 
         <curacao.version>6.3.0</curacao.version>
 
-        <kolich-common.version>0.5</kolich-common.version>
-
         <jetty.version>9.4.43.v20210629</jetty.version>
 
         <typesafe-config.version>1.4.1</typesafe-config.version>
@@ -130,12 +128,6 @@
             <groupId>curacao</groupId>
             <artifactId>curacao-jackson</artifactId>
             <version>${curacao.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.kolich</groupId>
-            <artifactId>kolich-common</artifactId>
-            <version>${kolich-common.version}</version>
         </dependency>
 
         <dependency>

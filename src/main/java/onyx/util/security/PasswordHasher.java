@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.util;
+package onyx.util.security;
 
 import org.mindrot.jbcrypt.BCrypt;
 

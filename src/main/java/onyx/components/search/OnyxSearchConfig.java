@@ -35,12 +35,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Component
-public final class OnyxTypesafeSearchConfig implements SearchConfig {
+public final class OnyxSearchConfig implements SearchConfig {
 
     private final Config config_;
 
     @Injectable
-    public OnyxTypesafeSearchConfig(
+    public OnyxSearchConfig(
             final OnyxConfig onyxConfig) {
         config_ = onyxConfig.getOnyxConfig().getConfig(SEARCH_CONFIG_PATH);
     }

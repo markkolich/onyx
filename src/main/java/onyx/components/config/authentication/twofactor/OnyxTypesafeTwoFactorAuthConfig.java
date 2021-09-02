@@ -61,16 +61,6 @@ public final class OnyxTypesafeTwoFactorAuthConfig implements TwoFactorAuthConfi
     }
 
     @Override
-    public String getTokenSignerSecret() {
-        return config_.getString(TOKEN_SIGNER_SECRET_PROP);
-    }
-
-    @Override
-    public String getTrustedDeviceTokenSignerSecret() {
-        return config_.getString(TRUSTED_DEVICE_TOKEN_SIGNER_SECRET_PROP);
-    }
-
-    @Override
     public long getTrustedDeviceTokenDuration(
             final TimeUnit timeUnit) {
         return config_.getDuration(TRUSTED_DEVICE_TOKEN_DURATION_PROP, timeUnit);

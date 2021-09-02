@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.OnyxJacksonObjectMapper;
-import onyx.components.config.authentication.SessionConfig;
+import onyx.components.security.StringSigner;
 import onyx.entities.authentication.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,23 +39,22 @@ import javax.annotation.Nullable;
 import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static onyx.util.StringSigner.newDefaultSigner;
 
 @Component
 public final class OnyxSignedSessionManager implements SessionManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(OnyxSignedSessionManager.class);
 
-    private final ObjectMapper objectMapper_;
+    private final StringSigner stringSigner_;
 
-    private final String sessionSignerSecret_;
+    private final ObjectMapper objectMapper_;
 
     @Injectable
     public OnyxSignedSessionManager(
-            final SessionConfig sessionConfig,
+            final StringSigner stringSigner,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
+        stringSigner_ = stringSigner;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
-        sessionSignerSecret_ = sessionConfig.getSessionSignerSecret();
     }
 
     @Nullable
@@ -66,9 +65,9 @@ public final class OnyxSignedSessionManager implements SessionManager {
 
         try {
             final String serializedSession = objectMapper_.writeValueAsString(session);
-            return newDefaultSigner(sessionSignerSecret_).sign(serializedSession);
+            return stringSigner_.sign(serializedSession);
         } catch (final Exception e) {
-            LOG.warn("Failed to sign session: " + session.getId(), e);
+            LOG.warn("Failed to sign session: {}", session.getId(), e);
             return null;
         }
     }
@@ -80,7 +79,7 @@ public final class OnyxSignedSessionManager implements SessionManager {
         checkNotNull(signedSession, "Signed session string cannot be null.");
 
         try {
-            final String sessionString = newDefaultSigner(sessionSignerSecret_).isValid(signedSession);
+            final String sessionString = stringSigner_.verifyAndGet(signedSession);
             final Session session = objectMapper_.readValue(sessionString, Session.class);
 
             final Instant now = Instant.now();
@@ -91,7 +90,7 @@ public final class OnyxSignedSessionManager implements SessionManager {
 
             return session;
         } catch (final Exception e) {
-            LOG.warn("Failed to get session from signed session string: " + signedSession, e);
+            LOG.warn("Failed to get session from signed session string: {}", signedSession, e);
             return null;
         }
     }

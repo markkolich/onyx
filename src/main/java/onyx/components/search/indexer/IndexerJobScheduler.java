@@ -28,7 +28,6 @@ package onyx.components.search.indexer;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.components.CuracaoComponent;
 import onyx.components.search.SearchConfig;
 import onyx.components.search.SearchManager;
 import onyx.components.storage.ResourceManager;
@@ -39,7 +38,7 @@ import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 @Component
-public final class IndexerJobScheduler implements CuracaoComponent {
+public final class IndexerJobScheduler {
 
     private final Scheduler quartzScheduler_;
 
@@ -49,7 +48,7 @@ public final class IndexerJobScheduler implements CuracaoComponent {
             final IndexerSchedulerFactory indexerSchedulerFactory,
             final ResourceManager resourceManager,
             final SearchManager searchManager) throws Exception {
-        quartzScheduler_ = indexerSchedulerFactory.getNewScheduler();
+        quartzScheduler_ = indexerSchedulerFactory.getScheduler();
 
         final JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put(ResourceManager.class.getSimpleName(), resourceManager);
@@ -75,19 +74,6 @@ public final class IndexerJobScheduler implements CuracaoComponent {
             quartzScheduler_.addJob(job, true);
             quartzScheduler_.triggerJob(JobKey.jobKey(IndexerJob.class.getSimpleName())); // Fire now!
         }
-    }
-
-    @Override
-    public void initialize() throws Exception {
-        // Starts the scheduler.
-        quartzScheduler_.start();
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        // Clears any pending jobs in prep for shutdown.
-        quartzScheduler_.clear();
-        quartzScheduler_.shutdown();
     }
 
 }

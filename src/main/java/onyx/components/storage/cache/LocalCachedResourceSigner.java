@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.OnyxJacksonObjectMapper;
-import onyx.components.config.cache.LocalCacheConfig;
+import onyx.components.security.StringSigner;
 import onyx.entities.storage.cache.CachedResourceToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,22 +39,21 @@ import javax.annotation.Nullable;
 import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static onyx.util.StringSigner.newDefaultSigner;
 
 @Component
 public final class LocalCachedResourceSigner implements CachedResourceSigner {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalCachedResourceSigner.class);
 
-    private final ObjectMapper objectMapper_;
+    private final StringSigner stringSigner_;
 
-    private final String cacheTokenSignerSecret_;
+    private final ObjectMapper objectMapper_;
 
     @Injectable
     public LocalCachedResourceSigner(
-            final LocalCacheConfig localCacheConfig,
+            final StringSigner stringSigner,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        cacheTokenSignerSecret_ = localCacheConfig.getLocalCacheTokenSignerSecret();
+        stringSigner_ = stringSigner;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
@@ -66,9 +65,9 @@ public final class LocalCachedResourceSigner implements CachedResourceSigner {
 
         try {
             final String serializedCachedResource = objectMapper_.writeValueAsString(cachedResourceToken);
-            return newDefaultSigner(cacheTokenSignerSecret_).sign(serializedCachedResource);
+            return stringSigner_.sign(serializedCachedResource);
         } catch (final Exception e) {
-            LOG.warn("Failed to sign cached resource token: " + cachedResourceToken.getPath(), e);
+            LOG.warn("Failed to sign cached resource token: {}", cachedResourceToken.getPath(), e);
             return null;
         }
     }
@@ -80,7 +79,7 @@ public final class LocalCachedResourceSigner implements CachedResourceSigner {
         checkNotNull(signedToken, "Signed cached resource token string cannot be null.");
 
         try {
-            final String tokenString = newDefaultSigner(cacheTokenSignerSecret_).isValid(signedToken);
+            final String tokenString = stringSigner_.verifyAndGet(signedToken);
             final CachedResourceToken cachedResource = objectMapper_.readValue(tokenString,
                     CachedResourceToken.class);
 
@@ -92,7 +91,7 @@ public final class LocalCachedResourceSigner implements CachedResourceSigner {
 
             return cachedResource;
         } catch (final Exception e) {
-            LOG.warn("Failed to get cached resource from signed token: " + signedToken, e);
+            LOG.warn("Failed to get cached resource from signed token: {}", signedToken, e);
             return null;
         }
     }

@@ -62,11 +62,6 @@ public final class OnyxTypesafeSessionConfig implements SessionConfig {
     }
 
     @Override
-    public String getSessionSignerSecret() {
-        return config_.getString(SESSION_SIGNER_SECRET_PROP);
-    }
-
-    @Override
     public boolean isSessionUsingHttps() {
         return config_.getBoolean(SESSION_HTTPS_PROP);
     }

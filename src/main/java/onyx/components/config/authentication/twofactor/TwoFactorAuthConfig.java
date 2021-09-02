@@ -35,8 +35,6 @@ public interface TwoFactorAuthConfig {
     String ENABLED_PROP = "enabled";
     String RANDOM_CODE_LENGTH_PROP = "random-code-length";
     String TOKEN_DURATION_PROP = "token-duration";
-    String TOKEN_SIGNER_SECRET_PROP = "token-signer-secret";
-    String TRUSTED_DEVICE_TOKEN_SIGNER_SECRET_PROP = "trusted-device-token-signer-secret";
     String TRUSTED_DEVICE_TOKEN_DURATION_PROP = "trusted-device-token-duration";
     String TRUSTED_DEVICE_TOKEN_COOKIE_MAX_AGE_PROP = "trusted-device-token-cookie-max-age";
 
@@ -46,10 +44,6 @@ public interface TwoFactorAuthConfig {
 
     long getTokenDuration(
             final TimeUnit timeUnit);
-
-    String getTokenSignerSecret();
-
-    String getTrustedDeviceTokenSignerSecret();
 
     long getTrustedDeviceTokenDuration(
             final TimeUnit timeUnit);

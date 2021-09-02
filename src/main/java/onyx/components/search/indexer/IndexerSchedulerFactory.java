@@ -34,6 +34,6 @@ import javax.annotation.Nonnull;
 public interface IndexerSchedulerFactory {
 
     @Nonnull
-    Scheduler getNewScheduler() throws SchedulerException;
+    Scheduler getScheduler() throws SchedulerException;
 
 }

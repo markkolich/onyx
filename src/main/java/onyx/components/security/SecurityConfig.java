@@ -24,36 +24,25 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.util;
+package onyx.components.security;
 
-import com.kolich.common.util.secure.KolichStringSigner;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
-import java.security.NoSuchAlgorithmException;
+public interface SecurityConfig {
 
-import static com.google.common.base.Preconditions.checkNotNull;
+    String SECURITY_CONFIG_PATH = "security";
 
-public final class StringSigner {
+    String SIGNER_KEY_ALGORITHM_PROP = "signer-key-algorithm";
+    String SIGNER_PUBLIC_KEY_PROP = "signer-public-key";
+    String SIGNER_PRIVATE_KEY_PROP = "signer-private-key";
 
-    private static final String ALGORITHM_SHA_512 = "SHA-512";
+    String getSignerKeyAlgorithm();
 
-    // Cannot instantiate.
-    private StringSigner() {
-    }
+    PublicKey getSignerPublicKey()
+        throws Exception;
 
-    public static KolichStringSigner newDefaultSigner(
-            final String algorithm,
-            final String secret) throws NoSuchAlgorithmException {
-        checkNotNull(algorithm, "String signer algorithm cannot be null.");
-        checkNotNull(secret, "String signer secret cannot be null.");
-
-        return new KolichStringSigner(algorithm, secret);
-    }
-
-    public static KolichStringSigner newDefaultSigner(
-            final String secret) throws NoSuchAlgorithmException {
-        checkNotNull(secret, "String signer secret cannot be null.");
-
-        return newDefaultSigner(ALGORITHM_SHA_512, secret);
-    }
+    PrivateKey getSignerPrivateKey()
+        throws Exception;
 
 }

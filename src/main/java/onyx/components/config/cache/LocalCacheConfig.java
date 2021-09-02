@@ -35,14 +35,11 @@ public interface LocalCacheConfig {
 
     String LOCAL_CACHE_ENABLED_PROP = "enabled";
     String LOCAL_CACHE_DIRECTORY_PROP = "directory";
-    String LOCAL_CACHE_TOKEN_SIGNER_SECRET_PROP = "token-signer-secret";
     String LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP = "token-validity-duration";
 
     boolean localCacheEnabled();
 
     Path getLocalCacheDirectory();
-
-    String getLocalCacheTokenSignerSecret();
 
     long getLocalCacheTokenValidityDuration(
             final TimeUnit timeUnit);

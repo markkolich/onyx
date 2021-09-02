@@ -24,41 +24,56 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.config.cache;
+package onyx.components.security;
 
 import com.typesafe.config.Config;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.config.OnyxConfig;
 
-import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 @Component
-public final class OnyxTypesafeLocalCacheConfig implements LocalCacheConfig {
+public final class OnyxSecurityConfig implements SecurityConfig {
 
     private final Config config_;
 
     @Injectable
-    public OnyxTypesafeLocalCacheConfig(
+    public OnyxSecurityConfig(
             final OnyxConfig onyxConfig) {
-        config_ = onyxConfig.getOnyxConfig().getConfig(LOCAL_CACHE_CONFIG_PATH);
+        config_ = onyxConfig.getOnyxConfig().getConfig(SECURITY_CONFIG_PATH);
     }
 
     @Override
-    public boolean localCacheEnabled() {
-        return config_.getBoolean(LOCAL_CACHE_ENABLED_PROP);
+    public String getSignerKeyAlgorithm() {
+        return config_.getString(SIGNER_KEY_ALGORITHM_PROP);
     }
 
     @Override
-    public Path getLocalCacheDirectory() {
-        return Path.of(config_.getString(LOCAL_CACHE_DIRECTORY_PROP));
+    public PublicKey getSignerPublicKey() throws Exception {
+        final String publicKeyEncoded = config_.getString(SIGNER_PUBLIC_KEY_PROP);
+        final byte[] keyBytes = Base64.getUrlDecoder().decode(publicKeyEncoded);
+
+        final X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+        final KeyFactory keyFactory = KeyFactory.getInstance(getSignerKeyAlgorithm());
+
+        return keyFactory.generatePublic(keySpec);
     }
 
     @Override
-    public long getLocalCacheTokenValidityDuration(
-            final TimeUnit timeUnit) {
-        return config_.getDuration(LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP, timeUnit);
+    public PrivateKey getSignerPrivateKey() throws Exception {
+        final String privateKeyEncoded = config_.getString(SIGNER_PRIVATE_KEY_PROP);
+        final byte[] keyBytes = Base64.getUrlDecoder().decode(privateKeyEncoded);
+
+        final PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+        final KeyFactory keyFactory = KeyFactory.getInstance(getSignerKeyAlgorithm());
+
+        return keyFactory.generatePrivate(keySpec);
     }
 
 }
