@@ -169,6 +169,15 @@ public final class Directory extends AbstractOnyxApiController {
         return created();
     }
 
+    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]*)$",
+            methods = PUT)
+    public CuracaoEntity updateHomeDirectory(
+            @Path("username") final String username,
+            @RequestBody final UpdateDirectoryRequest request,
+            final Session session) {
+        return updateDirectory(username, ResourceManager.ROOT_PATH, request, session);
+    }
+
     @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = PUT)
     public CuracaoEntity updateDirectory(

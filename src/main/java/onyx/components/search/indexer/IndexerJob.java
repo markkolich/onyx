@@ -69,7 +69,7 @@ public final class IndexerJob implements Job {
         int documentsIndexed = 0;
         final List<Resource> homeDirectories = resourceManager.listHomeDirectories();
         for (final Resource homeDirectory : homeDirectories) {
-            final String normalizedPath = normalizePath(homeDirectory.getOwner(), "/");
+            final String normalizedPath = normalizePath(homeDirectory.getOwner(), ResourceManager.ROOT_PATH);
 
             final Resource resource = resourceManager.getResourceAtPath(normalizedPath);
             if (resource != null) {

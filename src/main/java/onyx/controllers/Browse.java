@@ -59,7 +59,7 @@ public final class Browse extends AbstractOnyxFreeMarkerController {
     public FreeMarkerContent browseUserRoot(
             @Path("username") final String username,
             final Session session) {
-        return browseDirectory(username, "/", session);
+        return browseDirectory(username, ResourceManager.ROOT_PATH, session);
     }
 
     @RequestMapping(value = "^/browse/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")

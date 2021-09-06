@@ -75,7 +75,7 @@ public final class Details extends AbstractOnyxFreeMarkerController {
     public FreeMarkerContent userRootDetails(
             @Path("username") final String username,
             final Session session) {
-        return resourceDetails(username, "/", session);
+        return resourceDetails(username, ResourceManager.ROOT_PATH, session);
     }
 
     @RequestMapping(value = "^/details/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
