@@ -61,6 +61,10 @@ public final class Application {
 
     public static final String CONTEXT_ATTRIBUTE_BASE_RESOURCE = "onyx.base-resource";
 
+    @Option(names = {"--host"}, paramLabel = "HOST", description = "Server host.",
+            defaultValue = "127.0.0.1")
+    private String host_;
+
     @Option(names = {"--port"}, paramLabel = "PORT", description = "Server port.",
             defaultValue = "8080", required = true)
     private int port_;
@@ -94,6 +98,7 @@ public final class Application {
         // Grab a NIO connector for the server.
         final HttpConnectionFactory factory = new HttpConnectionFactory(config);
         final ServerConnector connector = new ServerConnector(server, factory);
+        connector.setHost(host_);
         connector.setPort(port_);
         connector.setIdleTimeout(30000L); // 30-seconds
         server.addConnector(connector);

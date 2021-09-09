@@ -27,7 +27,7 @@
 package onyx.mappers.request.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import curacao.mappers.request.types.body.InputStreamReaderRequestBodyMapper;
+import curacao.mappers.request.types.body.AbstractInputStreamReaderRequestBodyMapper;
 import onyx.exceptions.api.ApiBadRequestException;
 
 import java.io.InputStreamReader;
@@ -35,7 +35,7 @@ import java.io.InputStreamReader;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public abstract class AbstractApiArgumentRequestMapper<T>
-        extends InputStreamReaderRequestBodyMapper<T> {
+        extends AbstractInputStreamReaderRequestBodyMapper<T> {
 
     private final Class<T> clazz_;
 

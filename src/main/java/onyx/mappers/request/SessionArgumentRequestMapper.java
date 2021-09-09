@@ -29,7 +29,7 @@ package onyx.mappers.request;
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import curacao.context.CuracaoContext;
-import curacao.mappers.request.ControllerArgumentMapper;
+import curacao.mappers.request.AbstractControllerArgumentMapper;
 import onyx.components.authentication.SessionManager;
 import onyx.entities.authentication.Session;
 import org.apache.commons.lang3.ArrayUtils;
@@ -43,7 +43,7 @@ import static onyx.util.CookieBaker.getFirstCookieByName;
 
 @Mapper
 public final class SessionArgumentRequestMapper
-        extends ControllerArgumentMapper<Session> {
+        extends AbstractControllerArgumentMapper<Session> {
 
     private final SessionManager sessionManager_;
 

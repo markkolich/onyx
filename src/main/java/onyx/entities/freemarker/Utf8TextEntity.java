@@ -28,7 +28,7 @@ package onyx.entities.freemarker;
 
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 import com.googlecode.htmlcompressor.compressor.YuiJavaScriptCompressor;
-import curacao.entities.AppendableCuracaoEntity;
+import curacao.entities.AbstractAppendableCuracaoEntity;
 import onyx.util.HtmlUtils;
 import org.apache.commons.codec.binary.StringUtils;
 
@@ -45,7 +45,7 @@ import static com.google.common.net.MediaType.*;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.apache.commons.io.IOUtils.copyLarge;
 
-public final class Utf8TextEntity extends AppendableCuracaoEntity {
+public final class Utf8TextEntity extends AbstractAppendableCuracaoEntity {
 
     private static final String HTML_UTF_8_STRING = HTML_UTF_8.toString();
     private static final String XML_UTF_8_STRING = XML_UTF_8.toString();

@@ -26,7 +26,7 @@
 
 package onyx.mappers.response;
 
-import curacao.mappers.response.ControllerReturnTypeMapper;
+import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 import onyx.components.FreeMarkerContentToString;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.entities.freemarker.Utf8TextEntity;
@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public abstract class AbstractFreeMarkerContentAwareResponseMapper<T>
-        extends ControllerReturnTypeMapper<T> {
+        extends AbstractControllerReturnTypeMapper<T> {
 
     protected final FreeMarkerContentToString fmContentToString_;
 
