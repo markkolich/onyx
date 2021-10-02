@@ -23,9 +23,9 @@
                 closeSpeed: 100
             });
 
-            // Show video resources in a Featherlight lightbox preview.
+            // Show video and PDF resources in a Featherlight lightbox preview.
             data.$contentDiv.find('a[data-resource-type="FILE"]').filter(function() {
-                return this.href.match(/\.(mov|mp4)$/i);
+                return this.href.match(/\.(mov|mp4|mp3|pdf)$/i);
             }).featherlight({
                 type: 'iframe',
                 targetAttr: 'href',

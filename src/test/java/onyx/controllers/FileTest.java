@@ -83,7 +83,7 @@ public final class FileTest extends AbstractOnyxControllerTest {
                 localCacheConfig, assetManager, cacheManager);
 
         final Session session = generateNewSession("foobar");
-        controller.redirectToFileDownload("foobar", "secret-stuff/cool.txt",
+        controller.redirectToFileDownload("foobar", "secret-stuff/cool.txt", null,
                 session, httpServletResponse, asyncContext);
 
         assertEquals(redirectUrl.toString(), redirectLocation.getValue());
@@ -126,10 +126,47 @@ public final class FileTest extends AbstractOnyxControllerTest {
                 localCacheConfig, assetManager, cacheManager);
 
         final Session session = generateNewSession("foobar");
-        controller.redirectToFileDownload("foobar", "secret-stuff/cool.txt",
+        controller.redirectToFileDownload("foobar", "secret-stuff/cool.txt", null,
                 session, httpServletResponse, asyncContext);
 
         assertEquals(privateFile, privateFileCaptor.getValue());
+        assertEquals(redirectUrl.toString(), redirectLocation.getValue());
+        Mockito.verify(asyncContext).complete();
+    }
+
+    @Test
+    public void redirectToFileDownloadTestSkipCache() throws Exception {
+        final LocalCacheConfig localCacheConfig = Mockito.mock(LocalCacheConfig.class);
+        Mockito.when(localCacheConfig.localCacheEnabled()).thenReturn(false);
+
+        final AssetManager assetManager = Mockito.mock(AssetManager.class);
+        final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
+        final CacheManager cacheManager = Mockito.mock(CacheManager.class);
+
+        final String privateFileName = "/foobar/secret-stuff/cool.txt";
+        final Resource privateFile =
+                resourceJsonToObject("mock/browse/foobar-private-file.json", Resource.class);
+        Mockito.when(resourceManager.getResourceAtPath(ArgumentMatchers.eq(privateFileName)))
+                .thenReturn(privateFile);
+
+        final URL redirectUrl = new URL(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + privateFileName);
+        Mockito.when(assetManager.getPresignedDownloadUrlForResource(privateFile))
+                .thenReturn(redirectUrl);
+
+        final HttpServletResponse httpServletResponse = Mockito.mock(HttpServletResponse.class);
+        final AsyncContext asyncContext = Mockito.mock(AsyncContext.class);
+
+        final ArgumentCaptor<String> redirectLocation = ArgumentCaptor.forClass(String.class);
+        Mockito.doNothing().when(httpServletResponse).sendRedirect(redirectLocation.capture());
+
+        final File controller = new File(onyxConfig_, asyncResourcePool_, resourceManager,
+                localCacheConfig, assetManager, cacheManager);
+
+        final Session session = generateNewSession("foobar");
+        controller.redirectToFileDownload("foobar", "secret-stuff/cool.txt", true,
+                session, httpServletResponse, asyncContext);
+
+        Mockito.verifyNoInteractions(cacheManager);
         assertEquals(redirectUrl.toString(), redirectLocation.getValue());
         Mockito.verify(asyncContext).complete();
     }
@@ -163,7 +200,7 @@ public final class FileTest extends AbstractOnyxControllerTest {
                 localCacheConfig, assetManager, cacheManager);
 
         final Session session = generateNewSession("foobar");
-        controller.redirectToFileDownload("foobar", "secret-stuff/cool.txt",
+        controller.redirectToFileDownload("foobar", "secret-stuff/cool.txt", false,
                 session, httpServletResponse, asyncContext);
 
         Mockito.verifyNoInteractions(cacheManager);
@@ -200,7 +237,7 @@ public final class FileTest extends AbstractOnyxControllerTest {
                 localCacheConfig, assetManager, cacheManager);
 
         final Session session = generateNewSession("foobar");
-        controller.redirectToFileDownload("foobar", "secret-stuff/awesome.txt",
+        controller.redirectToFileDownload("foobar", "secret-stuff/awesome.txt", null,
                 session, httpServletResponse, asyncContext);
 
         // Non-favorite files are never downloaded to the local cache.
@@ -238,7 +275,7 @@ public final class FileTest extends AbstractOnyxControllerTest {
                 localCacheConfig, assetManager, cacheManager);
 
         final Session session = generateNewSession("foobar");
-        controller.redirectToFileDownload("foobar", "secret-stuff/kewl.txt",
+        controller.redirectToFileDownload("foobar", "secret-stuff/kewl.txt", null,
                 session, httpServletResponse, asyncContext);
 
         // Public files are never downloaded to the local cache.

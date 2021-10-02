@@ -30,6 +30,7 @@ import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
+import curacao.annotations.parameters.Query;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
@@ -40,6 +41,7 @@ import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.resource.ResourceForbiddenException;
 import onyx.exceptions.resource.ResourceNotFoundException;
+import org.apache.commons.lang3.BooleanUtils;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
@@ -73,6 +75,7 @@ public final class File extends AbstractOnyxFreeMarkerController {
     public void redirectToFileDownload(
             @Path("username") final String username,
             @Path("path") final String path,
+            @Query("nocache") final Boolean noCache,
             final Session session,
             final HttpServletResponse response,
             final AsyncContext context) throws Exception {
@@ -102,8 +105,10 @@ public final class File extends AbstractOnyxFreeMarkerController {
         {
             final boolean localCacheEnabled = localCacheConfig_.localCacheEnabled();
 
+            final boolean skipCache = BooleanUtils.toBooleanDefaultIfNull(noCache, false);
+
             // Only favorite files are stored in the local cache.
-            if (localCacheEnabled && file.getFavorite()) {
+            if (!skipCache && localCacheEnabled && file.getFavorite()) {
                 // Attempt to resolve the file from the local cache first; then if the file
                 // is not found in the cache, generate the S3 download URL.
                 final URL cacheUrl = cacheManager_.getCachedDownloadUrlForResource(file);
