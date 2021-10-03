@@ -24,37 +24,33 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage;
+package onyx.components.shortlink.bitly;
 
-import com.amazonaws.HttpMethod;
-import onyx.entities.storage.aws.dynamodb.Resource;
+import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
-import java.net.URL;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
+public interface BitlyShortLinkGeneratorConfig {
 
-public interface AssetManager {
+    String BITLY_SHORTLINK_GENERATOR_CONFIG_PATH = "bitly";
 
-    URL getPresignedDownloadUrlForResource(
-            final Resource resource);
+    String BITLY_API_BASE_URL_PROP = "api-base-url";
+    String BITLY_API_ACCESS_TOKEN_PROP = "api-access-token";
+    String BITLY_API_CLIENT_TIMEOUT_PROP = "api-client-timeout";
 
-    URL getPresignedUploadUrlForResource(
-            final Resource resource);
+    String BITLY_VISIBLE_BASE_APP_URL_PROP = "visible-base-app-url";
 
-    URL getPresignedUrlForResource(
-            final Resource resource,
-            final HttpMethod method,
-            @Nullable final Map<String, String> requestParameters);
+    String getApiBaseUrl();
 
-    boolean resourceExists(
-            final Resource resource);
+    String getApiAccessToken();
 
-    void deleteResource(
-            final Resource resource);
+    long getApiClientTimeout(
+            final TimeUnit timeUnit);
 
-    void deleteResourceAsync(
-            final Resource resource,
-            final ExecutorService executorService);
+    /**
+     * The bit.ly API does not support shortening <code>localhost</code> URLs,
+     * so when running Onyx in dev mode an optional configuration property can
+     * be set here to explicitly override the "visible base app URL" as seen by
+     * bit.ly.
+     */
+    String getVisibleBaseAppUrl();
 
 }

@@ -4,7 +4,7 @@
     var
 
         // Namespace
-        self = parent.ImageViewer = parent.ImageViewer || {},
+        self = parent.Previewer = parent.Previewer || {},
 
         data = {
             $contentDiv: $('#content')

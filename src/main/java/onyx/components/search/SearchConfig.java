@@ -37,11 +37,10 @@ public interface SearchConfig {
     String SOLR_CORE_NAME_PROP = "solr.core-name";
     String SOLR_NODE_NAME_PROP = "solr.node-name";
 
-    String INDEXER_REBUILD_ON_APP_STARTUP_PROP = "indexer.rebuild.on-app-startup";
-    String INDEXER_REBUILD_ON_SCHEDULE_PROP = "indexer.rebuild.on-schedule";
-    String INDEXER_REBUILD_CRON_EXPRESSION_PROP = "indexer.rebuild.cron-expression";
-    String INDEXER_THREAD_POOL_SIZE_PROP = "indexer.thread-pool.size";
-    String INDEXER_THREAD_POOL_USE_DAEMONS_PROP = "indexer.thread-pool.use-daemons";
+    String INDEXER_RUN_ON_APP_STARTUP_PROP = "indexer.run-on-app-startup";
+    String INDEXER_REBUILD_ON_SCHEDULE_PROP = "indexer.rebuild-on-schedule";
+    String INDEXER_REBUILD_CRON_EXPRESSION_PROP = "indexer.rebuild-cron-expression";
+    String INDEXER_REBUILD_DELETE_INDEX_FIRST_PROP = "indexer.rebuild-delete-index-first";
 
     // Solr config
 
@@ -55,14 +54,12 @@ public interface SearchConfig {
 
     // Indexer config
 
-    boolean getIndexerRebuildOnAppStartup();
+    boolean getIndexerRunOnAppStartup();
 
     boolean getIndexerRebuildOnSchedule();
 
     String getIndexerRebuildCronExpression();
 
-    int getIndexerThreadPoolSize();
-
-    boolean getIndexerUseDaemonThreads();
+    boolean getIndexerRebuildDeleteIndexFirst();
 
 }

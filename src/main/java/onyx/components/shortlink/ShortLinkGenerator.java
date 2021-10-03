@@ -24,37 +24,15 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage;
+package onyx.components.shortlink;
 
-import com.amazonaws.HttpMethod;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
-import javax.annotation.Nullable;
 import java.net.URL;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
-public interface AssetManager {
+public interface ShortLinkGenerator {
 
-    URL getPresignedDownloadUrlForResource(
+    URL createShortLinkForResource(
             final Resource resource);
-
-    URL getPresignedUploadUrlForResource(
-            final Resource resource);
-
-    URL getPresignedUrlForResource(
-            final Resource resource,
-            final HttpMethod method,
-            @Nullable final Map<String, String> requestParameters);
-
-    boolean resourceExists(
-            final Resource resource);
-
-    void deleteResource(
-            final Resource resource);
-
-    void deleteResourceAsync(
-            final Resource resource,
-            final ExecutorService executorService);
 
 }

@@ -28,8 +28,10 @@ package onyx.components.search.indexer;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import onyx.components.quartz.QuartzSchedulerFactory;
 import onyx.components.search.SearchConfig;
 import onyx.components.search.SearchManager;
+import onyx.components.storage.AssetManager;
 import onyx.components.storage.ResourceManager;
 import org.quartz.*;
 
@@ -45,14 +47,17 @@ public final class IndexerJobScheduler {
     @Injectable
     public IndexerJobScheduler(
             final SearchConfig searchConfig,
-            final IndexerSchedulerFactory indexerSchedulerFactory,
+            final QuartzSchedulerFactory quartzSchedulerFactory,
             final ResourceManager resourceManager,
-            final SearchManager searchManager) throws Exception {
-        quartzScheduler_ = indexerSchedulerFactory.getScheduler();
+            final SearchManager searchManager,
+            final AssetManager assetManager) throws Exception {
+        quartzScheduler_ = quartzSchedulerFactory.getScheduler();
 
         final JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put(SearchConfig.class.getSimpleName(), searchConfig);
         jobDataMap.put(ResourceManager.class.getSimpleName(), resourceManager);
         jobDataMap.put(SearchManager.class.getSimpleName(), searchManager);
+        jobDataMap.put(AssetManager.class.getSimpleName(), assetManager);
 
         final JobDetail job = newJob(IndexerJob.class)
                 .withIdentity(IndexerJob.class.getSimpleName())
@@ -69,8 +74,8 @@ public final class IndexerJobScheduler {
             quartzScheduler_.scheduleJob(job, trigger);
         }
 
-        final boolean rebuildIndexOnAppStartup = searchConfig.getIndexerRebuildOnAppStartup();
-        if (rebuildIndexOnAppStartup) {
+        final boolean runIndexerOnAppStartup = searchConfig.getIndexerRunOnAppStartup();
+        if (runIndexerOnAppStartup) {
             quartzScheduler_.addJob(job, true);
             quartzScheduler_.triggerJob(JobKey.jobKey(IndexerJob.class.getSimpleName())); // Fire now!
         }

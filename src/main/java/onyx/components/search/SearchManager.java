@@ -34,8 +34,10 @@ import java.util.List;
 public interface SearchManager {
 
     String INDEX_FIELD_PATH = "path";
+    String INDEX_FIELD_PATH_LOWER = "pathLower";
     String INDEX_FIELD_PARENT = "parent";
     String INDEX_FIELD_DESCRIPTION = "description";
+    String INDEX_FIELD_DESCRIPTION_LOWER = "descriptionLower";
     String INDEX_FIELD_SIZE = "size";
     String INDEX_FIELD_TYPE = "type";
     String INDEX_FIELD_VISIBILITY = "visibility";
@@ -46,6 +48,7 @@ public interface SearchManager {
     // Derived fields
 
     String INDEX_FIELD_NAME = "name";
+    String INDEX_FIELD_NAME_LOWER = "nameLower";
 
     // Query fields
 

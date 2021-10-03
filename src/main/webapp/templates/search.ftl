@@ -73,14 +73,14 @@
                                           <#if result.getLeft().getHtmlDescription()?has_content>
                                               ${result.getLeft().getHtmlDescription()?truncate(40, '...')}
                                           <#else>
-                                              &nbsp;
+                                              <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
                                           </#if>
                                       </td>
                                       <td class="align-middle d-none d-lg-table-cell text-nowrap">
                                           <#if result.getLeft().getType() == "FILE">
                                               ${result.getLeft().getHtmlSize()}
                                           <#else>
-                                              &nbsp;
+                                              <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
                                           </#if>
                                       </td>
 

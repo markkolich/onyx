@@ -24,37 +24,32 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage;
+package onyx.components.quartz;
 
-import com.amazonaws.HttpMethod;
-import onyx.entities.storage.aws.dynamodb.Resource;
+import com.typesafe.config.Config;
+import curacao.annotations.Component;
+import curacao.annotations.Injectable;
+import onyx.components.config.OnyxConfig;
 
-import javax.annotation.Nullable;
-import java.net.URL;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
+@Component
+public final class OnyxQuartzConfig implements QuartzConfig {
 
-public interface AssetManager {
+    private final Config config_;
 
-    URL getPresignedDownloadUrlForResource(
-            final Resource resource);
+    @Injectable
+    public OnyxQuartzConfig(
+            final OnyxConfig onyxConfig) {
+        config_ = onyxConfig.getOnyxConfig().getConfig(QUARTZ_CONFIG_PATH);
+    }
 
-    URL getPresignedUploadUrlForResource(
-            final Resource resource);
+    @Override
+    public int getThreadPoolSize() {
+        return config_.getInt(THREAD_POOL_SIZE_PROP);
+    }
 
-    URL getPresignedUrlForResource(
-            final Resource resource,
-            final HttpMethod method,
-            @Nullable final Map<String, String> requestParameters);
-
-    boolean resourceExists(
-            final Resource resource);
-
-    void deleteResource(
-            final Resource resource);
-
-    void deleteResourceAsync(
-            final Resource resource,
-            final ExecutorService executorService);
+    @Override
+    public boolean getUseDaemonThreads() {
+        return config_.getBoolean(THREAD_POOL_USE_DAEMON_THREADS_PROP);
+    }
 
 }

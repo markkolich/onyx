@@ -24,37 +24,21 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage;
+package onyx.exceptions.api;
 
-import com.amazonaws.HttpMethod;
-import onyx.entities.storage.aws.dynamodb.Resource;
+import static javax.servlet.http.HttpServletResponse.SC_SERVICE_UNAVAILABLE;
 
-import javax.annotation.Nullable;
-import java.net.URL;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
+public final class ApiServiceUnavailableException extends OnyxApiException {
 
-public interface AssetManager {
+    public ApiServiceUnavailableException(
+            final String message,
+            final Exception cause) {
+        super(SC_SERVICE_UNAVAILABLE, message, cause);
+    }
 
-    URL getPresignedDownloadUrlForResource(
-            final Resource resource);
-
-    URL getPresignedUploadUrlForResource(
-            final Resource resource);
-
-    URL getPresignedUrlForResource(
-            final Resource resource,
-            final HttpMethod method,
-            @Nullable final Map<String, String> requestParameters);
-
-    boolean resourceExists(
-            final Resource resource);
-
-    void deleteResource(
-            final Resource resource);
-
-    void deleteResourceAsync(
-            final Resource resource,
-            final ExecutorService executorService);
+    public ApiServiceUnavailableException(
+            final String message) {
+        super(SC_SERVICE_UNAVAILABLE, message);
+    }
 
 }

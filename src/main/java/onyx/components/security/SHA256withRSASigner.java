@@ -112,7 +112,8 @@ public final class SHA256withRSASigner {
         checkNotNull(publicKey_, "Public key cannot be null.");
         checkNotNull(message_, "Message cannot be null.");
 
-        if (!verify()) {
+        final boolean signatureVerified = verify();
+        if (!signatureVerified) {
             return null;
         }
 

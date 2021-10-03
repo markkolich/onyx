@@ -61,7 +61,7 @@ public final class DynamoDbManager implements ResourceManager {
     }
 
     @VisibleForTesting
-    protected DynamoDbManager(
+    DynamoDbManager(
             final AwsConfig awsConfig,
             final IDynamoDBMapper dbMapper,
             final SearchManager searchManager) {

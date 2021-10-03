@@ -57,7 +57,7 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void browseUserRootTest() throws Exception {
+    public void browseUserHomeDirectoryTest() throws Exception {
         final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
 
         final Resource homeDirectory =
@@ -78,7 +78,7 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
         final Browse controller = new Browse(onyxConfig_, asyncResourcePool_, resourceManager);
 
         final Session session = generateNewSession("foobar");
-        final FreeMarkerContent responseEntity = controller.browseUserRoot(session.getUsername(), session);
+        final FreeMarkerContent responseEntity = controller.browseUserHomeDirectory(session.getUsername(), session);
         assertNotNull(responseEntity);
 
         assertEquals(ImmutableSet.of(Resource.Visibility.PUBLIC, Resource.Visibility.PRIVATE),
@@ -112,7 +112,7 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
 
         final Browse controller = new Browse(onyxConfig_, asyncResourcePool_, resourceManager);
 
-        final FreeMarkerContent responseEntity = controller.browseUserRoot("foobar", null);
+        final FreeMarkerContent responseEntity = controller.browseUserHomeDirectory("foobar", null);
         assertNotNull(responseEntity);
 
         assertEquals(ImmutableSet.of(Resource.Visibility.PUBLIC),

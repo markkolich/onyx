@@ -47,6 +47,10 @@
                               <div class="dropdown-divider"></div>
                               <a class="dropdown-item" href="#" data-action="create-directory"><i class="fas fa-folder-plus fa-sm fa-fw mr-2 text-gray-400"></i> Create Directory</a>
                               <a class="dropdown-item" href="#" data-action="edit-directory"><i class="fas fa-edit fa-sm fa-fw mr-2 text-gray-400"></i> Edit Directory</a>
+                              <#if resource.getVisibility() == "PUBLIC">
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-action="get-shortlink"><i class="fas fa-link fa-sm fa-fw mr-2 text-gray-400"></i> Get Shortlink</a>
+                              </#if>
                             </div>
                           </div>
                       </#if>

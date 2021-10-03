@@ -53,6 +53,10 @@
                            <#elseif resource.getType() == "FILE">
                              <a class="dropdown-item" href="#" data-action="edit-file"><i class="fas fa-edit fa-sm fa-fw mr-2 text-gray-400"></i> Edit File</a>
                            </#if>
+                           <#if resource.getVisibility() == "PUBLIC">
+                             <div class="dropdown-divider"></div>
+                             <a class="dropdown-item" href="#" data-action="get-shortlink"><i class="fas fa-link fa-sm fa-fw mr-2 text-gray-400"></i> Get Shortlink</a>
+                           </#if>
                          </div>
                        </div>
                      </#if>

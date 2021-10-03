@@ -58,7 +58,8 @@ gulp.task('concat-js', ['eslint-js'], function() {
         'js/onyx/app/app.js',
         'js/onyx/app/file.js',
         'js/onyx/app/directory.js',
-        'js/onyx/app/featherlight-previewer.js'
+        'js/onyx/app/shortlink.js',
+        'js/onyx/app/previewer.js'
     ];
 
       return gulp.src(jsResources)

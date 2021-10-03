@@ -24,16 +24,43 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.search.indexer;
+package onyx.entities.shortlink.bitly.request;
 
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import javax.annotation.Nonnull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public interface IndexerSchedulerFactory {
+@JsonDeserialize(builder = BitlyShortenUrlRequest.Builder.class)
+public interface BitlyShortenUrlRequest {
 
-    @Nonnull
-    Scheduler getScheduler() throws SchedulerException;
+    @JsonProperty("long_url")
+    String getLongUrl();
+
+    @JsonIgnore
+    default Builder toBuilder() {
+        return new BitlyShortenUrlRequest.Builder()
+                .setLongUrl(getLongUrl());
+    }
+
+    final class Builder {
+
+        private String longUrl_;
+
+        @JsonProperty("long_url")
+        public Builder setLongUrl(
+                final String longUrl) {
+            longUrl_ = longUrl;
+            return this;
+        }
+
+        public BitlyShortenUrlRequest build() {
+            checkNotNull(longUrl_, "Long URL cannot be null.");
+
+            return () -> longUrl_;
+        }
+
+    }
 
 }

@@ -59,6 +59,8 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(EmbeddedSolrSearchManager.class);
 
+    private static final int DEFAULT_ROW_COUNT = 25;
+
     private final AwsConfig awsConfig_;
 
     private final SolrClient solrClient_;
@@ -157,43 +159,43 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
 
         final StringBuilder sb = new StringBuilder();
         if (query.startsWith(":")) {
-            final String escapedQuery = ClientUtils.escapeQueryChars(query.substring(1));
+            final String cleanedQuery = cleanQuery(query.substring(1));
             sb.append("type:").append(Resource.Type.FILE);
             sb.append(" AND ");
             sb.append("owner:").append(owner);
             sb.append(" AND ")
-                    .append("name:*")
-                    .append(escapedQuery)
+                    .append("nameLower:*")
+                    .append(cleanedQuery)
                     .append("*");
         } else if (query.startsWith("/")) {
-            final String escapedQuery = ClientUtils.escapeQueryChars(query.substring(1));
+            final String cleanedQuery = cleanQuery(query.substring(1));
             sb.append("type:").append(Resource.Type.DIRECTORY);
             sb.append(" AND ");
             sb.append("owner:").append(owner);
             sb.append(" AND (");
-            sb.append("name:*")
-                    .append(escapedQuery)
+            sb.append("nameLower:*")
+                    .append(cleanedQuery)
                     .append("*");
             sb.append(" OR ");
-            sb.append("path:*")
-                    .append(escapedQuery)
+            sb.append("pathLower:*")
+                    .append(cleanedQuery)
                     .append("*");
             sb.append(")");
         } else {
-            final String escapedQuery = ClientUtils.escapeQueryChars(query);
+            final String cleanedQuery = cleanQuery(query);
             sb.append("owner:").append(owner);
             sb.append(" AND ");
             sb.append("(")
-                    .append("name:").append("*").append(escapedQuery).append("*")
+                    .append("nameLower:").append("*").append(cleanedQuery).append("*")
                     .append(" OR ")
-                    .append("description:").append("*").append(escapedQuery).append("*")
+                    .append("descriptionLower:").append("*").append(cleanedQuery).append("*")
                     .append(")");
         }
 
         try {
             final SolrQuery solrQuery = new SolrQuery(sb.toString())
                     .addSort(SearchManager.QUERY_FIELD_SCORE, SolrQuery.ORDER.desc)
-                    .setRows(20);
+                    .setRows(DEFAULT_ROW_COUNT);
             final QueryResponse response = solrClient_.query(solrQuery);
             final SolrDocumentList documents = response.getResults();
 
@@ -206,14 +208,23 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
         }
     }
 
-    public static SolrInputDocument mapResourceToSolrInputDocument(
+    private static String cleanQuery(
+            final String query) {
+        checkNotNull(query, "Query to clean cannot be null.");
+
+        return ClientUtils.escapeQueryChars(StringUtils.trim(query));
+    }
+
+    private static SolrInputDocument mapResourceToSolrInputDocument(
             final Resource resource) {
         checkNotNull(resource, "Resource to map cannot be null.");
 
         final SolrInputDocument doc = new SolrInputDocument();
         doc.addField(INDEX_FIELD_PATH, resource.getPath());
+        doc.addField(INDEX_FIELD_PATH_LOWER, resource.getPath());
         doc.addField(INDEX_FIELD_PARENT, resource.getParent());
         doc.addField(INDEX_FIELD_DESCRIPTION, resource.getDescription());
+        doc.addField(INDEX_FIELD_DESCRIPTION_LOWER, resource.getDescription());
         doc.addField(INDEX_FIELD_SIZE, resource.getSize());
         doc.addField(INDEX_FIELD_TYPE, resource.getType().toString());
         doc.addField(INDEX_FIELD_VISIBILITY, resource.getVisibility().toString());
@@ -223,11 +234,12 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
 
         // Derived fields
         doc.addField(INDEX_FIELD_NAME, resource.getName());
+        doc.addField(INDEX_FIELD_NAME_LOWER, resource.getName());
 
         return doc;
     }
 
-    public static Resource mapSolrDocumentToResource(
+    private static Resource mapSolrDocumentToResource(
             final SolrDocument document,
             final AwsConfig awsConfig,
             final IDynamoDBMapper dbMapper) {

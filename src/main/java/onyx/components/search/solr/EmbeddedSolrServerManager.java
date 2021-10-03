@@ -75,7 +75,7 @@ public final class EmbeddedSolrServerManager implements SolrClientProvider, Cura
         final String coreName = searchConfig_.getSolrCoreName();
         final String nodeName = searchConfig_.getSolrNodeName();
 
-        // Intentionally disable metrics - it's not needed on this single node application.
+        // Intentionally disable metrics - it's not needed here.
         final MetricsConfig metricsConfig = new MetricsConfig.MetricsConfigBuilder()
                 .setEnabled(false)
                 .build();

@@ -47,8 +47,10 @@
 
     <!-- Defined fields -->
     <field name="path" type="string" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
+    <field name="pathLower" type="text_lower" indexed="true" stored="false" required="true" multiValued="false" docValues="false" />
     <field name="parent" type="string" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
-    <field name="description" type="text_lower" indexed="true" stored="true" required="false" multiValued="false" docValues="false" />
+    <field name="description" type="string" indexed="true" stored="true" required="false" multiValued="false" docValues="false" />
+    <field name="descriptionLower" type="text_lower" indexed="true" stored="false" required="false" multiValued="false" docValues="false" />
     <field name="size" type="long" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
     <field name="type" type="string" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
     <field name="visibility" type="string" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
@@ -58,6 +60,7 @@
     <field name="_version_" type="long" indexed="true" stored="false" required="false" />
 
     <field name="name" type="string" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
+    <field name="nameLower" type="text_lower" indexed="true" stored="false" required="true" multiValued="false" docValues="false" />
 
     <uniqueKey>path</uniqueKey>
 

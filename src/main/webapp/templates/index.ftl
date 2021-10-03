@@ -52,9 +52,10 @@
                                         <#if child.getHtmlDescription()?has_content>
                                             ${child.getHtmlDescription()?truncate(40, '...')}
                                         <#else>
-                                            &nbsp;
+                                            <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
                                         </#if>
                                     </td>
+                                    <td><div class="mt-2 invisible">&nbsp;</div></td> <#-- vertical spacer! -->
                                 </tr>
                             </#list>
                         <#else>

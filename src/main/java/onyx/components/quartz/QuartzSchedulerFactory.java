@@ -24,37 +24,16 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage;
+package onyx.components.quartz;
 
-import com.amazonaws.HttpMethod;
-import onyx.entities.storage.aws.dynamodb.Resource;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 
-import javax.annotation.Nullable;
-import java.net.URL;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
+import javax.annotation.Nonnull;
 
-public interface AssetManager {
+public interface QuartzSchedulerFactory {
 
-    URL getPresignedDownloadUrlForResource(
-            final Resource resource);
-
-    URL getPresignedUploadUrlForResource(
-            final Resource resource);
-
-    URL getPresignedUrlForResource(
-            final Resource resource,
-            final HttpMethod method,
-            @Nullable final Map<String, String> requestParameters);
-
-    boolean resourceExists(
-            final Resource resource);
-
-    void deleteResource(
-            final Resource resource);
-
-    void deleteResourceAsync(
-            final Resource resource,
-            final ExecutorService executorService);
+    @Nonnull
+    Scheduler getScheduler() throws SchedulerException;
 
 }

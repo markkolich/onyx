@@ -63,7 +63,7 @@ public final class ListDirectory {
         directory_ = checkNotNull(directory, "Resource directory cannot be null.");
         visibility_ = checkNotNull(visibility, "Resource directory child visibility cannot be null.");
 
-        parentIndexName_ = awsConfig.getAwsDynamoDbParentIndexName();
+        parentIndexName_ = awsConfig_.getAwsDynamoDbParentIndexName();
     }
 
     public List<Resource> run(

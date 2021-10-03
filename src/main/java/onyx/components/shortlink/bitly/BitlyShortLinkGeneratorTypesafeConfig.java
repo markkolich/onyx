@@ -24,69 +24,52 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.search;
+package onyx.components.shortlink.bitly;
 
 import com.typesafe.config.Config;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.config.OnyxConfig;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 @Component
-public final class OnyxSearchConfig implements SearchConfig {
+public final class BitlyShortLinkGeneratorTypesafeConfig implements BitlyShortLinkGeneratorConfig {
+
+    private final OnyxConfig onyxConfig_;
 
     private final Config config_;
 
     @Injectable
-    public OnyxSearchConfig(
+    public BitlyShortLinkGeneratorTypesafeConfig(
             final OnyxConfig onyxConfig) {
-        config_ = onyxConfig.getOnyxConfig().getConfig(SEARCH_CONFIG_PATH);
-    }
-
-    // Solr config
-
-    @Override
-    public Path getSolrHomeDirectory() {
-        return Paths.get(config_.getString(SOLR_HOME_DIR_PROP));
+        onyxConfig_ = onyxConfig;
+        config_ = onyxConfig.getOnyxConfig().getConfig(BITLY_SHORTLINK_GENERATOR_CONFIG_PATH);
     }
 
     @Override
-    public Path getSolrConfigDirectory() {
-        return Paths.get(config_.getString(SOLR_CONFIG_DIR_PROP));
+    public String getApiBaseUrl() {
+        return config_.getString(BITLY_API_BASE_URL_PROP);
     }
 
     @Override
-    public String getSolrCoreName() {
-        return config_.getString(SOLR_CORE_NAME_PROP);
+    public String getApiAccessToken() {
+        return config_.getString(BITLY_API_ACCESS_TOKEN_PROP);
     }
 
     @Override
-    public String getSolrNodeName() {
-        return config_.getString(SOLR_NODE_NAME_PROP);
-    }
-
-    // Indexer config
-
-    @Override
-    public boolean getIndexerRunOnAppStartup() {
-        return config_.getBoolean(INDEXER_RUN_ON_APP_STARTUP_PROP);
+    public long getApiClientTimeout(
+            final TimeUnit timeUnit) {
+        return config_.getDuration(BITLY_API_CLIENT_TIMEOUT_PROP, timeUnit);
     }
 
     @Override
-    public boolean getIndexerRebuildOnSchedule() {
-        return config_.getBoolean(INDEXER_REBUILD_ON_SCHEDULE_PROP);
-    }
-
-    @Override
-    public String getIndexerRebuildCronExpression() {
-        return config_.getString(INDEXER_REBUILD_CRON_EXPRESSION_PROP);
-    }
-
-    @Override
-    public boolean getIndexerRebuildDeleteIndexFirst() {
-        return config_.getBoolean(INDEXER_REBUILD_DELETE_INDEX_FIRST_PROP);
+    public String getVisibleBaseAppUrl() {
+        if (config_.hasPath(BITLY_VISIBLE_BASE_APP_URL_PROP)) {
+            return config_.getString(BITLY_VISIBLE_BASE_APP_URL_PROP);
+        } else {
+            return onyxConfig_.getViewSafeFullUri();
+        }
     }
 
 }

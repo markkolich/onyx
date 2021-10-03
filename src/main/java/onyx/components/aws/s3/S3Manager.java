@@ -108,13 +108,16 @@ public final class S3Manager implements AssetManager {
         final String contentType = CuracaoConfigLoader.getContentTypeForExtension(extension,
                 DEFAULT_CONTENT_TYPE);
 
+        final Date expiration =
+                new Date(Instant.now().plusSeconds(linkValidityDurationInSeconds).toEpochMilli());
+
         final ResponseHeaderOverrides responseHeaderOverrides = new ResponseHeaderOverrides()
                 .withContentType(contentType)
                 .withContentDisposition(String.format("inline; filename=\"%s\"", name));
 
         final GeneratePresignedUrlRequest presignedUrlRequest =
                 new GeneratePresignedUrlRequest(s3Link.getBucketName(), s3Link.getKey())
-                .withExpiration(new Date(Instant.now().plusSeconds(linkValidityDurationInSeconds).toEpochMilli()))
+                .withExpiration(expiration)
                 .withResponseHeaders(responseHeaderOverrides)
                 .withMethod(httpMethod);
 
@@ -126,6 +129,22 @@ public final class S3Manager implements AssetManager {
         }
 
         return s3_.generatePresignedUrl(presignedUrlRequest);
+    }
+
+    @Override
+    public boolean resourceExists(
+            final Resource resource) {
+        final S3Link s3Link = resource.getS3Link();
+
+        try {
+            s3_.getObjectMetadata(s3Link.getBucketName(), s3Link.getKey());
+            // If we get here, then we know for a fact the object/resource exists in S3
+            // because the fetch of object metadata for a non-existent object will just
+            // throw an exception.
+            return true;
+        } catch (final Exception e) {
+            return false;
+        }
     }
 
     @Override

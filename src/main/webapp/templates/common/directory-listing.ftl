@@ -60,14 +60,14 @@
                       <#if child.getHtmlDescription()?has_content>
                           ${child.getHtmlDescription()?truncate(40, '...')}
                       <#else>
-                          &nbsp;
+                          <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
                       </#if>
                   </td>
                   <td class="align-middle d-none d-lg-table-cell text-nowrap">
                       <#if child.getType() == "FILE">
                           ${child.getHtmlSize()}
                       <#else>
-                          &nbsp;
+                          <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
                       </#if>
                   </td>
 
@@ -88,7 +88,7 @@
                               </#if>
                           </div>
                       <#else>
-                          &nbsp;
+                          <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
                       </#if>
                   </td>
               </tr>

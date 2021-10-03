@@ -56,7 +56,7 @@ public final class ListHomeDirectories {
             final AwsConfig awsConfig) {
         awsConfig_ = checkNotNull(awsConfig, "AWS config cannot be null.");
 
-        parentIndexName_ = awsConfig.getAwsDynamoDbParentIndexName();
+        parentIndexName_ = awsConfig_.getAwsDynamoDbParentIndexName();
     }
 
     public List<Resource> run(

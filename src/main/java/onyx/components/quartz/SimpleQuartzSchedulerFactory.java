@@ -24,12 +24,11 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.search.indexer;
+package onyx.components.quartz;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.CuracaoComponent;
-import onyx.components.search.SearchConfig;
 import org.quartz.Scheduler;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -39,23 +38,24 @@ import java.util.Properties;
 import static org.quartz.impl.StdSchedulerFactory.PROP_THREAD_POOL_PREFIX;
 
 @Component
-public final class SimpleIndexerSchedulerFactory implements IndexerSchedulerFactory, CuracaoComponent {
+public final class SimpleQuartzSchedulerFactory
+        implements QuartzSchedulerFactory, CuracaoComponent {
 
     private static final String PROP_THREAD_POOL_COUNT = PROP_THREAD_POOL_PREFIX + ".threadCount";
     private static final String PROP_THREAD_POOL_USE_DAEMONS = PROP_THREAD_POOL_PREFIX + ".makeThreadsDaemons";
 
-    private final SearchConfig searchConfig_;
+    private final QuartzConfig quartzConfig_;
 
     private final Scheduler quartzScheduler_;
 
     @Injectable
-    public SimpleIndexerSchedulerFactory(
-            final SearchConfig searchConfig) throws Exception {
-        searchConfig_ = searchConfig;
+    public SimpleQuartzSchedulerFactory(
+            final QuartzConfig quartzConfig) throws Exception {
+        quartzConfig_ = quartzConfig;
 
         final Properties p = new Properties();
-        p.put(PROP_THREAD_POOL_COUNT, Integer.toString(searchConfig_.getIndexerThreadPoolSize()));
-        p.put(PROP_THREAD_POOL_USE_DAEMONS, Boolean.toString(searchConfig_.getIndexerUseDaemonThreads()));
+        p.put(PROP_THREAD_POOL_COUNT, Integer.toString(quartzConfig_.getThreadPoolSize()));
+        p.put(PROP_THREAD_POOL_USE_DAEMONS, Boolean.toString(quartzConfig_.getUseDaemonThreads()));
 
         quartzScheduler_ = new StdSchedulerFactory(p).getScheduler();
     }
