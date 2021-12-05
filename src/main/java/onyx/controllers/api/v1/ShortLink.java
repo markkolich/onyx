@@ -34,16 +34,12 @@ import curacao.annotations.parameters.Path;
 import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.shortlink.ShortLinkGenerator;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.response.CreateShortLinkResponse;
 import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
-import onyx.exceptions.api.ApiBadRequestException;
-import onyx.exceptions.api.ApiForbiddenException;
-import onyx.exceptions.api.ApiNotFoundException;
-import onyx.exceptions.api.ApiServiceUnavailableException;
+import onyx.exceptions.api.*;
 
 import java.net.URL;
 
@@ -62,17 +58,16 @@ public final class ShortLink extends AbstractOnyxApiController {
     @Injectable
     public ShortLink(
             final OnyxConfig onyxConfig,
-            final AsynchronousResourcePool asynchronousResourcePool,
             final ResourceManager resourceManager,
             final ShortLinkGenerator shortLinkManager,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(onyxConfig, asynchronousResourcePool);
+        super(onyxConfig);
         resourceManager_ = resourceManager;
         shortLinkManager_ = shortLinkManager;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
-    @RequestMapping(value = "^/api/v1/shortlink/(?<username>[a-zA-Z0-9]*)$",
+    @RequestMapping(value = "^/api/v1/shortlink/(?<username>[a-zA-Z0-9]+)$",
             methods = POST)
     public CreateShortLinkResponse createShortLinkHomeDirectory(
             @Path("username") final String username,
@@ -80,14 +75,16 @@ public final class ShortLink extends AbstractOnyxApiController {
         return createShortLink(username, ResourceManager.ROOT_PATH, session);
     }
 
-    @RequestMapping(value = "^/api/v1/shortlink/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @RequestMapping(value = "^/api/v1/shortlink/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = POST)
     public CreateShortLinkResponse createShortLink(
             @Path("username") final String username,
             @Path("path") final String path,
             final Session session) {
         if (session == null) {
-            throw new ApiForbiddenException("User not authenticated.");
+            throw new ApiUnauthorizedException("User not authenticated.");
+        } else if (!session.getUsername().equals(username)) {
+            throw new ApiForbiddenException("User session does not match request.");
         }
 
         final String normalizedPath = normalizePath(username, path);

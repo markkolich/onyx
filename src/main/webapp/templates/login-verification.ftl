@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>Onyx - Login - Verify your Identity</title>
+    <title>Onyx <#if devMode>(dev) </#if>- Login - Verify your Identity</title>
     <#include "common/css.ftl">
 </head>
 <body>

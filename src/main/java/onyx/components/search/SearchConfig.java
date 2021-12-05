@@ -27,6 +27,7 @@
 package onyx.components.search;
 
 import java.nio.file.Path;
+import java.time.Duration;
 
 public interface SearchConfig {
 
@@ -41,6 +42,8 @@ public interface SearchConfig {
     String INDEXER_REBUILD_ON_SCHEDULE_PROP = "indexer.rebuild-on-schedule";
     String INDEXER_REBUILD_CRON_EXPRESSION_PROP = "indexer.rebuild-cron-expression";
     String INDEXER_REBUILD_DELETE_INDEX_FIRST_PROP = "indexer.rebuild-delete-index-first";
+    String INDEXER_BACKOFF_MAX_RETRIES_PROP = "indexer.backoff-max-retries";
+    String INDEXER_BACKOFF_THROTTLE_DURATION_PROP = "indexer.backoff-throttle-duration";
 
     // Solr config
 
@@ -61,5 +64,9 @@ public interface SearchConfig {
     String getIndexerRebuildCronExpression();
 
     boolean getIndexerRebuildDeleteIndexFirst();
+
+    int getIndexerBackoffMaxRetries();
+
+    Duration getIndexerBackoffThrottleDuration();
 
 }

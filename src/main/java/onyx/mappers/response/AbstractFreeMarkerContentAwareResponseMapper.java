@@ -27,7 +27,7 @@
 package onyx.mappers.response;
 
 import curacao.mappers.response.AbstractControllerReturnTypeMapper;
-import onyx.components.FreeMarkerContentToString;
+import onyx.components.FreeMarkerContentRenderer;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.entities.freemarker.Utf8TextEntity;
 
@@ -39,17 +39,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class AbstractFreeMarkerContentAwareResponseMapper<T>
         extends AbstractControllerReturnTypeMapper<T> {
 
-    protected final FreeMarkerContentToString fmContentToString_;
+    protected final FreeMarkerContentRenderer fmcRenderer_;
 
     public AbstractFreeMarkerContentAwareResponseMapper(
-            @Nonnull final FreeMarkerContentToString fmContentToString) {
-        fmContentToString_ = checkNotNull(fmContentToString, "FreeMarker content to string cannot be null.");
+            @Nonnull final FreeMarkerContentRenderer fmcRenderer) {
+        fmcRenderer_ = checkNotNull(fmcRenderer, "FreeMarker content renderer cannot be null.");
     }
 
     protected final void renderFreeMarkerContent(
             final HttpServletResponse response,
             final FreeMarkerContent content) throws Exception {
-        final String rendered = fmContentToString_.contentToString(content);
+        final String rendered = fmcRenderer_.contentToString(content);
         renderEntity(response, new Utf8TextEntity(content.getEntityType(), content.getStatus(), rendered));
     }
 

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Onyx - Home</title>
+    <title>Onyx <#if devMode>(dev) </#if>- Home</title>
     <#include "common/css.ftl">
 </head>
 

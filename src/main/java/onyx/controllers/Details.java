@@ -28,14 +28,13 @@ package onyx.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.MediaType;
-import curacao.CuracaoConfigLoader;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
+import curacao.util.ContentTypes;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.cache.LocalCacheConfig;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
@@ -47,6 +46,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.util.List;
 
+import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
 
@@ -62,23 +62,22 @@ public final class Details extends AbstractOnyxFreeMarkerController {
     @Injectable
     public Details(
             final OnyxConfig onyxConfig,
-            final AsynchronousResourcePool asynchronousResourcePool,
             final LocalCacheConfig localCacheConfig,
             final ResourceManager resourceManager,
             final CacheManager cacheManager) {
-        super(onyxConfig, asynchronousResourcePool, resourceManager);
+        super(onyxConfig, resourceManager);
         localCacheConfig_ = localCacheConfig;
         cacheManager_ = cacheManager;
     }
 
-    @RequestMapping(value = "^/details/(?<username>[a-zA-Z0-9]*)$")
+    @RequestMapping(value = "^/details/(?<username>[a-zA-Z0-9]+)$")
     public FreeMarkerContent resourceDetailsHomeDirectory(
             @Path("username") final String username,
             final Session session) {
         return resourceDetails(username, ResourceManager.ROOT_PATH, session);
     }
 
-    @RequestMapping(value = "^/details/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
+    @RequestMapping(value = "^/details/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
     public FreeMarkerContent resourceDetails(
             @Path("username") final String username,
             @Path("path") final String path,
@@ -114,7 +113,7 @@ public final class Details extends AbstractOnyxFreeMarkerController {
                 listDirectory(resource, session) : ImmutableList.of();
 
         final String extension = FilenameUtils.getExtension(resource.getName()).toLowerCase();
-        final String contentType = CuracaoConfigLoader.getContentTypeForExtension(extension, DEFAULT_CONTENT_TYPE);
+        final String contentType = ContentTypes.getContentTypeForExtension(extension, DEFAULT_CONTENT_TYPE);
 
         final boolean localCacheEnabled = localCacheConfig_.localCacheEnabled();
         final boolean hasResourceInCache = (localCacheEnabled && userIsOwner)
@@ -128,7 +127,7 @@ public final class Details extends AbstractOnyxFreeMarkerController {
                 .withAttr("children", children)
                 .withAttr("directoryCount", countDirectories(children))
                 .withAttr("fileCount", countFiles(children))
-                .withAttr("totalFileDisplaySize", countTotalFileSizeForDisplay(children))
+                .withAttr("totalFileDisplaySize", humanReadableByteCountBin(resource.getSize()))
                 .withAttr("contentType", contentType)
                 .withAttr("userIsOwner", userIsOwner)
                 .withAttr("hasResourceInCache", hasResourceInCache)

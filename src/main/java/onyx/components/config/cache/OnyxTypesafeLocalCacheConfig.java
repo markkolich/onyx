@@ -61,4 +61,9 @@ public final class OnyxTypesafeLocalCacheConfig implements LocalCacheConfig {
         return config_.getDuration(LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP, timeUnit);
     }
 
+    @Override
+    public int getLocalCacheAsyncThreadPoolSize() {
+        return config_.getInt(LOCAL_CACHE_ASYNC_THREAD_POOL_SIZE_PROP);
+    }
+
 }

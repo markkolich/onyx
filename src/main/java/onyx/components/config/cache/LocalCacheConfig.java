@@ -37,11 +37,15 @@ public interface LocalCacheConfig {
     String LOCAL_CACHE_DIRECTORY_PROP = "directory";
     String LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP = "token-validity-duration";
 
+    String LOCAL_CACHE_ASYNC_THREAD_POOL_SIZE_PROP = "async-thread-pool-size";
+
     boolean localCacheEnabled();
 
     Path getLocalCacheDirectory();
 
     long getLocalCacheTokenValidityDuration(
             final TimeUnit timeUnit);
+
+    int getLocalCacheAsyncThreadPoolSize();
 
 }

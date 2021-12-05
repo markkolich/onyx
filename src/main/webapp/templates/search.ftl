@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Onyx - Search - ${query}</title>
+    <title>Onyx <#if devMode>(dev) </#if>- Search - ${query}</title>
     <#include "common/css.ftl">
 </head>
 
@@ -76,15 +76,11 @@
                                               <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
                                           </#if>
                                       </td>
-                                      <td class="align-middle d-none d-lg-table-cell text-nowrap">
-                                          <#if result.getLeft().getType() == "FILE">
-                                              ${result.getLeft().getHtmlSize()}
-                                          <#else>
-                                              <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
-                                          </#if>
+                                      <td class="align-middle d-none d-lg-table-cell text-nowrap text-gray-500">
+                                          ${result.getLeft().getHtmlSize()}
                                       </td>
 
-                                      <td class="align-middle text-right">
+                                      <td class="align-middle d-none d-lg-table-cell text-right">
                                           <#if result.getLeft().getVisibility() == "PRIVATE">
                                             <span class="badge badge-dark mr-1">private</span>
                                           <#else>

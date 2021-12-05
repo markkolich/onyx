@@ -27,9 +27,10 @@
 package onyx.controllers;
 
 import onyx.AbstractOnyxTest;
-import onyx.components.FreeMarkerContentToString;
+import onyx.components.FreeMarkerContentRenderer;
 import onyx.components.OnyxFreeMarkerConfig;
 import onyx.entities.authentication.Session;
+import onyx.entities.authentication.Session.Type;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -40,12 +41,12 @@ public abstract class AbstractOnyxControllerTest extends AbstractOnyxTest {
 
     protected final OnyxFreeMarkerConfig onyxFreeMarkerConfig_;
 
-    protected final FreeMarkerContentToString fmcToString_;
+    protected final FreeMarkerContentRenderer fmcRenderer_;
 
     public AbstractOnyxControllerTest() throws Exception {
         onyxFreeMarkerConfig_ = new OnyxFreeMarkerConfig(servletContext_);
 
-        fmcToString_ = new FreeMarkerContentToString(onyxConfig_, onyxFreeMarkerConfig_);
+        fmcRenderer_ = new FreeMarkerContentRenderer(onyxConfig_, onyxFreeMarkerConfig_);
     }
 
     protected static Session generateNewSession(
@@ -68,6 +69,7 @@ public abstract class AbstractOnyxControllerTest extends AbstractOnyxTest {
 
         return new Session.Builder()
                 .setId(UUID.randomUUID().toString())
+                .setType(Type.USER)
                 .setUsername(username)
                 .setExpiry(expiry)
                 .setRefreshAfter(refreshAfter)

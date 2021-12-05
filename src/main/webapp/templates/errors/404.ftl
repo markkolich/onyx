@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Onyx - Not Found</title>
+    <title>Onyx <#if devMode>(dev) </#if>- Not Found</title>
     <#include "../common/css.ftl">
 </head>
 

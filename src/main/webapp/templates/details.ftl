@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Onyx - Details - ${resource.getHtmlPath()}</title>
+    <title>Onyx <#if devMode>(dev) </#if>- Details - ${resource.getHtmlPath()}</title>
     <#include "common/css.ftl">
 </head>
 
@@ -83,97 +83,23 @@
 
             <div class="col-xl-4 col-lg-12">
 
-              <div class="card shadow mb-4">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                          <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Owner</div>
-                          <div class="h5 mb-0 font-weight-bold text-gray-800">${resource.getOwner()}</div>
-                        </div>
-                        <div class="col-auto">
-                          <i class="fas fa-user fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-              </div>
+              <#include "details/resource-owner-card.ftl">
 
-              <div class="card shadow mb-4">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                          <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Created At</div>
-                          <div class="h5 mb-0 font-weight-bold text-gray-800">${resource.getCreatedDate()?datetime?string["MMM dd, yyyy, h:mm a"]}</div>
-                        </div>
-                        <div class="col-auto">
-                          <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-              </div>
+              <#include "details/resource-created-at-card.ftl">
 
-              <div class="card shadow mb-4">
-                  <div class="card-body">
-                      <div class="row no-gutters align-items-center">
-                          <div class="col mr-2">
-                              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Type</div>
-                              <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                <#if resource.getType() == "FILE">
-                                  <#if contentType?has_content>${contentType}</#if>
-                                <#else>
-                                  Directory
-                                </#if>
-                              </div>
-                          </div>
-                          <div class="col-auto">
-                              <i class="fas fa-file-code fa-2x text-gray-300"></i>
-                          </div>
-                      </div>
-                  </div>
-              </div>
+              <#include "details/resource-type-card.ftl">
 
               <#if resource.getType() == "FILE">
-                <div class="card shadow mb-4">
-                  <div class="card-body">
-                      <div class="row no-gutters align-items-center">
-                          <div class="col mr-2">
-                              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">File Size</div>
-                              <div class="h5 mb-0 font-weight-bold text-gray-800">${resource.getHtmlSize()}</div>
-                          </div>
-                          <div class="col-auto">
-                              <i class="fas fa-hdd fa-2x text-gray-300"></i>
-                          </div>
-                      </div>
-                  </div>
-                </div>
+                  <#include "details/resource-size-card.ftl">
+              <#elseif userIsOwner>
+                  <#--
+                    Only show the user the total size of the resource and all
+                    of its children if the authenticated user is the owner.
+                  -->
+                  <#include "details/resource-size-card.ftl">
               </#if>
 
-              <div class="card shadow mb-4">
-                  <div class="card-body">
-                      <div class="row no-gutters align-items-center">
-                          <div class="col mr-2">
-                              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Attributes</div>
-                              <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                <#if resource.getVisibility() == "PRIVATE">
-                                  <span class="badge badge-dark mr-1">private</span>
-                                <#else>
-                                  <span class="badge badge-light mr-1">public</span>
-                                </#if>
-
-                                <#if userIsOwner && resource.getFavorite()>
-                                  <span class="badge badge-warning mr-1">favorite</span>
-                                </#if>
-
-                                <#if hasResourceInCache>
-                                  <span class="badge badge-success mr-1">cached</span>
-                                </#if>
-                              </div>
-                          </div>
-                          <div class="col-auto">
-                              <i class="fas fa-tags fa-2x text-gray-300"></i>
-                          </div>
-                      </div>
-                  </div>
-              </div>
+              <#include "details/resource-attributes-card.ftl">
 
             </div> <!-- /.col-xl-4 -->
 

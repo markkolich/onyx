@@ -44,19 +44,20 @@ import java.io.Writer;
 import java.util.Map;
 
 @Component
-public final class FreeMarkerContentToString {
+public final class FreeMarkerContentRenderer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FreeMarkerContentToString.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FreeMarkerContentRenderer.class);
 
     private static final String BUILD_VERSION_ATTR = "buildVersion";
     private static final String CONTEXT_PATH_ATTR = "contextPath";
+    private static final String FULL_URI_ATTR = "fullUri";
     private static final String DEV_MODE_ATTR = "devMode";
 
     private final OnyxConfig onyxConfig_;
     private final OnyxFreeMarkerConfig onyxFreeMarkerConfig_;
 
     @Injectable
-    public FreeMarkerContentToString(
+    public FreeMarkerContentRenderer(
             final OnyxConfig onyxConfig,
             final OnyxFreeMarkerConfig onyxFreeMarkerConfig) throws Exception {
         onyxConfig_ = onyxConfig;
@@ -90,6 +91,7 @@ public final class FreeMarkerContentToString {
 
         // Shared application/service properties
         map.put(CONTEXT_PATH_ATTR, onyxConfig_.getViewSafeContentPath());
+        map.put(FULL_URI_ATTR, onyxConfig_.getViewSafeFullUri());
         map.put(DEV_MODE_ATTR, onyxConfig_.isDevMode());
 
         return map.build();

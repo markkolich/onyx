@@ -34,11 +34,12 @@ import com.amazonaws.services.s3.model.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.MediaType;
-import curacao.CuracaoConfigLoader;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import curacao.util.ContentTypes;
 import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.AssetManager;
+import onyx.components.storage.async.AsyncAssetThreadPool;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -69,12 +70,22 @@ public final class S3Manager implements AssetManager {
 
     private final AmazonS3 s3_;
 
+    private final ExecutorService asyncAssetExecutorService_;
+
     @Injectable
     public S3Manager(
             final AwsConfig awsConfig,
-            final S3Client s3Client) {
+            final S3Client s3Client,
+            final AsyncAssetThreadPool asyncAssetThreadPool) {
         awsConfig_ = awsConfig;
         s3_ = s3Client.getS3Client();
+        asyncAssetExecutorService_ = asyncAssetThreadPool.getExecutorService();
+    }
+
+    @Override
+    public URL getPresignedInfoUrlForResource(
+            final Resource resource) {
+        return getPresignedUrlForResource(resource, HttpMethod.HEAD, null);
     }
 
     @Override
@@ -105,7 +116,7 @@ public final class S3Manager implements AssetManager {
 
         final String name = resource.getName();
         final String extension = FilenameUtils.getExtension(s3Link.getKey()).toLowerCase();
-        final String contentType = CuracaoConfigLoader.getContentTypeForExtension(extension,
+        final String contentType = ContentTypes.getContentTypeForExtension(extension,
                 DEFAULT_CONTENT_TYPE);
 
         final Date expiration =
@@ -132,18 +143,22 @@ public final class S3Manager implements AssetManager {
     }
 
     @Override
-    public boolean resourceExists(
+    public long getResourceObjectSize(
             final Resource resource) {
         final S3Link s3Link = resource.getS3Link();
 
         try {
-            s3_.getObjectMetadata(s3Link.getBucketName(), s3Link.getKey());
-            // If we get here, then we know for a fact the object/resource exists in S3
-            // because the fetch of object metadata for a non-existent object will just
-            // throw an exception.
-            return true;
+            final ObjectMetadata metadata =
+                    s3_.getObjectMetadata(s3Link.getBucketName(), s3Link.getKey());
+            if (metadata == null) {
+                return -1L;
+            }
+
+            return metadata.getContentLength();
         } catch (final Exception e) {
-            return false;
+            LOG.warn("Failed to load resource object size from S3 for key: {}",
+                    s3Link.getKey(), e);
+            return -1L;
         }
     }
 
@@ -179,9 +194,8 @@ public final class S3Manager implements AssetManager {
 
     @Override
     public void deleteResourceAsync(
-            final Resource resource,
-            final ExecutorService executorService) {
-        executorService.submit(() -> deleteResource(resource));
+            final Resource resource) {
+        asyncAssetExecutorService_.submit(() -> deleteResource(resource));
     }
 
 }

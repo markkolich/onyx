@@ -30,6 +30,7 @@ import onyx.entities.storage.aws.dynamodb.Resource;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 public interface SearchManager {
 
@@ -57,14 +58,38 @@ public interface SearchManager {
     void addResourceToIndex(
             final Resource resource);
 
+    default void addResourceToIndexAsync(
+            final Resource resource,
+            final ExecutorService executorService) {
+        executorService.submit(() -> addResourceToIndex(resource));
+    }
+
     void addResourcesToIndex(
             final Collection<Resource> resources);
+
+    default void addResourcesToIndexAsync(
+            final Collection<Resource> resources,
+            final ExecutorService executorService) {
+        executorService.submit(() -> addResourcesToIndex(resources));
+    }
 
     void deleteResourceFromIndex(
             final Resource resource);
 
+    default void deleteResourceFromIndexAsync(
+            final Resource resource,
+            final ExecutorService executorService) {
+        executorService.submit(() -> deleteResourceFromIndex(resource));
+    }
+
     void deleteResourcesFromIndex(
             final Collection<Resource> resources);
+
+    default void deleteResourcesFromIndexAsync(
+            final Collection<Resource> resources,
+            final ExecutorService executorService) {
+        executorService.submit(() -> deleteResourcesFromIndex(resources));
+    }
 
     void deleteIndex();
 

@@ -28,7 +28,6 @@ package onyx.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableSet;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
@@ -42,17 +41,12 @@ import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public final class BrowseTest extends AbstractOnyxControllerTest {
 
-    private final AsynchronousResourcePool asyncResourcePool_;
-
     public BrowseTest() throws Exception {
-        final ExecutorService executorService = Mockito.mock(ExecutorService.class);
-        asyncResourcePool_ = new AsynchronousResourcePool(executorService);
     }
 
     @Test
@@ -75,7 +69,7 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
         Mockito.when(resourceManager.listDirectory(ArgumentMatchers.eq(homeDirectory),
                 visibilityCaptor.capture(), sortCapture.capture())).thenReturn(directoryList);
 
-        final Browse controller = new Browse(onyxConfig_, asyncResourcePool_, resourceManager);
+        final Browse controller = new Browse(onyxConfig_, resourceManager);
 
         final Session session = generateNewSession("foobar");
         final FreeMarkerContent responseEntity = controller.browseUserHomeDirectory(session.getUsername(), session);
@@ -86,7 +80,7 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
         assertEquals(ResourceManager.Extensions.Sort.FAVORITE,
                 sortCapture.getValue());
 
-        final String renderedHtml = fmcToString_.contentToString(responseEntity);
+        final String renderedHtml = fmcRenderer_.contentToString(responseEntity);
         assertTrue(StringUtils.isNotBlank(renderedHtml));
     }
 
@@ -110,7 +104,7 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
         Mockito.when(resourceManager.listDirectory(ArgumentMatchers.eq(homeDirectory),
                 visibilityCaptor.capture(), sortCapture.capture())).thenReturn(directoryList);
 
-        final Browse controller = new Browse(onyxConfig_, asyncResourcePool_, resourceManager);
+        final Browse controller = new Browse(onyxConfig_, resourceManager);
 
         final FreeMarkerContent responseEntity = controller.browseUserHomeDirectory("foobar", null);
         assertNotNull(responseEntity);
@@ -119,7 +113,7 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
                 visibilityCaptor.getValue());
         assertNull(sortCapture.getValue());
 
-        final String renderedHtml = fmcToString_.contentToString(responseEntity);
+        final String renderedHtml = fmcRenderer_.contentToString(responseEntity);
         assertTrue(StringUtils.isNotBlank(renderedHtml));
     }
 
@@ -132,7 +126,7 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
         Mockito.when(resourceManager.getResourceAtPath(ArgumentMatchers.eq("/foobar/secret-stuff")))
                 .thenReturn(privateDirectory);
 
-        final Browse controller = new Browse(onyxConfig_, asyncResourcePool_, resourceManager);
+        final Browse controller = new Browse(onyxConfig_, resourceManager);
 
         final Session session = generateNewSession("baz");
         assertThrows(ResourceForbiddenException.class,

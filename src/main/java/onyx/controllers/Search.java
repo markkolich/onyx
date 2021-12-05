@@ -33,7 +33,6 @@ import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Query;
 import onyx.components.config.OnyxConfig;
 import onyx.components.search.SearchManager;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
@@ -60,10 +59,9 @@ public final class Search extends AbstractOnyxFreeMarkerController {
     @Injectable
     public Search(
             final OnyxConfig onyxConfig,
-            final AsynchronousResourcePool asynchronousResourcePool,
             final ResourceManager resourceManager,
             final SearchManager searchManager) {
-        super(onyxConfig, asynchronousResourcePool, resourceManager);
+        super(onyxConfig, resourceManager);
         searchManager_ = searchManager;
     }
 

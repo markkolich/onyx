@@ -28,7 +28,7 @@ package onyx.mappers.response.exceptions;
 
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
-import onyx.components.FreeMarkerContentToString;
+import onyx.components.FreeMarkerContentRenderer;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.exceptions.resource.ResourceNotFoundException;
 import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
@@ -45,8 +45,8 @@ public final class ResourceNotFoundExceptionResponseMapper
 
     @Injectable
     public ResourceNotFoundExceptionResponseMapper(
-            @Nonnull final FreeMarkerContentToString fmContentToString) {
-        super(fmContentToString);
+            @Nonnull final FreeMarkerContentRenderer fmcRenderer) {
+        super(fmcRenderer);
     }
 
     @Override

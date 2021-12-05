@@ -27,7 +27,6 @@
 package onyx.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
@@ -37,18 +36,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class IndexTest extends AbstractOnyxControllerTest {
 
-    private final AsynchronousResourcePool asyncResourcePool_;
-
     public IndexTest() throws Exception {
-        final ExecutorService executorService = Mockito.mock(ExecutorService.class);
-        asyncResourcePool_ = new AsynchronousResourcePool(executorService);
     }
 
     @Test
@@ -59,13 +53,13 @@ public final class IndexTest extends AbstractOnyxControllerTest {
         final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
         Mockito.when(resourceManager.listHomeDirectories()).thenReturn(homeDirectories);
 
-        final Index controller = new Index(onyxConfig_, asyncResourcePool_, resourceManager);
+        final Index controller = new Index(onyxConfig_, resourceManager);
 
         final Session session = generateNewSession("foobar");
         final FreeMarkerContent responseEntity = controller.index(session);
         assertNotNull(responseEntity);
 
-        final String renderedHtml = fmcToString_.contentToString(responseEntity);
+        final String renderedHtml = fmcRenderer_.contentToString(responseEntity);
         assertTrue(StringUtils.isNotBlank(renderedHtml));
     }
 

@@ -31,7 +31,6 @@ import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
 import onyx.components.config.OnyxConfig;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
@@ -41,6 +40,7 @@ import onyx.exceptions.resource.ResourceNotFoundException;
 
 import java.util.List;
 
+import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
 
@@ -50,19 +50,18 @@ public final class Browse extends AbstractOnyxFreeMarkerController {
     @Injectable
     public Browse(
             final OnyxConfig onyxConfig,
-            final AsynchronousResourcePool asynchronousResourcePool,
             final ResourceManager resourceManager) {
-        super(onyxConfig, asynchronousResourcePool, resourceManager);
+        super(onyxConfig, resourceManager);
     }
 
-    @RequestMapping(value = "^/browse/(?<username>[a-zA-Z0-9]*)$")
+    @RequestMapping(value = "^/browse/(?<username>[a-zA-Z0-9]+)$")
     public FreeMarkerContent browseUserHomeDirectory(
             @Path("username") final String username,
             final Session session) {
         return browseDirectory(username, ResourceManager.ROOT_PATH, session);
     }
 
-    @RequestMapping(value = "^/browse/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
+    @RequestMapping(value = "^/browse/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
     public FreeMarkerContent browseDirectory(
             @Path("username") final String username,
             @Path("path") final String path,
@@ -102,7 +101,7 @@ public final class Browse extends AbstractOnyxFreeMarkerController {
                 .withAttr("children", children)
                 .withAttr("directoryCount", countDirectories(children))
                 .withAttr("fileCount", countFiles(children))
-                .withAttr("totalFileDisplaySize", countTotalFileSizeForDisplay(children))
+                .withAttr("totalFileDisplaySize", humanReadableByteCountBin(resource.getSize()))
                 .withAttr("userIsOwner", userIsOwner)
                 .build();
     }

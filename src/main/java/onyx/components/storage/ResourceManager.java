@@ -32,7 +32,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 public interface ResourceManager {
 
@@ -53,15 +52,20 @@ public interface ResourceManager {
     void createResource(
             final Resource resource);
 
+    void createResourceAsync(
+            final Resource resource);
+
     void updateResource(
+            final Resource resource);
+
+    void updateResourceAsync(
             final Resource resource);
 
     void deleteResource(
             final Resource resource);
 
     void deleteResourceAsync(
-            final Resource resource,
-            final ExecutorService executorService);
+            final Resource resource);
 
     @Nonnull
     List<Resource> listDirectory(
@@ -71,5 +75,13 @@ public interface ResourceManager {
 
     @Nonnull
     List<Resource> listHomeDirectories();
+
+    void addChildSizeToParentPath(
+            final String parentPath,
+            final Resource child);
+
+    void subtractChildSizeFromParentPath(
+            final String parentPath,
+            final Resource child);
 
 }

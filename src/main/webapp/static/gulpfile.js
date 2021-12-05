@@ -5,6 +5,7 @@ const gulp = require('gulp'),
     concat = require('gulp-concat'),
     eslint = require('gulp-eslint'),
     uglify = require('gulp-uglify'),
+    cleanCSS = require('gulp-clean-css'),
     rename = require('gulp-rename'),
     banner = require('gulp-banner'),
     watch = require('gulp-watch'),
@@ -32,6 +33,7 @@ gulp.task('watch-css', ['concat-css']);
 
 gulp.task('minify-css', ['concat-css'], function() {
     return gulp.src('build/app.css')
+        .pipe(cleanCSS())
         .pipe(rename({suffix: '.min'}))
         .pipe(gulp.dest('release'));
 });

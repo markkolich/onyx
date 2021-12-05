@@ -28,7 +28,7 @@ package onyx.mappers.response.freemarker;
 
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
-import onyx.components.FreeMarkerContentToString;
+import onyx.components.FreeMarkerContentRenderer;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.config.OnyxConfig;
@@ -58,12 +58,12 @@ public final class FreeMarkerContentResponseMapper
 
     @Injectable
     public FreeMarkerContentResponseMapper(
-            @Nonnull final FreeMarkerContentToString fmContentToString,
+            @Nonnull final FreeMarkerContentRenderer fmcRenderer,
             @Nonnull final OnyxConfig onyxConfig,
             @Nonnull final UserAuthenticator userAuthenticator,
             @Nonnull final SessionConfig sessionConfig,
             @Nonnull final SessionManager sessionManager) {
-        super(fmContentToString);
+        super(fmcRenderer);
         onyxConfig_ = onyxConfig;
         userAuthenticator_ = userAuthenticator;
         sessionConfig_ = sessionConfig;

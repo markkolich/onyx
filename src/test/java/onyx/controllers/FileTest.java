@@ -28,7 +28,6 @@ package onyx.controllers;
 
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
@@ -41,17 +40,12 @@ import org.mockito.Mockito;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
-import java.util.concurrent.ExecutorService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public final class FileTest extends AbstractOnyxControllerTest {
 
-    private final AsynchronousResourcePool asyncResourcePool_;
-
     public FileTest() throws Exception {
-        final ExecutorService executorService = Mockito.mock(ExecutorService.class);
-        asyncResourcePool_ = new AsynchronousResourcePool(executorService);
     }
 
     @Test
@@ -79,8 +73,8 @@ public final class FileTest extends AbstractOnyxControllerTest {
         final ArgumentCaptor<String> redirectLocation = ArgumentCaptor.forClass(String.class);
         Mockito.doNothing().when(httpServletResponse).sendRedirect(redirectLocation.capture());
 
-        final File controller = new File(onyxConfig_, asyncResourcePool_, resourceManager,
-                localCacheConfig, assetManager, cacheManager);
+        final File controller = new File(onyxConfig_, resourceManager, localCacheConfig,
+                assetManager, cacheManager);
 
         final Session session = generateNewSession("foobar");
         controller.redirectToFileDownload("foobar", "secret-stuff/cool.txt", null,
@@ -113,8 +107,7 @@ public final class FileTest extends AbstractOnyxControllerTest {
 
         Mockito.when(cacheManager.getCachedDownloadUrlForResource(ArgumentMatchers.eq(privateFile)))
                 .thenReturn(null); // File is not in cache
-        Mockito.doNothing().when(cacheManager)
-                .downloadResourceToCacheAsync(privateFileCaptor.capture(), ArgumentMatchers.any());
+        Mockito.doNothing().when(cacheManager).downloadResourceToCacheAsync(privateFileCaptor.capture());
 
         final HttpServletResponse httpServletResponse = Mockito.mock(HttpServletResponse.class);
         final AsyncContext asyncContext = Mockito.mock(AsyncContext.class);
@@ -122,8 +115,8 @@ public final class FileTest extends AbstractOnyxControllerTest {
         final ArgumentCaptor<String> redirectLocation = ArgumentCaptor.forClass(String.class);
         Mockito.doNothing().when(httpServletResponse).sendRedirect(redirectLocation.capture());
 
-        final File controller = new File(onyxConfig_, asyncResourcePool_, resourceManager,
-                localCacheConfig, assetManager, cacheManager);
+        final File controller = new File(onyxConfig_, resourceManager, localCacheConfig,
+                assetManager, cacheManager);
 
         final Session session = generateNewSession("foobar");
         controller.redirectToFileDownload("foobar", "secret-stuff/cool.txt", null,
@@ -159,8 +152,8 @@ public final class FileTest extends AbstractOnyxControllerTest {
         final ArgumentCaptor<String> redirectLocation = ArgumentCaptor.forClass(String.class);
         Mockito.doNothing().when(httpServletResponse).sendRedirect(redirectLocation.capture());
 
-        final File controller = new File(onyxConfig_, asyncResourcePool_, resourceManager,
-                localCacheConfig, assetManager, cacheManager);
+        final File controller = new File(onyxConfig_, resourceManager, localCacheConfig,
+                assetManager, cacheManager);
 
         final Session session = generateNewSession("foobar");
         controller.redirectToFileDownload("foobar", "secret-stuff/cool.txt", true,
@@ -196,8 +189,8 @@ public final class FileTest extends AbstractOnyxControllerTest {
         final ArgumentCaptor<String> redirectLocation = ArgumentCaptor.forClass(String.class);
         Mockito.doNothing().when(httpServletResponse).sendRedirect(redirectLocation.capture());
 
-        final File controller = new File(onyxConfig_, asyncResourcePool_, resourceManager,
-                localCacheConfig, assetManager, cacheManager);
+        final File controller = new File(onyxConfig_, resourceManager, localCacheConfig,
+                assetManager, cacheManager);
 
         final Session session = generateNewSession("foobar");
         controller.redirectToFileDownload("foobar", "secret-stuff/cool.txt", false,
@@ -233,8 +226,8 @@ public final class FileTest extends AbstractOnyxControllerTest {
         final ArgumentCaptor<String> redirectLocation = ArgumentCaptor.forClass(String.class);
         Mockito.doNothing().when(httpServletResponse).sendRedirect(redirectLocation.capture());
 
-        final File controller = new File(onyxConfig_, asyncResourcePool_, resourceManager,
-                localCacheConfig, assetManager, cacheManager);
+        final File controller = new File(onyxConfig_, resourceManager, localCacheConfig,
+                assetManager, cacheManager);
 
         final Session session = generateNewSession("foobar");
         controller.redirectToFileDownload("foobar", "secret-stuff/awesome.txt", null,
@@ -271,8 +264,8 @@ public final class FileTest extends AbstractOnyxControllerTest {
         final ArgumentCaptor<String> redirectLocation = ArgumentCaptor.forClass(String.class);
         Mockito.doNothing().when(httpServletResponse).sendRedirect(redirectLocation.capture());
 
-        final File controller = new File(onyxConfig_, asyncResourcePool_, resourceManager,
-                localCacheConfig, assetManager, cacheManager);
+        final File controller = new File(onyxConfig_, resourceManager, localCacheConfig,
+                assetManager, cacheManager);
 
         final Session session = generateNewSession("foobar");
         controller.redirectToFileDownload("foobar", "secret-stuff/kewl.txt", null,
@@ -280,7 +273,7 @@ public final class FileTest extends AbstractOnyxControllerTest {
 
         // Public files are never downloaded to the local cache.
         Mockito.verify(cacheManager, Mockito.never())
-                .downloadResourceToCacheAsync(ArgumentMatchers.any(), ArgumentMatchers.any());
+                .downloadResourceToCacheAsync(ArgumentMatchers.any());
         assertEquals(redirectUrl.toString(), redirectLocation.getValue());
         Mockito.verify(asyncContext).complete();
     }

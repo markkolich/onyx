@@ -51,6 +51,11 @@ public final class OnyxTypesafeSessionConfig implements SessionConfig {
     }
 
     @Override
+    public ConfigList getApiKeys() {
+        return config_.getList(SESSION_API_KEYS_PROP);
+    }
+
+    @Override
     public String getSessionDomain() {
         return config_.getString(SESSION_DOMAIN_PROP);
     }

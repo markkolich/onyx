@@ -40,6 +40,7 @@ import onyx.components.config.authentication.SessionConfig;
 import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
+import onyx.entities.authentication.Session.Type;
 import onyx.entities.authentication.User;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.OnyxException;
@@ -131,7 +132,7 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
 
     @Nullable
     @Override
-    public Pair<User, Session> getSession(
+    public Pair<User, Session> getSessionForCredentials(
             final String username,
             final String password) {
         // Lookup the password from configuration.
@@ -149,6 +150,15 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
             return null;
         }
 
+        final Session session = getSessionForUsername(Type.USER, username);
+
+        return Pair.of(userFromConfig, session);
+    }
+
+    @Override
+    public Session getSessionForUsername(
+            final Type sessionType,
+            final String username) {
         final long sessionDurationInSeconds =
                 sessionConfig_.getSessionDuration(TimeUnit.SECONDS);
         final Instant sessionExpiry = Instant.now().plusSeconds(sessionDurationInSeconds);
@@ -156,14 +166,13 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
                 sessionConfig_.getRefreshSessionAfter(TimeUnit.SECONDS);
         final Instant refreshAfter = Instant.now().plusSeconds(refreshSessionAfterInSeconds);
 
-        final Session session = new Session.Builder()
+        return new Session.Builder()
                 .setId(UUID.randomUUID().toString())
+                .setType(sessionType)
                 .setUsername(username)
                 .setExpiry(sessionExpiry)
                 .setRefreshAfter(refreshAfter)
                 .build();
-
-        return Pair.of(userFromConfig, session);
     }
 
     @Override

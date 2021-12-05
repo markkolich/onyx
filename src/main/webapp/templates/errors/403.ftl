@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Onyx - Forbidden</title>
+    <title>Onyx <#if devMode>(dev) </#if>- Forbidden</title>
     <#include "../common/css.ftl">
 </head>
 

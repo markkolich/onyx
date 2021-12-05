@@ -34,7 +34,6 @@ import curacao.annotations.parameters.Query;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
@@ -60,18 +59,17 @@ public final class File extends AbstractOnyxFreeMarkerController {
     @Injectable
     public File(
             final OnyxConfig onyxConfig,
-            final AsynchronousResourcePool asynchronousResourcePool,
             final ResourceManager resourceManager,
             final LocalCacheConfig localCacheConfig,
             final AssetManager assetManager,
             final CacheManager cacheManager) {
-        super(onyxConfig, asynchronousResourcePool, resourceManager);
+        super(onyxConfig, resourceManager);
         localCacheConfig_ = localCacheConfig;
         assetManager_ = assetManager;
         cacheManager_ = cacheManager;
     }
 
-    @RequestMapping(value = "^/file/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
+    @RequestMapping(value = "^/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
     public void redirectToFileDownload(
             @Path("username") final String username,
             @Path("path") final String path,
@@ -119,7 +117,7 @@ public final class File extends AbstractOnyxFreeMarkerController {
                     // File was not found in cache; trigger a download of the file to the cache
                     // only if the resource has private visibility.
                     if (Resource.Visibility.PRIVATE.equals(file.getVisibility())) {
-                        cacheManager_.downloadResourceToCacheAsync(file, executorService_);
+                        cacheManager_.downloadResourceToCacheAsync(file);
                     }
 
                     downloadUrl = assetManager_.getPresignedDownloadUrlForResource(file);

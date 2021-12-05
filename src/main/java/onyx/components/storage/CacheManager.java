@@ -32,7 +32,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.concurrent.ExecutorService;
 
 public interface CacheManager {
 
@@ -63,14 +62,12 @@ public interface CacheManager {
             final Resource resource);
 
     void downloadResourceToCacheAsync(
-            final Resource resource,
-            final ExecutorService executorService);
+            final Resource resource);
 
     void deleteResourceFromCache(
             final Resource resource);
 
     void deleteResourceFromCacheAsync(
-            final Resource resource,
-            final ExecutorService executorService);
+            final Resource resource);
 
 }

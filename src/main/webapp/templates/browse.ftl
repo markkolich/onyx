@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Onyx - ${resource.getHtmlPath()}</title>
+    <title>Onyx <#if devMode>(dev) </#if>- ${resource.getHtmlPath()}</title>
     <#include "common/css.ftl">
 </head>
 

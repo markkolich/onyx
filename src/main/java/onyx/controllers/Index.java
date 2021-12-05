@@ -30,7 +30,6 @@ import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import onyx.components.config.OnyxConfig;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
@@ -38,15 +37,17 @@ import onyx.entities.storage.aws.dynamodb.Resource;
 
 import java.util.List;
 
+import static onyx.entities.freemarker.Utf8TextEntity.EntityType.TEXT;
+import static onyx.entities.freemarker.Utf8TextEntity.EntityType.XML;
+
 @Controller
 public final class Index extends AbstractOnyxFreeMarkerController {
 
     @Injectable
     public Index(
             final OnyxConfig onyxConfig,
-            final AsynchronousResourcePool asynchronousResourcePool,
             final ResourceManager resourceManager) {
-        super(onyxConfig, asynchronousResourcePool, resourceManager);
+        super(onyxConfig, resourceManager);
     }
 
     @RequestMapping(value = "^/$")
@@ -56,6 +57,20 @@ public final class Index extends AbstractOnyxFreeMarkerController {
 
         return new FreeMarkerContent.Builder("templates/index.ftl")
                 .withSession(session)
+                .withAttr("children", homeDirectories)
+                .build();
+    }
+
+    @RequestMapping("^/robots\\.txt$")
+    public FreeMarkerContent robots() {
+        return new FreeMarkerContent.Builder("templates/txt/robots.ftl", TEXT).build();
+    }
+
+    @RequestMapping("^/sitemap\\.xml$")
+    public FreeMarkerContent sitemap() {
+        final List<Resource> homeDirectories = resourceManager_.listHomeDirectories();
+
+        return new FreeMarkerContent.Builder("templates/xml/sitemap.ftl", XML)
                 .withAttr("children", homeDirectories)
                 .build();
     }

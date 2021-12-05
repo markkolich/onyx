@@ -31,12 +31,13 @@ import org.apache.commons.lang3.StringUtils;
 
 public interface OnyxConfig {
 
-    String CONTEXT_PATH_PROP = "context-path";
     String BASE_URI_PROP = "base-uri";
-    String FULL_URI_PROP = "full-uri";
+    String CONTEXT_PATH_PROP = "context-path";
     String DEV_MODE_PROP = "dev-mode";
 
     Config getOnyxConfig();
+
+    String getBaseUri();
 
     String getContextPath();
 
@@ -62,9 +63,9 @@ public interface OnyxConfig {
         return getContextPath();
     }
 
-    String getBaseUri();
-
-    String getFullUri();
+    default String getFullUri() {
+        return getBaseUri() + getContextPath();
+    }
 
     /**
      * Returns the "view" safe full URI.

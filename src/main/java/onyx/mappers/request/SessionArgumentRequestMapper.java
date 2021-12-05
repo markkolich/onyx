@@ -26,30 +26,38 @@
 
 package onyx.mappers.request;
 
+import com.google.common.net.HttpHeaders;
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import curacao.context.CuracaoContext;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
 import onyx.components.authentication.SessionManager;
+import onyx.components.authentication.api.ApiKeyAuthenticator;
 import onyx.entities.authentication.Session;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 
+import static onyx.components.authentication.api.ApiKeyAuthenticator.API_KEY_AUTH_HEADER_PREFIX;
 import static onyx.util.CookieBaker.getFirstCookieByName;
 
 @Mapper
 public final class SessionArgumentRequestMapper
         extends AbstractControllerArgumentMapper<Session> {
 
+    private final ApiKeyAuthenticator apiKeySessionManager_;
     private final SessionManager sessionManager_;
 
     @Injectable
     public SessionArgumentRequestMapper(
+            final ApiKeyAuthenticator apiKeySessionManager,
             final SessionManager sessionManager) {
+        apiKeySessionManager_ = apiKeySessionManager;
         sessionManager_ = sessionManager;
     }
 
@@ -57,7 +65,22 @@ public final class SessionArgumentRequestMapper
     public Session resolve(
             @Nullable final Annotation annotation,
             @Nonnull final CuracaoContext context) throws Exception {
-        final Cookie[] cookies = context.getRequest().getCookies();
+        final HttpServletRequest request = context.getRequest();
+
+        // 1. If there's an API key on the request, validate it first.
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        final String apiKey = StringUtils.removeStart(authHeader, API_KEY_AUTH_HEADER_PREFIX);
+        if (StringUtils.isNotBlank(apiKey)) {
+            final Session session = apiKeySessionManager_.getSessionForApiKey(apiKey);
+            if (session != null) {
+                context.setProperty(SessionManager.SESSION_COOKIE_NAME, session);
+                return session;
+            }
+        }
+
+        // 2. If no API key is present, fallback to extracting the user session from a
+        // signed session cookie.
+        final Cookie[] cookies = request.getCookies();
         if (ArrayUtils.isNotEmpty(cookies)) {
             final Cookie sessionCookie = getFirstCookieByName(cookies, SessionManager.SESSION_COOKIE_NAME);
             if (sessionCookie != null) {

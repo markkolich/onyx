@@ -35,6 +35,7 @@ import onyx.components.aws.dynamodb.queries.*;
 import onyx.components.config.aws.AwsConfig;
 import onyx.components.search.SearchManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.async.AsyncResourceThreadPool;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
 import javax.annotation.Nonnull;
@@ -48,26 +49,32 @@ public final class DynamoDbManager implements ResourceManager {
 
     private final AwsConfig awsConfig_;
 
+    private final IDynamoDBMapper dbMapper_;
+
     private final SearchManager searchManager_;
 
-    private final IDynamoDBMapper dbMapper_;
+    private final ExecutorService asyncResourceExecutorService_;
 
     @Injectable
     public DynamoDbManager(
             final AwsConfig awsConfig,
             final DynamoDbMapper dynamoDbMapper,
-            final SearchManager searchManager) {
-        this(awsConfig, dynamoDbMapper.getDbMapper(), searchManager);
+            final SearchManager searchManager,
+            final AsyncResourceThreadPool asyncResourceThreadPool) {
+        this(awsConfig, dynamoDbMapper.getDbMapper(), searchManager,
+                asyncResourceThreadPool.getExecutorService());
     }
 
     @VisibleForTesting
-    DynamoDbManager(
+    public DynamoDbManager(
             final AwsConfig awsConfig,
             final IDynamoDBMapper dbMapper,
-            final SearchManager searchManager) {
+            final SearchManager searchManager,
+            final ExecutorService executorService) {
         awsConfig_ = awsConfig;
         dbMapper_ = dbMapper;
         searchManager_ = searchManager;
+        asyncResourceExecutorService_ = executorService;
     }
 
     @Nullable
@@ -80,26 +87,56 @@ public final class DynamoDbManager implements ResourceManager {
     @Override
     public void createResource(
             final Resource resource) {
-        new CreateResource(resource).run(dbMapper_, searchManager_::addResourceToIndex);
+        new CreateResource(resource).run(dbMapper_, r -> {
+            // Index the addition of the resource asynchronously.
+            searchManager_.addResourceToIndexAsync(r, asyncResourceExecutorService_);
+
+            // Update the parent resource size to account for the addition of the resource.
+            // This is intentionally NOT done asynchronously as we want the parent to update
+            // cleanly before the add operation returns in success.
+            addChildSizeToParentPath(r.getParent(), r);
+        });
+    }
+
+    @Override
+    public void createResourceAsync(
+            final Resource resource) {
+        asyncResourceExecutorService_.submit(() -> createResource(resource));
     }
 
     @Override
     public void updateResource(
             final Resource resource) {
-        new UpdateResource(resource).run(dbMapper_, searchManager_::addResourceToIndex);
+        new UpdateResource(resource).run(dbMapper_, r -> {
+            // Index the update of the resource asynchronously.
+            searchManager_.addResourceToIndexAsync(r, asyncResourceExecutorService_);
+        });
+    }
+
+    @Override
+    public void updateResourceAsync(
+            final Resource resource) {
+        asyncResourceExecutorService_.submit(() -> updateResource(resource));
     }
 
     @Override
     public void deleteResource(
             final Resource resource) {
-        new DeleteResource(awsConfig_, resource).run(dbMapper_, searchManager_::deleteResourceFromIndex);
+        new DeleteResource(awsConfig_, resource).run(dbMapper_, r -> {
+            // Index the deletion of the resource asynchronously.
+            searchManager_.deleteResourceFromIndexAsync(r, asyncResourceExecutorService_);
+
+            // Update the parent resource size to account for the deletion of the resource.
+            // This is intentionally NOT done asynchronously as we want the parent to update
+            // cleanly before the delete operation returns in success.
+            subtractChildSizeFromParentPath(r.getParent(), r);
+        });
     }
 
     @Override
     public void deleteResourceAsync(
-            final Resource resource,
-            final ExecutorService executorService) {
-        executorService.submit(() -> deleteResource(resource));
+            final Resource resource) {
+        asyncResourceExecutorService_.submit(() -> deleteResource(resource));
     }
 
     @Nonnull
@@ -141,6 +178,46 @@ public final class DynamoDbManager implements ResourceManager {
     @Override
     public List<Resource> listHomeDirectories() {
         return new ListHomeDirectories(awsConfig_).run(dbMapper_);
+    }
+
+    @Override
+    public void addChildSizeToParentPath(
+            final String parentPath,
+            final Resource child) {
+        if (ResourceManager.ROOT_PATH.equals(parentPath)) {
+            // Intentionally never update the root "/" resource.
+            return;
+        } else if (child.getSize() <= 0L) {
+            // Nothing to update if the child is empty.
+            return;
+        }
+
+        final Resource parent = getResourceAtPath(parentPath);
+        if (parent != null) {
+            final long newParentSize = parent.getSize() + child.getSize();
+            parent.setSize(newParentSize);
+            updateResource(parent);
+        }
+    }
+
+    @Override
+    public void subtractChildSizeFromParentPath(
+            final String parentPath,
+            final Resource child) {
+        if (ResourceManager.ROOT_PATH.equals(parentPath)) {
+            // Intentionally never update the root "/" resource.
+            return;
+        } else if (child.getSize() <= 0L) {
+            // Nothing to update if the child is empty.
+            return;
+        }
+
+        final Resource parent = getResourceAtPath(parentPath);
+        if (parent != null) {
+            final long newParentSize = parent.getSize() - child.getSize();
+            parent.setSize(Math.max(0L, newParentSize));
+            updateResource(parent);
+        }
     }
 
 }

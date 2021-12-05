@@ -43,7 +43,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.componentFromContext;
+import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.getComponentFromContext;
 
 public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
 
@@ -64,7 +64,7 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
 
         // If the local cache is not enabled, immediately bail.
         final LocalCacheConfig localCacheConfig =
-                componentFromContext(context, LocalCacheConfig.class);
+                getComponentFromContext(context, LocalCacheConfig.class);
         checkNotNull(localCacheConfig, "Local cache config cannot be null; context not initialized?");
         final boolean localCacheEnabled = localCacheConfig.localCacheEnabled();
         if (!localCacheEnabled) {
@@ -81,7 +81,7 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
 
         // Validate the signed cache token.
         final CachedResourceSigner cachedResourceSigner =
-                componentFromContext(context, CachedResourceSigner.class);
+                getComponentFromContext(context, CachedResourceSigner.class);
         checkNotNull(cachedResourceSigner, "Cached resource signer cannot be null; context not initialized?");
         final String token = tokens.iterator().next();
         final CachedResourceToken cachedResourceToken =
@@ -92,7 +92,7 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
         }
 
         // Locate the cached asset/file for the resource token.
-        final CacheManager cacheManager = componentFromContext(context, CacheManager.class);
+        final CacheManager cacheManager = getComponentFromContext(context, CacheManager.class);
         checkNotNull(cacheManager, "Cache manager cannot be null; context not initialized?");
         final boolean hasResourceInCache = cacheManager.hasResourceInCache(cachedResourceToken.getPath());
         if (!hasResourceInCache) {

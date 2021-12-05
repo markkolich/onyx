@@ -32,9 +32,11 @@ import onyx.entities.storage.aws.dynamodb.Resource;
 import javax.annotation.Nullable;
 import java.net.URL;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 public interface AssetManager {
+
+    URL getPresignedInfoUrlForResource(
+            final Resource resource);
 
     URL getPresignedDownloadUrlForResource(
             final Resource resource);
@@ -47,14 +49,13 @@ public interface AssetManager {
             final HttpMethod method,
             @Nullable final Map<String, String> requestParameters);
 
-    boolean resourceExists(
+    long getResourceObjectSize(
             final Resource resource);
 
     void deleteResource(
             final Resource resource);
 
     void deleteResourceAsync(
-            final Resource resource,
-            final ExecutorService executorService);
+            final Resource resource);
 
 }

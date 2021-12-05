@@ -37,8 +37,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @JsonDeserialize(builder = Session.Builder.class)
 public interface Session {
 
+    enum Type {
+        USER, API
+    }
+
     @JsonProperty("id")
     String getId();
+
+    @JsonProperty("type")
+    Type getType();
 
     @JsonProperty("username")
     String getUsername();
@@ -53,6 +60,7 @@ public interface Session {
     default Builder toBuilder() {
         return new Builder()
                 .setId(getId())
+                .setType(getType())
                 .setUsername(getUsername())
                 .setExpiry(getExpiry())
                 .setRefreshAfter(getRefreshAfter());
@@ -61,6 +69,8 @@ public interface Session {
     final class Builder {
 
         private String id_;
+        private Type type_;
+
         private String username_;
 
         private Instant expiry_;
@@ -70,6 +80,13 @@ public interface Session {
         public Builder setId(
                 final String id) {
             id_ = id;
+            return this;
+        }
+
+        @JsonProperty("type")
+        public Builder setType(
+                final Type type) {
+            type_ = type;
             return this;
         }
 
@@ -96,6 +113,7 @@ public interface Session {
 
         public Session build() {
             checkNotNull(id_, "Session ID cannot be null.");
+            checkNotNull(type_, "Session type cannot be null.");
             checkNotNull(username_, "Session username cannot be null.");
             checkNotNull(expiry_, "Session expiry cannot be null.");
             checkNotNull(refreshAfter_, "Session refresh after cannot be null.");
@@ -104,6 +122,11 @@ public interface Session {
                 @Override
                 public String getId() {
                     return id_;
+                }
+
+                @Override
+                public Type getType() {
+                    return type_;
                 }
 
                 @Override

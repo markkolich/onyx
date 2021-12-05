@@ -33,6 +33,7 @@ import onyx.components.config.OnyxConfig;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 
 @Component
 public final class OnyxSearchConfig implements SearchConfig {
@@ -87,6 +88,16 @@ public final class OnyxSearchConfig implements SearchConfig {
     @Override
     public boolean getIndexerRebuildDeleteIndexFirst() {
         return config_.getBoolean(INDEXER_REBUILD_DELETE_INDEX_FIRST_PROP);
+    }
+
+    @Override
+    public int getIndexerBackoffMaxRetries() {
+        return config_.getInt(INDEXER_BACKOFF_MAX_RETRIES_PROP);
+    }
+
+    @Override
+    public Duration getIndexerBackoffThrottleDuration() {
+        return config_.getDuration(INDEXER_BACKOFF_THROTTLE_DURATION_PROP);
     }
 
 }

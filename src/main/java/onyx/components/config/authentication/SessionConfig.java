@@ -35,6 +35,7 @@ public interface SessionConfig {
     String SESSION_CONFIG_PATH = "session";
 
     String SESSION_USERS_PROP = "users";
+    String SESSION_API_KEYS_PROP = "api-keys";
     String SESSION_DOMAIN_PROP = "domain";
     String SESSION_DURATION_PROP = "duration";
     String SESSION_HTTPS_PROP = "https";
@@ -43,6 +44,8 @@ public interface SessionConfig {
     String SESSION_REFRESH_AFTER_PROP = "refresh-after";
 
     ConfigList getUsers();
+
+    ConfigList getApiKeys();
 
     String getSessionDomain();
 

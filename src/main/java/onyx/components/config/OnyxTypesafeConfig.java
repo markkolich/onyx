@@ -63,11 +63,6 @@ public final class OnyxTypesafeConfig implements OnyxConfig {
     }
 
     @Override
-    public String getFullUri() {
-        return config_.getString(FULL_URI_PROP);
-    }
-
-    @Override
     public boolean isDevMode() {
         return config_.getBoolean(DEV_MODE_PROP);
     }

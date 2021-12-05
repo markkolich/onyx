@@ -32,25 +32,18 @@ import onyx.components.authentication.twofactor.TwoFactorAuthCodeManager;
 import onyx.components.authentication.twofactor.TwoFactorAuthTokenManager;
 import onyx.components.config.authentication.SessionConfig;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.freemarker.FreeMarkerContent;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.concurrent.ExecutorService;
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class SessionTest extends AbstractOnyxControllerTest {
 
-    private final AsynchronousResourcePool asyncResourcePool_;
-
     public SessionTest() throws Exception {
-        final ExecutorService executorService = Mockito.mock(ExecutorService.class);
-        asyncResourcePool_ = new AsynchronousResourcePool(executorService);
     }
 
     @Test
@@ -63,14 +56,14 @@ public final class SessionTest extends AbstractOnyxControllerTest {
         final TwoFactorAuthTokenManager twoFactorAuthTokenManager = Mockito.mock(TwoFactorAuthTokenManager.class);
         final TwoFactorAuthCodeManager twoFactorAuthCodeManager = Mockito.mock(TwoFactorAuthCodeManager.class);
 
-        final Session controller = new Session(onyxConfig_, asyncResourcePool_, resourceManager,
-                sessionConfig, sessionManager, userAuthenticator, twoFactorAuthConfig,
+        final Session controller = new Session(onyxConfig_, resourceManager, sessionConfig,
+                sessionManager, userAuthenticator, twoFactorAuthConfig,
                 twoFactorAuthTokenManager, twoFactorAuthCodeManager);
 
         final FreeMarkerContent responseEntity = controller.login();
         assertNotNull(responseEntity);
 
-        final String renderedHtml = fmcToString_.contentToString(responseEntity);
+        final String renderedHtml = fmcRenderer_.contentToString(responseEntity);
         assertTrue(StringUtils.isNotBlank(renderedHtml));
     }
 

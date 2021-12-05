@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Onyx - Bad Gateway</title>
+    <title>Onyx <#if devMode>(dev) </#if>- Bad Gateway</title>
     <#include "../common/css.ftl">
 </head>
 

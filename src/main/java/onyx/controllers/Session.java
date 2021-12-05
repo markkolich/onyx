@@ -39,7 +39,6 @@ import onyx.components.authentication.twofactor.TwoFactorAuthTokenManager;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.authentication.SessionConfig;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.User;
 import onyx.entities.authentication.twofactor.TrustedDeviceToken;
@@ -85,7 +84,6 @@ public final class Session extends AbstractOnyxFreeMarkerController {
     @Injectable
     public Session(
             final OnyxConfig onyxConfig,
-            final AsynchronousResourcePool asynchronousResourcePool,
             final ResourceManager resourceManager,
             final SessionConfig sessionConfig,
             final SessionManager sessionManager,
@@ -93,7 +91,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
             final TwoFactorAuthConfig twoFactorAuthConfig,
             final TwoFactorAuthTokenManager twoFactorAuthTokenManager,
             final TwoFactorAuthCodeManager twoFactorAuthCodeManager) {
-        super(onyxConfig, asynchronousResourcePool, resourceManager);
+        super(onyxConfig, resourceManager);
         sessionConfig_ = sessionConfig;
         sessionManager_ = sessionManager;
         userAuthenticator_ = userAuthenticator;
@@ -120,7 +118,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
         }
 
         final Pair<User, onyx.entities.authentication.Session> sessionPair =
-                userAuthenticator_.getSession(username, password);
+                userAuthenticator_.getSessionForCredentials(username, password);
         if (sessionPair == null) {
             return login();
         }

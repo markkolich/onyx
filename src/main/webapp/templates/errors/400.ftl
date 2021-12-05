@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Onyx - Bad Request</title>
+    <title>Onyx <#if devMode>(dev) </#if>- Bad Request</title>
     <#include "../common/css.ftl">
 </head>
 

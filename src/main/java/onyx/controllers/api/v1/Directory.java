@@ -39,19 +39,16 @@ import onyx.components.aws.dynamodb.DynamoDbMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.AssetManager;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.request.CreateDirectoryRequest;
 import onyx.entities.api.request.UpdateDirectoryRequest;
 import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
-import onyx.exceptions.api.ApiBadRequestException;
-import onyx.exceptions.api.ApiConflictException;
-import onyx.exceptions.api.ApiForbiddenException;
-import onyx.exceptions.api.ApiNotFoundException;
+import onyx.exceptions.api.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.time.Instant;
@@ -74,19 +71,18 @@ public final class Directory extends AbstractOnyxApiController {
     @Injectable
     public Directory(
             final OnyxConfig onyxConfig,
-            final AsynchronousResourcePool asynchronousResourcePool,
             final AwsConfig awsConfig,
             final AssetManager assetManager,
             final ResourceManager resourceManager,
             final DynamoDbMapper dynamoDbMapper) {
-        super(onyxConfig, asynchronousResourcePool);
+        super(onyxConfig);
         awsConfig_ = awsConfig;
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
         dbMapper_ = dynamoDbMapper.getDbMapper();
     }
 
-    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = POST)
     public CuracaoEntity createDirectory(
             @Path("username") final String username,
@@ -95,7 +91,9 @@ public final class Directory extends AbstractOnyxApiController {
             @RequestBody final CreateDirectoryRequest request,
             final Session session) {
         if (session == null) {
-            throw new ApiForbiddenException("User not authenticated.");
+            throw new ApiUnauthorizedException("User not authenticated.");
+        } else if (!session.getUsername().equals(username)) {
+            throw new ApiForbiddenException("User session does not match request.");
         }
 
         final String normalizedPath = normalizePath(username, path);
@@ -154,7 +152,7 @@ public final class Directory extends AbstractOnyxApiController {
         final Resource newDirectory = new Resource.Builder()
                 .setPath(normalizedPath)
                 .setParent(parent.getPath())
-                .setDescription(request.getDescription())
+                .setDescription(StringUtils.trimToEmpty(request.getDescription()))
                 .setType(Resource.Type.DIRECTORY)
                 .setVisibility(request.getVisibility())
                 .setOwner(session.getUsername())
@@ -169,7 +167,7 @@ public final class Directory extends AbstractOnyxApiController {
         return created();
     }
 
-    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]*)$",
+    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)$",
             methods = PUT)
     public CuracaoEntity updateHomeDirectory(
             @Path("username") final String username,
@@ -178,7 +176,7 @@ public final class Directory extends AbstractOnyxApiController {
         return updateDirectory(username, ResourceManager.ROOT_PATH, request, session);
     }
 
-    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = PUT)
     public CuracaoEntity updateDirectory(
             @Path("username") final String username,
@@ -186,7 +184,9 @@ public final class Directory extends AbstractOnyxApiController {
             @RequestBody final UpdateDirectoryRequest request,
             final Session session) {
         if (session == null) {
-            throw new ApiForbiddenException("User not authenticated.");
+            throw new ApiUnauthorizedException("User not authenticated.");
+        } else if (!session.getUsername().equals(username)) {
+            throw new ApiForbiddenException("User session does not match request.");
         }
 
         final String normalizedPath = normalizePath(username, path);
@@ -204,7 +204,7 @@ public final class Directory extends AbstractOnyxApiController {
 
         final String description = request.getDescription();
         if (description != null) {
-            directory.setDescription(description);
+            directory.setDescription(StringUtils.trimToEmpty(description));
         }
 
         final Resource.Visibility visibility = request.getVisibility();
@@ -222,14 +222,16 @@ public final class Directory extends AbstractOnyxApiController {
         return noContent();
     }
 
-    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = DELETE)
     public CuracaoEntity deleteDirectory(
             @Path("username") final String username,
             @Path("path") final String path,
             final Session session) {
         if (session == null) {
-            throw new ApiForbiddenException("User not authenticated.");
+            throw new ApiUnauthorizedException("User not authenticated.");
+        } else if (!session.getUsername().equals(username)) {
+            throw new ApiForbiddenException("User session does not match request.");
         }
 
         final String normalizedPath = normalizePath(username, path);
@@ -256,7 +258,7 @@ public final class Directory extends AbstractOnyxApiController {
         resourceManager_.deleteResource(directory);
 
         // Recursively delete all assets under the directory, asynchronously.
-        assetManager_.deleteResourceAsync(directory, executorService_);
+        assetManager_.deleteResourceAsync(directory);
 
         return noContent();
     }

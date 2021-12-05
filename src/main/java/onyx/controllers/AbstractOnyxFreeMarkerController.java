@@ -28,11 +28,9 @@ package onyx.controllers;
 
 import com.google.common.collect.ImmutableSet;
 import onyx.components.config.OnyxConfig;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
-import onyx.util.FileUtils;
 import org.apache.commons.collections4.CollectionUtils;
 
 import javax.annotation.Nullable;
@@ -46,9 +44,8 @@ public abstract class AbstractOnyxFreeMarkerController extends AbstractOnyxContr
 
     protected AbstractOnyxFreeMarkerController(
             final OnyxConfig onyxConfig,
-            final AsynchronousResourcePool asynchronousResourcePool,
             final ResourceManager resourceManager) {
-        super(onyxConfig, asynchronousResourcePool);
+        super(onyxConfig);
         resourceManager_ = resourceManager;
     }
 
@@ -93,24 +90,6 @@ public abstract class AbstractOnyxFreeMarkerController extends AbstractOnyxContr
         return resources.stream()
                 .filter(c -> Resource.Type.FILE.equals(c.getType()))
                 .count();
-    }
-
-    protected long countTotalFileSize(
-            final List<Resource> resources) {
-        if (CollectionUtils.isEmpty(resources)) {
-            return 0L;
-        }
-
-        return resources.stream()
-                .filter(c -> Resource.Type.FILE.equals(c.getType()))
-                .map(Resource::getSize)
-                .mapToLong(Long::longValue)
-                .sum();
-    }
-
-    protected String countTotalFileSizeForDisplay(
-            final List<Resource> resources) {
-        return FileUtils.humanReadableByteCountBin(countTotalFileSize(resources));
     }
 
     protected boolean userIsOwner(

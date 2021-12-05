@@ -4,7 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
 
-    <description>The default Onyx PMD check ruleset.</description>
+    <description>The default Havalo PMD check ruleset.</description>
 
     <rule ref="category/java/bestpractices.xml/CheckResultSet" />
     <rule ref="category/java/bestpractices.xml/UnusedFormalParameter" />
@@ -41,11 +41,12 @@
     <rule ref="category/java/codestyle.xml/CommentDefaultAccessModifier" />
     <rule ref="category/java/codestyle.xml/UnnecessaryModifier" />
     <rule ref="category/java/codestyle.xml/UnnecessaryReturn" />
+    <rule ref="category/java/codestyle.xml/UnnecessarySemicolon" />
+    <rule ref="category/java/codestyle.xml/EmptyControlStatement" />
     <rule ref="category/java/codestyle.xml/UselessQualifiedThis" />
     <rule ref="category/java/codestyle.xml/ClassNamingConventions">
         <properties>
             <property name="abstractClassPattern" value="^Abstract[a-zA-Z0-9]*" />
-            <!--property name="interfacePattern" value="^I([A-Z][a-zA-Z0-9]*)" /-->
             <property name="utilityClassPattern" value="[A-Z][a-zA-Z0-9]*" />
         </properties>
     </rule>
@@ -84,15 +85,6 @@
             <property name="allowCommentedBlocks" value="true" />
         </properties>
     </rule>
-    <rule ref="category/java/errorprone.xml/EmptyFinallyBlock" />
-    <rule ref="category/java/errorprone.xml/EmptyIfStmt" />
-    <rule ref="category/java/errorprone.xml/EmptyInitializer" />
-    <rule ref="category/java/errorprone.xml/EmptyStatementBlock" />
-    <rule ref="category/java/errorprone.xml/EmptyStatementNotInLoop" />
-    <rule ref="category/java/errorprone.xml/EmptySwitchStatements" />
-    <rule ref="category/java/errorprone.xml/EmptySynchronizedBlock" />
-    <rule ref="category/java/errorprone.xml/EmptyTryBlock" />
-    <rule ref="category/java/errorprone.xml/EmptyWhileStmt" />
     <rule ref="category/java/errorprone.xml/JumbledIncrementer" />
     <rule ref="category/java/errorprone.xml/MisplacedNullCheck" />
     <rule ref="category/java/errorprone.xml/OverrideBothEqualsAndHashcode" />

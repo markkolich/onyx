@@ -35,9 +35,13 @@ import javax.annotation.Nullable;
 public interface UserAuthenticator {
 
     @Nullable
-    Pair<User, Session> getSession(
+    Pair<User, Session> getSessionForCredentials(
             final String username,
             final String password);
+
+    Session getSessionForUsername(
+            final Session.Type sessionType,
+            final String username);
 
     Session refreshSession(
             final Session session);

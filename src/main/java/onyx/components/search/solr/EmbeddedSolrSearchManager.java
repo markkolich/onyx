@@ -254,15 +254,12 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
         // Descriptions are optional.
         final String description =
                 StringUtils.defaultIfBlank((String) document.get(INDEX_FIELD_DESCRIPTION), "");
-        // Only files have a size.
-        final long size =
-                Resource.Type.FILE.equals(type) ? (long) document.get(INDEX_FIELD_SIZE) : 0L;
 
         return new Resource.Builder()
                 .setPath((String) document.get(INDEX_FIELD_PATH))
                 .setParent((String) document.get(INDEX_FIELD_PARENT))
                 .setDescription(description)
-                .setSize(size)
+                .setSize((Long) document.get(INDEX_FIELD_SIZE))
                 .setType(type)
                 .setVisibility(visibility)
                 .setOwner((String) document.get(INDEX_FIELD_OWNER))

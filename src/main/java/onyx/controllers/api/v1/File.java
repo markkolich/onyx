@@ -29,6 +29,7 @@ package onyx.controllers.api.v1;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.amazonaws.services.s3.model.Region;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.HttpHeaders;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
@@ -42,7 +43,6 @@ import onyx.components.config.OnyxConfig;
 import onyx.components.config.aws.AwsConfig;
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
 import onyx.controllers.api.AbstractOnyxApiController;
@@ -51,14 +51,13 @@ import onyx.entities.api.request.UploadFileRequest;
 import onyx.entities.api.response.UploadFileResponse;
 import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
-import onyx.exceptions.api.ApiBadRequestException;
-import onyx.exceptions.api.ApiConflictException;
-import onyx.exceptions.api.ApiForbiddenException;
-import onyx.exceptions.api.ApiNotFoundException;
+import onyx.exceptions.api.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 
+import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
 import java.time.Instant;
 import java.util.List;
@@ -84,7 +83,6 @@ public final class File extends AbstractOnyxApiController {
     @Injectable
     public File(
             final OnyxConfig onyxConfig,
-            final AsynchronousResourcePool asynchronousResourcePool,
             final AwsConfig awsConfig,
             final LocalCacheConfig localCacheConfig,
             final AssetManager assetManager,
@@ -92,7 +90,7 @@ public final class File extends AbstractOnyxApiController {
             final CacheManager cacheManager,
             final DynamoDbMapper dynamoDbMapper,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(onyxConfig, asynchronousResourcePool);
+        super(onyxConfig);
         awsConfig_ = awsConfig;
         localCacheConfig_ = localCacheConfig;
         assetManager_ = assetManager;
@@ -102,16 +100,19 @@ public final class File extends AbstractOnyxApiController {
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
-    @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = POST)
     public UploadFileResponse uploadFile(
             @Path("username") final String username,
             @Path("path") final String path,
             @Query("recursive") final Boolean recursive,
             @RequestBody final UploadFileRequest request,
+            final HttpServletResponse response,
             final Session session) {
         if (session == null) {
-            throw new ApiForbiddenException("User not authenticated.");
+            throw new ApiUnauthorizedException("User not authenticated.");
+        } else if (!session.getUsername().equals(username)) {
+            throw new ApiForbiddenException("User session does not match request.");
         }
 
         final String normalizedPath = normalizePath(username, path);
@@ -184,13 +185,20 @@ public final class File extends AbstractOnyxApiController {
         resourceManager_.createResource(newFile);
 
         final URL presignedUploadUrl = assetManager_.getPresignedUploadUrlForResource(newFile);
+        final String presignedUploadUrlString = presignedUploadUrl.toString();
+
+        // The Location response header only provides a meaning when served with a
+        // 3xx (redirection) or 201 (created) status response. In our case, the Location
+        // header represents the location of the newly created resource - the presigned
+        // URL of the asset as it exists on S3.
+        response.addHeader(HttpHeaders.LOCATION, presignedUploadUrlString);
 
         return new UploadFileResponse.Builder(objectMapper_)
-                .setPresignedUploadUrl(presignedUploadUrl.toString())
+                .setPresignedUploadUrl(presignedUploadUrlString)
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = PUT)
     public CuracaoEntity updateFile(
             @Path("username") final String username,
@@ -198,7 +206,9 @@ public final class File extends AbstractOnyxApiController {
             @RequestBody final UpdateFileRequest request,
             final Session session) {
         if (session == null) {
-            throw new ApiForbiddenException("User not authenticated.");
+            throw new ApiUnauthorizedException("User not authenticated.");
+        } else if (!session.getUsername().equals(username)) {
+            throw new ApiForbiddenException("User session does not match request.");
         }
 
         final String normalizedPath = normalizePath(username, path);
@@ -216,7 +226,7 @@ public final class File extends AbstractOnyxApiController {
 
         final String description = request.getDescription();
         if (description != null) {
-            file.setDescription(description);
+            file.setDescription(StringUtils.trimToEmpty(description));
         }
 
         final Resource.Visibility visibility = request.getVisibility();
@@ -233,10 +243,10 @@ public final class File extends AbstractOnyxApiController {
             if (localCacheEnabled && Resource.Visibility.PRIVATE.equals(file.getVisibility())) {
                 if (BooleanUtils.isTrue(favorite)) {
                     // When a file is favorited, trigger a download of the resource to the cache.
-                    cacheManager_.downloadResourceToCacheAsync(file, executorService_);
+                    cacheManager_.downloadResourceToCacheAsync(file);
                 } else {
                     // When a file is un-favorited, deleted it from the cache.
-                    cacheManager_.deleteResourceFromCacheAsync(file, executorService_);
+                    cacheManager_.deleteResourceFromCacheAsync(file);
                 }
             }
         }
@@ -246,14 +256,16 @@ public final class File extends AbstractOnyxApiController {
         return noContent();
     }
 
-    @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]*)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = DELETE)
     public CuracaoEntity deleteFile(
             @Path("username") final String username,
             @Path("path") final String path,
             final Session session) {
         if (session == null) {
-            throw new ApiForbiddenException("User not authenticated.");
+            throw new ApiUnauthorizedException("User not authenticated.");
+        } else if (!session.getUsername().equals(username)) {
+            throw new ApiForbiddenException("User session does not match request.");
         }
 
         final String normalizedPath = normalizePath(username, path);
@@ -280,12 +292,12 @@ public final class File extends AbstractOnyxApiController {
         resourceManager_.deleteResource(file);
 
         // Delete the asset asynchronously.
-        assetManager_.deleteResourceAsync(file, executorService_);
+        assetManager_.deleteResourceAsync(file);
 
         // Delete the asset from the cache asynchronously too.
         final boolean localCacheEnabled = localCacheConfig_.localCacheEnabled();
         if (localCacheEnabled) {
-            cacheManager_.deleteResourceFromCacheAsync(file, executorService_);
+            cacheManager_.deleteResourceFromCacheAsync(file);
         }
 
         return noContent();

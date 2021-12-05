@@ -33,6 +33,7 @@ import onyx.components.config.OnyxConfig;
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
+import onyx.components.storage.async.AsyncCacheThreadPool;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.entities.storage.cache.CachedResourceToken;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -66,16 +67,20 @@ public final class LocalCacheManager implements CacheManager {
 
     private final CachedResourceSigner cachedResourceSigner_;
 
+    private final ExecutorService asyncCacheExecutorService_;
+
     @Injectable
     public LocalCacheManager(
             final OnyxConfig onyxConfig,
             final LocalCacheConfig localCacheConfig,
             final AssetManager assetManager,
-            final CachedResourceSigner cachedResourceSigner) throws Exception {
+            final CachedResourceSigner cachedResourceSigner,
+            final AsyncCacheThreadPool asyncCacheThreadPool) throws Exception {
         onyxConfig_ = onyxConfig;
         localCacheConfig_ = localCacheConfig;
         assetManager_ = assetManager;
         cachedResourceSigner_ = cachedResourceSigner;
+        asyncCacheExecutorService_ = asyncCacheThreadPool.getExecutorService();
 
         // Create the local cache directory if it does not exist.
         final Path localCacheDir = localCacheConfig_.getLocalCacheDirectory();
@@ -190,12 +195,10 @@ public final class LocalCacheManager implements CacheManager {
 
     @Override
     public void downloadResourceToCacheAsync(
-            final Resource resource,
-            final ExecutorService executorService) {
+            final Resource resource) {
         checkNotNull(resource, "Resource cannot be null.");
-        checkNotNull(executorService, "Executor service cannot be null.");
 
-        executorService.submit(() -> downloadResourceToCache(resource));
+        asyncCacheExecutorService_.submit(() -> downloadResourceToCache(resource));
     }
 
     @Override
@@ -220,12 +223,10 @@ public final class LocalCacheManager implements CacheManager {
 
     @Override
     public void deleteResourceFromCacheAsync(
-            final Resource resource,
-            final ExecutorService executorService) {
+            final Resource resource) {
         checkNotNull(resource, "Resource cannot be null.");
-        checkNotNull(executorService, "Executor service cannot be null.");
 
-        executorService.submit(() -> deleteResourceFromCache(resource));
+        asyncCacheExecutorService_.submit(() -> deleteResourceFromCache(resource));
     }
 
     /**

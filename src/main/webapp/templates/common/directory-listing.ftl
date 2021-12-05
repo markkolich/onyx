@@ -19,7 +19,14 @@
                               <#if (fileCount > 0)>,&nbsp;</#if>
                           </#if>
                           <#if (fileCount > 0)>
-                              ${fileCount} file<#if (fileCount > 1)>s</#if> (${totalFileDisplaySize})
+                              ${fileCount} file<#if (fileCount > 1)>s</#if>
+                          </#if>
+                          <#--
+                            Only show the user the total size of the resource and all
+                            of its children if the authenticated user is the owner.
+                          -->
+                          <#if userIsOwner>
+                              &nbsp;(${totalFileDisplaySize})
                           </#if>
                       </p>
                   </#if>
@@ -63,11 +70,19 @@
                           <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
                       </#if>
                   </td>
-                  <td class="align-middle d-none d-lg-table-cell text-nowrap">
+                  <td class="align-middle d-none d-lg-table-cell text-nowrap text-gray-500">
                       <#if child.getType() == "FILE">
                           ${child.getHtmlSize()}
                       <#else>
-                          <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
+                          <#--
+                            Only show the user the total size of the directory and all
+                            of its children if the authenticated user is the owner.
+                          -->
+                          <#if userIsOwner>
+                              ${child.getHtmlSize()}
+                          <#else>
+                            <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
+                          </#if>
                       </#if>
                   </td>
 

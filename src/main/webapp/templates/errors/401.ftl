@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Onyx - Unauthorized</title>
+    <title>Onyx <#if devMode>(dev) </#if>- Unauthorized</title>
     <#include "../common/css.ftl">
 </head>
 

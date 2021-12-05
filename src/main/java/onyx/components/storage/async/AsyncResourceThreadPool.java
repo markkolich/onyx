@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage;
+package onyx.components.storage.async;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -37,24 +37,24 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 @Component
-public final class AsynchronousResourcePool implements ComponentDestroyable {
+public final class AsyncResourceThreadPool implements ComponentDestroyable {
 
     private static final int DEFAULT_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
 
     private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder()
             .setDaemon(true)
-            .setNameFormat("onyx-resource-pool-worker-%d")
+            .setNameFormat("onyx-async-resource-pool-worker-%d")
             .build();
 
     private final ExecutorService executorService_;
 
     @Injectable
-    public AsynchronousResourcePool() {
+    public AsyncResourceThreadPool() {
         this(Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE, THREAD_FACTORY));
     }
 
     @VisibleForTesting
-    public AsynchronousResourcePool(
+    public AsyncResourceThreadPool(
             final ExecutorService executorService) {
         executorService_ = executorService;
     }

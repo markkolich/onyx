@@ -27,15 +27,13 @@
 package onyx.controllers.api;
 
 import onyx.components.config.OnyxConfig;
-import onyx.components.storage.AsynchronousResourcePool;
 import onyx.controllers.AbstractOnyxController;
 
 public abstract class AbstractOnyxApiController extends AbstractOnyxController {
 
     protected AbstractOnyxApiController(
-            final OnyxConfig onyxConfig,
-            final AsynchronousResourcePool asynchronousResourcePool) {
-        super(onyxConfig, asynchronousResourcePool);
+            final OnyxConfig onyxConfig) {
+        super(onyxConfig);
     }
 
 }

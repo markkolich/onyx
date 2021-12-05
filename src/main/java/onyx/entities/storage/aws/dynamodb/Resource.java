@@ -29,7 +29,6 @@ package onyx.entities.storage.aws.dynamodb;
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import com.amazonaws.services.s3.model.Region;
 import onyx.components.aws.dynamodb.converters.InstantToStringTypeConverter;
-import onyx.util.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -40,6 +39,7 @@ import java.util.Date;
 import static com.amazonaws.util.SdkHttpUtils.urlDecode;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 public final class Resource {
@@ -203,7 +203,7 @@ public final class Resource {
      * Returns the simple name of a resource, typically the string after the last "/".
      * For example, given a resource with path "/foo/bar/baz" this method would
      * return "baz". This method handles all URL decoding and HTML escaping of
-     * the resulting name safe for injection into a HTML template.
+     * the resulting name safe for injection into an HTML template.
      */
     @DynamoDBIgnore
     public String getHtmlName() {
@@ -215,7 +215,7 @@ public final class Resource {
      */
     @DynamoDBIgnore
     public String getHtmlSize() {
-        return FileUtils.humanReadableByteCountBin(size_);
+        return humanReadableByteCountBin(size_);
     }
 
     /**

@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
-import javax.annotation.Nullable;
 import java.net.URL;
 
 import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SECURITY;
@@ -126,9 +125,9 @@ public final class Application {
 
         final ServletHolder defaultHolder = new ServletHolder("default", LocalCacheAwareDefaultServlet.class);
         defaultHolder.setAsyncSupported(true); // Async supported = true
-        defaultHolder.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
-        defaultHolder.setInitParameter(DefaultServlet.CONTEXT_INIT + "acceptRanges", "true");
-        defaultHolder.setInitParameter(DefaultServlet.CONTEXT_INIT + "cacheControl", "public,max-age=3600");
+        context.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
+        context.setInitParameter(DefaultServlet.CONTEXT_INIT + "acceptRanges", "true");
+        context.setInitParameter(DefaultServlet.CONTEXT_INIT + "cacheControl", "public,max-age=3600");
         context.addServlet(defaultHolder, STATIC_SERVLET_MAPPING_UNDER_CONTEXT);
 
         final ServletHolder curacaoHolder = new ServletHolder("curacao", CuracaoDispatcherServlet.class);
@@ -147,7 +146,6 @@ public final class Application {
         return server;
     }
 
-    @Nullable
     private static Resource getBaseResourceForRuntime() throws Exception {
         // In dev, the base resource will be something like "src/main/webapp".
         final Resource srcMainWebApp = Resource.newResource("src/main/webapp");

@@ -25,12 +25,12 @@
 
             // Show video and PDF resources in a Featherlight lightbox preview.
             data.$contentDiv.find('a[data-resource-type="FILE"]').filter(function() {
-                return this.href.match(/\.(mov|mp4|mp3|pdf)$/i);
+                return this.href.match(/\.(mp4|mp3|pdf)$/i);
             }).featherlight({
                 type: 'iframe',
                 targetAttr: 'href',
                 // https://github.com/noelboss/featherlight/issues/365#issuecomment-551329397
-                iframeStyle: 'width:95vw;max-width:90vw;height:90vh;border-radius:0',
+                iframeStyle: 'width:95vw;max-width:90vw;height:95vh;border-radius:0',
                 // No close icon.
                 closeIcon: '',
                 openSpeed: 100,
