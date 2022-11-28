@@ -69,7 +69,7 @@
                   </#if>
 
                   <#if resource.getType() == "DIRECTORY">
-                    <#include "common/directory-listing.ftl">
+                    <#include "common/directory/listing.ftl">
                   <#elseif resource.getType() == "FILE">
                     <a href="${contextPath}/file${resource.getPath()}?nocache=1" class="btn btn-primary btn-icon-split mb-0">
                       <span class="icon text-white-50"><i class="fas fa-file-download"></i></span>

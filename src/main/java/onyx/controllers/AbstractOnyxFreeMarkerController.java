@@ -30,8 +30,8 @@ import com.google.common.collect.ImmutableSet;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
+import onyx.entities.freemarker.DirectoryListing;
 import onyx.entities.storage.aws.dynamodb.Resource;
-import org.apache.commons.collections4.CollectionUtils;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -49,7 +49,7 @@ public abstract class AbstractOnyxFreeMarkerController extends AbstractOnyxContr
         resourceManager_ = resourceManager;
     }
 
-    protected List<Resource> listDirectory(
+    protected DirectoryListing listDirectory(
             final Resource directory,
             @Nullable final Session session) {
         checkNotNull(directory, "Directory resource cannot be null.");
@@ -58,38 +58,18 @@ public abstract class AbstractOnyxFreeMarkerController extends AbstractOnyxContr
 
         final ImmutableSet.Builder<Resource.Visibility> visibility = ImmutableSet.builder();
         visibility.add(Resource.Visibility.PUBLIC);
-        // Only show private resources inside of the directory if the authenticated
+        // Only show private resources inside the directory if the authenticated
         // user is the directory owner.
         if (userIsOwner) {
             visibility.add(Resource.Visibility.PRIVATE);
         }
 
-        return resourceManager_.listDirectory(directory,
+        final List<Resource> listing = resourceManager_.listDirectory(
+                directory,
                 visibility.build(),
-                // Sort only if the user is the directory resource owner.
-                userIsOwner ? ResourceManager.Extensions.Sort.FAVORITE : null);
-    }
+                null);
 
-    protected long countDirectories(
-            final List<Resource> resources) {
-        if (CollectionUtils.isEmpty(resources)) {
-            return 0L;
-        }
-
-        return resources.stream()
-                .filter(c -> Resource.Type.DIRECTORY.equals(c.getType()))
-                .count();
-    }
-
-    protected long countFiles(
-            final List<Resource> resources) {
-        if (CollectionUtils.isEmpty(resources)) {
-            return 0L;
-        }
-
-        return resources.stream()
-                .filter(c -> Resource.Type.FILE.equals(c.getType()))
-                .count();
+        return new DirectoryListing.Builder(listing).build();
     }
 
     protected boolean userIsOwner(

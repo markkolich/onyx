@@ -31,7 +31,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentDestroyable;
-import onyx.components.config.cache.LocalCacheConfig;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,6 +38,8 @@ import java.util.concurrent.ThreadFactory;
 
 @Component
 public final class AsyncCacheThreadPool implements ComponentDestroyable {
+
+    private static final int DEFAULT_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
 
     private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder()
             .setDaemon(true)
@@ -48,10 +49,8 @@ public final class AsyncCacheThreadPool implements ComponentDestroyable {
     private final ExecutorService executorService_;
 
     @Injectable
-    public AsyncCacheThreadPool(
-            final LocalCacheConfig localCacheConfig) {
-        this(Executors.newFixedThreadPool(localCacheConfig.getLocalCacheAsyncThreadPoolSize(),
-                THREAD_FACTORY));
+    public AsyncCacheThreadPool() {
+        this(Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE, THREAD_FACTORY));
     }
 
     @VisibleForTesting

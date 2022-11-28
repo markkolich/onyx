@@ -40,7 +40,11 @@ public interface ResourceManager {
     final class Extensions {
 
         public enum Sort {
-            FAVORITE;
+            FAVORITE
+        }
+
+        public enum Op {
+            ADD, SUBTRACT
         }
 
     }
@@ -75,13 +79,5 @@ public interface ResourceManager {
 
     @Nonnull
     List<Resource> listHomeDirectories();
-
-    void addChildSizeToParentPath(
-            final String parentPath,
-            final Resource child);
-
-    void subtractChildSizeFromParentPath(
-            final String parentPath,
-            final Resource child);
 
 }

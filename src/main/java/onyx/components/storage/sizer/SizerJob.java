@@ -97,7 +97,7 @@ public final class SizerJob implements Job {
         }
     }
 
-    private TreeNode sizeResource(
+    private static TreeNode sizeResource(
             final int backoffMaxRetries,
             final Duration backoffThrottle,
             final ResourceManager resourceManager,

@@ -26,7 +26,6 @@
 
 package onyx.controllers;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.net.MediaType;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
@@ -38,13 +37,12 @@ import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
+import onyx.entities.freemarker.DirectoryListing;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.resource.ResourceForbiddenException;
 import onyx.exceptions.resource.ResourceNotFoundException;
 import org.apache.commons.io.FilenameUtils;
-
-import java.util.List;
 
 import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
@@ -102,15 +100,18 @@ public final class Details extends AbstractOnyxFreeMarkerController {
             }
         }
 
-        // Whether or not the user is authenticated (has a valid session).
+        // Whether the user is authenticated (has a valid session).
         final boolean userAuthenticated = (session != null);
-        // Whether or not the user is authenticated (has a valid session)
-        // AND is the resource owner.
+        // Whether the user is authenticated (has a valid session) AND is the resource owner.
         final boolean userIsOwner = (userAuthenticated && session.getUsername().equals(resource.getOwner()));
 
         // Only directories have children; any other resource explicitly have none.
-        final List<Resource> children = (Resource.Type.DIRECTORY.equals(resource.getType())) ?
-                listDirectory(resource, session) : ImmutableList.of();
+        final DirectoryListing listing;
+        if (Resource.Type.DIRECTORY.equals(resource.getType())) {
+            listing = listDirectory(resource, session);
+        } else {
+            listing = DirectoryListing.of();
+        }
 
         final String extension = FilenameUtils.getExtension(resource.getName()).toLowerCase();
         final String contentType = ContentTypes.getContentTypeForExtension(extension, DEFAULT_CONTENT_TYPE);
@@ -124,13 +125,15 @@ public final class Details extends AbstractOnyxFreeMarkerController {
                 .withAttr("view", "details")
                 .withAttr("resource", resource)
                 .withAttr("breadcrumbs", splitNormalizedPathToElements(resource.getPath()))
-                .withAttr("children", children)
-                .withAttr("directoryCount", countDirectories(children))
-                .withAttr("fileCount", countFiles(children))
+                .withAttr("favorites", listing.getFavorites())
+                .withAttr("nonFavorites", listing.getNonFavorites())
+                .withAttr("allChildren", listing.getAll())
+                .withAttr("directoryCount", listing.getDirectoryCount())
+                .withAttr("fileCount", listing.getFileCount())
                 .withAttr("totalFileDisplaySize", humanReadableByteCountBin(resource.getSize()))
                 .withAttr("contentType", contentType)
-                .withAttr("userIsOwner", userIsOwner)
                 .withAttr("hasResourceInCache", hasResourceInCache)
+                .withAttr("userIsOwner", userIsOwner)
                 .build();
     }
 

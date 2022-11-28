@@ -66,7 +66,9 @@ public final class FreeMarkerContentRenderer {
 
     public String contentToString(
             final FreeMarkerContent content) throws Exception {
-        return contentToWriter(content).toString();
+        try (Writer w = contentToWriter(content)) {
+            return w.toString();
+        }
     }
 
     public Writer contentToWriter(

@@ -37,12 +37,15 @@ import onyx.components.search.SearchManager;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.async.AsyncResourceThreadPool;
 import onyx.entities.storage.aws.dynamodb.Resource;
+import onyx.exceptions.OnyxException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @Component
 public final class DynamoDbManager implements ResourceManager {
@@ -91,10 +94,8 @@ public final class DynamoDbManager implements ResourceManager {
             // Index the addition of the resource asynchronously.
             searchManager_.addResourceToIndexAsync(r, asyncResourceExecutorService_);
 
-            // Update the parent resource size to account for the addition of the resource.
-            // This is intentionally NOT done asynchronously as we want the parent to update
-            // cleanly before the add operation returns in success.
-            addChildSizeToParentPath(r.getParent(), r);
+            // Update the parent resource size and all of its ancestors.
+            updateParentResourceSizesAsync(r, Extensions.Op.ADD);
         });
     }
 
@@ -126,10 +127,8 @@ public final class DynamoDbManager implements ResourceManager {
             // Index the deletion of the resource asynchronously.
             searchManager_.deleteResourceFromIndexAsync(r, asyncResourceExecutorService_);
 
-            // Update the parent resource size to account for the deletion of the resource.
-            // This is intentionally NOT done asynchronously as we want the parent to update
-            // cleanly before the delete operation returns in success.
-            subtractChildSizeFromParentPath(r.getParent(), r);
+            // Update the parent resource size and all of its ancestors.
+            updateParentResourceSizesAsync(r, Extensions.Op.SUBTRACT);
         });
     }
 
@@ -180,44 +179,37 @@ public final class DynamoDbManager implements ResourceManager {
         return new ListHomeDirectories(awsConfig_).run(dbMapper_);
     }
 
-    @Override
-    public void addChildSizeToParentPath(
-            final String parentPath,
-            final Resource child) {
-        if (ResourceManager.ROOT_PATH.equals(parentPath)) {
-            // Intentionally never update the root "/" resource.
-            return;
-        } else if (child.getSize() <= 0L) {
+    // Helpers
+
+    private void updateParentResourceSizesAsync(
+            final Resource child,
+            final Extensions.Op op) {
+        checkNotNull(child, "Resource child cannot be null.");
+        checkNotNull(op, "Resource operation cannot be null.");
+
+        if (child.getSize() <= 0L) {
             // Nothing to update if the child is empty.
             return;
         }
 
-        final Resource parent = getResourceAtPath(parentPath);
-        if (parent != null) {
-            final long newParentSize = parent.getSize() + child.getSize();
-            parent.setSize(newParentSize);
-            updateResource(parent);
-        }
-    }
+        asyncResourceExecutorService_.submit(() -> {
+            Resource parent = getResourceAtPath(child.getParent());
+            while (parent != null && !ResourceManager.ROOT_PATH.equals(parent.getPath())) {
+                if (Extensions.Op.ADD.equals(op)) {
+                    final long newParentSize = parent.getSize() + child.getSize();
+                    parent.setSize(newParentSize);
+                } else if (Extensions.Op.SUBTRACT.equals(op)) {
+                    final long newParentSize = parent.getSize() - child.getSize();
+                    parent.setSize(Math.max(0L, newParentSize));
+                } else {
+                    throw new OnyxException("Unknown/unsupported resource operation: " + op);
+                }
 
-    @Override
-    public void subtractChildSizeFromParentPath(
-            final String parentPath,
-            final Resource child) {
-        if (ResourceManager.ROOT_PATH.equals(parentPath)) {
-            // Intentionally never update the root "/" resource.
-            return;
-        } else if (child.getSize() <= 0L) {
-            // Nothing to update if the child is empty.
-            return;
-        }
+                updateResource(parent);
 
-        final Resource parent = getResourceAtPath(parentPath);
-        if (parent != null) {
-            final long newParentSize = parent.getSize() - child.getSize();
-            parent.setSize(Math.max(0L, newParentSize));
-            updateResource(parent);
-        }
+                parent = getResourceAtPath(parent.getParent());
+            }
+        });
     }
 
 }

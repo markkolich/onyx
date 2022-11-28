@@ -33,12 +33,11 @@ import curacao.annotations.parameters.Path;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
+import onyx.entities.freemarker.DirectoryListing;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.resource.ResourceForbiddenException;
 import onyx.exceptions.resource.ResourceNotFoundException;
-
-import java.util.List;
 
 import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
@@ -89,7 +88,7 @@ public final class Browse extends AbstractOnyxFreeMarkerController {
             }
         }
 
-        final List<Resource> children = listDirectory(resource, session);
+        final DirectoryListing listing = listDirectory(resource, session);
 
         final boolean userIsOwner = userIsOwner(resource, session);
 
@@ -98,9 +97,11 @@ public final class Browse extends AbstractOnyxFreeMarkerController {
                 .withAttr("view", "browse")
                 .withAttr("resource", resource)
                 .withAttr("breadcrumbs", splitNormalizedPathToElements(resource.getPath()))
-                .withAttr("children", children)
-                .withAttr("directoryCount", countDirectories(children))
-                .withAttr("fileCount", countFiles(children))
+                .withAttr("favorites", listing.getFavorites())
+                .withAttr("nonFavorites", listing.getNonFavorites())
+                .withAttr("allChildren", listing.getAll())
+                .withAttr("directoryCount", listing.getDirectoryCount())
+                .withAttr("fileCount", listing.getFileCount())
                 .withAttr("totalFileDisplaySize", humanReadableByteCountBin(resource.getSize()))
                 .withAttr("userIsOwner", userIsOwner)
                 .build();

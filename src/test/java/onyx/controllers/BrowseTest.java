@@ -61,13 +61,11 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
 
         final ArgumentCaptor<Set<Resource.Visibility>> visibilityCaptor =
                 ArgumentCaptor.forClass(Set.class);
-        final ArgumentCaptor<ResourceManager.Extensions.Sort> sortCapture =
-                ArgumentCaptor.forClass(ResourceManager.Extensions.Sort.class);
 
         final List<Resource> directoryList =
                 resourceJsonToObject("mock/browse/foobar-dir-list.json", new TypeReference<>() {});
         Mockito.when(resourceManager.listDirectory(ArgumentMatchers.eq(homeDirectory),
-                visibilityCaptor.capture(), sortCapture.capture())).thenReturn(directoryList);
+                visibilityCaptor.capture(), ArgumentMatchers.any())).thenReturn(directoryList);
 
         final Browse controller = new Browse(onyxConfig_, resourceManager);
 
@@ -77,8 +75,6 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
 
         assertEquals(ImmutableSet.of(Resource.Visibility.PUBLIC, Resource.Visibility.PRIVATE),
                 visibilityCaptor.getValue());
-        assertEquals(ResourceManager.Extensions.Sort.FAVORITE,
-                sortCapture.getValue());
 
         final String renderedHtml = fmcRenderer_.contentToString(responseEntity);
         assertTrue(StringUtils.isNotBlank(renderedHtml));

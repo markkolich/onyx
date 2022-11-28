@@ -81,7 +81,7 @@ public final class ListDirectory {
         final ListMultimap<Resource.Type, Resource> resources = queryResult.stream()
                 // Intentionally keep the root "/" out of the listing.
                 .filter(resource -> !ROOT_PATH.equals(resource.getPath()))
-                // Sort the results alphabetically based on path.
+                // Sort the results alphabetically based on path, prior to partitioning by type.
                 .sorted(Comparator.comparing(Resource::getPath))
                 .collect(Multimaps.toMultimap(Resource::getType, r -> r,
                 MultimapBuilder.ListMultimapBuilder.treeKeys().arrayListValues()::build));

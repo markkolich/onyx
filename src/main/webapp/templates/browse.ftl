@@ -63,7 +63,7 @@
                       <p class="text-muted mb-3">${resource.getHtmlDescription()}</p>
                   </#if>
 
-                  <#include "common/directory-listing.ftl">
+                  <#include "common/directory/listing.ftl">
 
                 </div>
               </div>

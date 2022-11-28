@@ -107,7 +107,7 @@ public final class IndexerJob implements Job {
         }
     }
 
-    private TreeNode indexResource(
+    private static TreeNode indexResource(
             final int backoffMaxRetries,
             final Duration backoffThrottle,
             final ResourceManager resourceManager,
