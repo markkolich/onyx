@@ -35,6 +35,11 @@ public final class FileUtils {
     private FileUtils() {
     }
 
+    /**
+     * Given a file size in bytes, generates a <em>base-10</em> compatible human-readable string.
+     * If you wish to generate a human-readable string that matches the actual size of a file on disk as
+     * seen by an OS, DO NOT USE this method. Instead, use {@link #humanReadableByteCountBin(long)}.
+     */
     public static String humanReadableByteCountSI(
             final long bytes) {
         if (-1000 < bytes && bytes < 1000) {
@@ -60,6 +65,9 @@ public final class FileUtils {
         return String.format(format, bytesLargerThan1Kb / 1000.0, ci.current());
     }
 
+    /**
+     * Given a file size in bytes, generates a <em>base-2</em> compatible human-readable string.
+     */
     public static String humanReadableByteCountBin(
             final long bytes) {
         final long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);

@@ -96,6 +96,11 @@ public final class OnyxTypesafeAwsConfig implements AwsConfig {
         return StorageClass.fromValue(config_.getString(AWS_S3_DEFAULT_STORAGE_CLASS_PROP));
     }
 
+    @Override
+    public long getAwsS3MaxUploadFileSize() {
+        return config_.getBytes(AWS_S3_MAX_UPLOAD_FILE_SIZE_PROP);
+    }
+
     // SNS config
 
     @Override

@@ -56,6 +56,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
@@ -63,11 +65,14 @@ import java.time.Instant;
 import java.util.List;
 
 import static curacao.annotations.RequestMapping.Method.*;
+import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
 
 @Controller
 public final class File extends AbstractOnyxApiController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(File.class);
 
     private final AwsConfig awsConfig_;
     private final LocalCacheConfig localCacheConfig_;
@@ -120,6 +125,17 @@ public final class File extends AbstractOnyxApiController {
         if (file != null) {
             throw new ApiConflictException("File or other resource at path already exists: "
                     + normalizedPath);
+        }
+
+        final long uploadRequestSize = request.getSize();
+        final long maxUploadRequestSize = awsConfig_.getAwsS3MaxUploadFileSize();
+        if (uploadRequestSize > maxUploadRequestSize) {
+            LOG.warn("File upload size exceeds allowed maximum: {}-bytes > {}-bytes ({}): {}",
+                    uploadRequestSize, maxUploadRequestSize,
+                    humanReadableByteCountBin(maxUploadRequestSize),
+                    normalizedPath);
+            throw new ApiPreconditionFailedException(String.format("File upload size exceeds allowed maximum: "
+                    + "%s-bytes (%s)", maxUploadRequestSize, humanReadableByteCountBin(maxUploadRequestSize)));
         }
 
         final String parentPath = normalizePath(username, FilenameUtils.getPathNoEndSeparator(path));

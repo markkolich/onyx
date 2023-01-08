@@ -46,6 +46,7 @@ public interface AwsConfig {
     String AWS_S3_BUCKET_NAME_PROP = "s3.bucket-name";
     String AWS_S3_ASSET_URL_VALIDITY_DURATION_PROP = "s3.asset-url-validity-duration";
     String AWS_S3_DEFAULT_STORAGE_CLASS_PROP = "s3.default-storage-class";
+    String AWS_S3_MAX_UPLOAD_FILE_SIZE_PROP = "s3.max-upload-file-size";
 
     String AWS_SNS_REGION_PROP = "sns.region";
 
@@ -71,6 +72,8 @@ public interface AwsConfig {
             final TimeUnit timeUnit);
 
     StorageClass getAwsS3DefaultStorageClass();
+
+    long getAwsS3MaxUploadFileSize();
 
     // SNS config
 

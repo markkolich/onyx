@@ -53,11 +53,11 @@
               <#if child.getOwner() == session.getUsername()>
                   <#if child.getType() == "DIRECTORY">
                       <button type="button" class="btn btn-sm <#if child.getVisibility() == "PUBLIC">btn-dark<#else>btn-light</#if>" data-action="toggle-directory-visibility"><i class="<#if child.getVisibility() == "PUBLIC">fas fa-user-secret<#else>far fa-eye</#if> fa-fw"></i></button>
-                      <button type="button" class="btn btn-sm btn-warning" data-action="toggle-directory-favorite"><i class="<#if child.getFavorite()>fas<#else>far</#if> fa-star fa-fw"></i></button>
+                      <button type="button" class="btn btn-sm btn-warning" data-action="toggle-directory-favorite"><i class="<#if child.getFavorite()>fas<#else>far</#if> fa-heart fa-fw"></i></button>
                       <button type="button" class="btn btn-sm btn-danger" data-action="delete-directory" <#if child.getFavorite()>disabled="disabled"</#if>><i class="fas fa-trash fa-fw"></i></button>
                   <#elseif child.getType() == "FILE">
                       <button type="button" class="btn btn-sm <#if child.getVisibility() == "PUBLIC">btn-dark<#else>btn-light</#if>" data-action="toggle-file-visibility"><i class="<#if child.getVisibility() == "PUBLIC">fas fa-user-secret<#else>far fa-eye</#if> fa-fw" fa-fw"></i></button>
-                      <button type="button" class="btn btn-sm btn-warning" data-action="toggle-file-favorite"><i class="<#if child.getFavorite()>fas<#else>far</#if> fa-star fa-fw"></i></button>
+                      <button type="button" class="btn btn-sm btn-warning" data-action="toggle-file-favorite"><i class="<#if child.getFavorite()>fas<#else>far</#if> fa-heart fa-fw"></i></button>
                       <button type="button" class="btn btn-sm btn-danger" data-action="delete-file" <#if child.getFavorite()>disabled="disabled"</#if>><i class="fas fa-trash fa-fw"></i></button>
                   </#if>
               </#if>

@@ -71,7 +71,7 @@ To begin, clone the repository.
 
     #~> git clone https://github.com/markkolich/onyx.git
 
-Run `mvn package` from within your newly cloned *onyx* directory to complete your first build build: 
+Run `mvn package` from within your newly cloned *onyx* directory to complete your first build build:
 
     #~> cd onyx
     #~/onyx> mvn package
@@ -119,7 +119,7 @@ onyx {
 
       // Time bomb: how long any pre-signed download and pre-signed upload URLs
       // should remain valid once generated.
-      asset-url-validity-duration = 5m 
+      asset-url-validity-duration = 5m
     }
   }
 }
@@ -129,6 +129,26 @@ When running Onyx locally, specify your configuration file by passing a `-Dconfi
 
 ```
 java -Dconfig.file=/path/to/your/onyx.conf -jar dist/onyx-0.1-runnable.jar
+```
+
+## Notes
+
+Find all delete markers in an S3 bucket:
+
+```
+aws s3api list-object-versions \
+  --bucket "bucket-name" \
+  --output=json \
+  --query='{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}'
+```
+
+Find and delete all delete markers in an S3 bucket:
+
+```
+aws s3api delete-objects --bucket "bucket-name" --delete "$(aws s3api list-object-versions \
+  --bucket "bucket-name" \
+  --output=json \
+  --query='{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}')"
 ```
 
 ## Licensing
