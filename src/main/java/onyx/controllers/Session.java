@@ -32,6 +32,8 @@ import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.RequestBody;
 import curacao.annotations.parameters.convenience.Cookie;
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpResponse;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.authentication.twofactor.TwoFactorAuthCodeManager;
@@ -51,8 +53,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -111,7 +111,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
             @Cookie(TRUSTED_DEVICE_COOKIE_NAME) final String trustedDeviceCookie,
             @RequestBody(USERNAME_FIELD) final String username,
             @RequestBody(PASSWORD_FIELD) final String password,
-            final HttpServletResponse response,
+            final HttpResponse response,
             final AsyncContext context) throws Exception {
         if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
             return login();
@@ -158,7 +158,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
             @RequestBody(TOKEN_FIELD) final String signedToken,
             @RequestBody(CODE_FIELD) final String code,
             @RequestBody(TRUST_DEVICE_FIELD) final String trustDevice,
-            final HttpServletResponse response,
+            final HttpResponse response,
             final AsyncContext context) throws Exception {
         final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
         if (!twoFactorAuthEnabled) {
@@ -224,14 +224,14 @@ public final class Session extends AbstractOnyxFreeMarkerController {
 
     @RequestMapping(value = "^/logout$")
     public void logout(
-            final HttpServletResponse response,
+            final HttpResponse response,
             final AsyncContext context) throws Exception {
         processLogout(response, context);
     }
 
     private void processLogin(
             final onyx.entities.authentication.Session session,
-            final HttpServletResponse response,
+            final HttpResponse response,
             final AsyncContext context) throws Exception {
         final String signedSession = sessionManager_.signSession(session);
 
@@ -277,7 +277,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
     }
 
     private void processLogout(
-            final HttpServletResponse response,
+            final HttpResponse response,
             final AsyncContext context) throws Exception {
         final CookieBaker sessionCookieBaker = new CookieBaker.Builder()
                 .setName(SESSION_COOKIE_NAME)

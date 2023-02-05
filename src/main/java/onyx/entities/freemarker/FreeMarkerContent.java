@@ -36,7 +36,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static curacao.core.servlet.HttpStatus.SC_OK;
 
 public interface FreeMarkerContent {
 

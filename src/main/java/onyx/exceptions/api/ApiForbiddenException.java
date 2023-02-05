@@ -26,7 +26,7 @@
 
 package onyx.exceptions.api;
 
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static curacao.core.servlet.HttpStatus.SC_FORBIDDEN;
 
 public final class ApiForbiddenException extends OnyxApiException {
 

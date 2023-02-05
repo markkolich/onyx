@@ -42,7 +42,7 @@ import java.io.Writer;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.net.MediaType.*;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static curacao.core.servlet.HttpStatus.SC_OK;
 import static org.apache.commons.io.IOUtils.copyLarge;
 
 public final class Utf8TextEntity extends AbstractAppendableCuracaoEntity {

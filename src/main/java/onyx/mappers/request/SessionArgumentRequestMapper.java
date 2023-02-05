@@ -30,18 +30,19 @@ import com.google.common.net.HttpHeaders;
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import curacao.context.CuracaoContext;
+import curacao.core.servlet.HttpCookie;
+import curacao.core.servlet.HttpRequest;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.api.ApiKeyAuthenticator;
 import onyx.entities.authentication.Session;
-import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
+import java.util.List;
 
 import static onyx.components.authentication.api.ApiKeyAuthenticator.API_KEY_AUTH_HEADER_PREFIX;
 import static onyx.util.CookieBaker.getFirstCookieByName;
@@ -65,7 +66,7 @@ public final class SessionArgumentRequestMapper
     public Session resolve(
             @Nullable final Annotation annotation,
             @Nonnull final CuracaoContext context) throws Exception {
-        final HttpServletRequest request = context.getRequest();
+        final HttpRequest request = context.getRequest();
 
         // 1. If there's an API key on the request, validate it first.
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -80,9 +81,9 @@ public final class SessionArgumentRequestMapper
 
         // 2. If no API key is present, fallback to extracting the user session from a
         // signed session cookie.
-        final Cookie[] cookies = request.getCookies();
-        if (ArrayUtils.isNotEmpty(cookies)) {
-            final Cookie sessionCookie = getFirstCookieByName(cookies, SessionManager.SESSION_COOKIE_NAME);
+        final List<HttpCookie> cookies = request.getCookies();
+        if (CollectionUtils.isNotEmpty(cookies)) {
+            final HttpCookie sessionCookie = getFirstCookieByName(cookies, SessionManager.SESSION_COOKIE_NAME);
             if (sessionCookie != null) {
                 final Session session = sessionManager_.extractSignedSession(sessionCookie.getValue());
                 if (session != null) {

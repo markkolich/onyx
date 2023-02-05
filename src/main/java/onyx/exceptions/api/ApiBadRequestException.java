@@ -26,7 +26,7 @@
 
 package onyx.exceptions.api;
 
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static curacao.core.servlet.HttpStatus.SC_BAD_REQUEST;
 
 public final class ApiBadRequestException extends OnyxApiException {
 

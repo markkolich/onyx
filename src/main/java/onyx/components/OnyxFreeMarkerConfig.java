@@ -28,6 +28,7 @@ package onyx.components;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import curacao.core.servlet.ServletContext;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
@@ -37,7 +38,6 @@ import onyx.Application;
 import onyx.exceptions.OnyxException;
 import org.eclipse.jetty.util.resource.Resource;
 
-import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;

@@ -36,7 +36,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.net.MediaType;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.util.ContentTypes;
+import curacao.util.http.ContentTypes;
 import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.async.AsyncAssetThreadPool;

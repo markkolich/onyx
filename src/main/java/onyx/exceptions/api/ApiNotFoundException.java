@@ -26,7 +26,7 @@
 
 package onyx.exceptions.api;
 
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static curacao.core.servlet.HttpStatus.SC_NOT_FOUND;
 
 public final class ApiNotFoundException extends OnyxApiException {
 

@@ -28,6 +28,8 @@ package onyx.mappers.response.freemarker;
 
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpResponse;
 import onyx.components.FreeMarkerContentRenderer;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
@@ -39,8 +41,6 @@ import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
 import onyx.util.CookieBaker;
 
 import javax.annotation.Nonnull;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -73,7 +73,7 @@ public final class FreeMarkerContentResponseMapper
     @Override
     public void render(
             final AsyncContext context,
-            final HttpServletResponse response,
+            final HttpResponse response,
             @Nonnull final FreeMarkerContent content) throws Exception {
         final boolean shouldRefreshSessionAutomatically =
                 sessionConfig_.shouldRefreshSessionAutomatically();
@@ -87,7 +87,7 @@ public final class FreeMarkerContentResponseMapper
 
     private void refreshSessionIfNeeded(
             final Session session,
-            final HttpServletResponse response) {
+            final HttpResponse response) {
         checkNotNull(session, "Session to refresh cannot be null.");
         checkNotNull(response, "HTTP servlet response cannot be null.");
 
