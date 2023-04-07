@@ -53,6 +53,7 @@ gulp.task('concat-js', ['eslint-js'], function() {
         'vendor/jquery.fileupload/jquery.fileupload.js',
         'vendor/jquery.fileupload/jquery.fileupload-process.js',
         'vendor/jquery.fileupload/jquery.fileupload-validate.js',
+        'vendor/jquery.copy-to-clipboard/jquery.copy-to-clipboard.js',
         'vendor/jquery-easing/jquery.easing.min.js',
         'vendor/featherlight/featherlight.min.js',
         'js/sb-admin-2.js',

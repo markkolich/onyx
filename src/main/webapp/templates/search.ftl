@@ -71,7 +71,7 @@
                                       </td>
                                       <td class="align-middle d-none d-lg-table-cell">
                                           <#if result.getLeft().getHtmlDescription()?has_content>
-                                              ${result.getLeft().getHtmlDescription()?truncate(40, '...')}
+                                              <span data-clipboard-text="${result.getLeft().getHtmlDescription()}">${result.getLeft().getHtmlDescription()?truncate(40, '...')}</span>
                                           <#else>
                                               <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
                                           </#if>

@@ -25,7 +25,7 @@
   </td>
   <td class="align-middle d-none d-lg-table-cell">
       <#if child.getHtmlDescription()?has_content>
-          ${child.getHtmlDescription()?truncate(40, '...')}
+          <span data-clipboard-text="${child.getHtmlDescription()}">${child.getHtmlDescription()?truncate(40, '...')}</span>
       <#else>
           <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
       </#if>

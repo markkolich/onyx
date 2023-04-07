@@ -60,7 +60,7 @@
                 <div class="card-body table-responsive">
 
                   <#if resource.getHtmlDescription()?has_content>
-                      <p class="text-muted mb-3">${resource.getHtmlDescription()}</p>
+                      <p class="text-muted mb-3" data-clipboard-text="${resource.getHtmlDescription()}">${resource.getHtmlDescription()}</p>
                   </#if>
 
                   <#include "common/directory/listing.ftl">
