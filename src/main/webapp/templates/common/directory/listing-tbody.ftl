@@ -18,14 +18,14 @@
   </td>
   <td class="align-middle">
       <#if child.getType() == "DIRECTORY">
-          <a href="${contextPath}/<#if view == "browse">browse<#else>details</#if>${child.getPath()}" data-resource-type="DIRECTORY">${child.getHtmlName()?truncate(40, '...')}</a>
+          <a href="${contextPath}/<#if view == "browse">browse<#else>details</#if>${child.getPath()}" data-resource-type="DIRECTORY">${child.getHtmlName()?truncate(50, '...')}</a>
       <#elseif child.getType() == "FILE">
-          <a href="${contextPath}/file${child.getPath()}" data-resource-type="FILE">${child.getHtmlName()?truncate(40, '...')}</a>
+          <a href="${contextPath}/file${child.getPath()}" data-resource-type="FILE">${child.getHtmlName()?truncate(50, '...')}</a>
       </#if>
   </td>
   <td class="align-middle d-none d-lg-table-cell">
       <#if child.getHtmlDescription()?has_content>
-          <span data-clipboard-text="${child.getHtmlDescription()}">${child.getHtmlDescription()?truncate(40, '...')}</span>
+          <span title="${child.getHtmlDescription()}" data-clipboard-text="${child.getHtmlDescription()}">${child.getHtmlDescription()?truncate(50, '...')}</span>
       <#else>
           <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
       </#if>

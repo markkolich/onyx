@@ -83,10 +83,7 @@ public final class LocalCacheManager implements CacheManager {
         asyncCacheExecutorService_ = asyncCacheThreadPool.getExecutorService();
 
         // Create the local cache directory if it does not exist.
-        final Path localCacheDir = localCacheConfig_.getLocalCacheDirectory();
-        if (Files.notExists(localCacheDir)) {
-            Files.createDirectories(localCacheDir);
-        }
+        createCacheDirectoryIfDoesNotExist();
     }
 
     @Override
@@ -227,6 +224,24 @@ public final class LocalCacheManager implements CacheManager {
         checkNotNull(resource, "Resource cannot be null.");
 
         asyncCacheExecutorService_.submit(() -> deleteResourceFromCache(resource));
+    }
+
+    /**
+     * Attempt to auto-create the local cache directory. If the creation fails for any
+     * reason, move on with a warning as this won't impact operation of the app. If the
+     * cache directory does not exist, resource caching won't work, but the service will
+     * continue to hum along just fine.
+     */
+    private void createCacheDirectoryIfDoesNotExist() {
+        final Path localCacheDir = localCacheConfig_.getLocalCacheDirectory();
+
+        try {
+            if (Files.notExists(localCacheDir)) {
+                Files.createDirectories(localCacheDir);
+            }
+        } catch (final Exception e) {
+            LOG.warn("Failed to auto-create resource cache directory: {}", localCacheDir, e);
+        }
     }
 
     /**

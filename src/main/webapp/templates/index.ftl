@@ -50,7 +50,7 @@
                                     </td>
                                     <td class="align-middle d-none d-lg-table-cell">
                                         <#if child.getHtmlDescription()?has_content>
-                                            ${child.getHtmlDescription()?truncate(40, '...')}
+                                            ${child.getHtmlDescription()?truncate(50, '...')}
                                         <#else>
                                             <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
                                         </#if>
