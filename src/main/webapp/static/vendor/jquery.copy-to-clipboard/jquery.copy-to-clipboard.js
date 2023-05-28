@@ -9,15 +9,15 @@
 
 $.fn.CopyToClipboard = function() {
     var textToCopy = false;
-    if(this.is('select') || this.is('textarea') || this.is('input')){
+    if (this.is('select') || this.is('textarea') || this.is('input')){
         textToCopy = this.val();
-    }else {
+    } else {
         textToCopy = this.text();
     }
     CopyToClipboard(textToCopy);
 };
 
-function CopyToClipboard( val ){
+function CopyToClipboard( val ) {
     var hiddenClipboard = $('#_hiddenClipboard_');
     if(!hiddenClipboard.length){
         $('body').append('<textarea style="position:absolute;top: -9999px;" id="_hiddenClipboard_"></textarea>');
@@ -27,6 +27,7 @@ function CopyToClipboard( val ){
     hiddenClipboard.select();
     document.execCommand('copy');
     document.getSelection().removeAllRanges();
+    hiddenClipboard.remove();
 }
 
 $(function(){

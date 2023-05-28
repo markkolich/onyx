@@ -86,7 +86,7 @@ gulp.task('minify-js', ['concat-js'], function(callback) {
 gulp.task('banner', ['minify-css', 'minify-js'], function() {
     const comment =
         '/*\n' +
-        ' * (c) Copyright 2022 Mark S. Kolich\n' +
+        ' * (c) Copyright 2023 Mark S. Kolich\n' +
         ' * All rights reserved.\n' +
         ' * https://mark.koli.ch\n' +
         ' */\n';
