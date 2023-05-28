@@ -31,6 +31,8 @@ import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpResponse;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
@@ -42,8 +44,6 @@ import onyx.exceptions.resource.ResourceForbiddenException;
 import onyx.exceptions.resource.ResourceNotFoundException;
 import org.apache.commons.lang3.BooleanUtils;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
 
 import static onyx.util.PathUtils.normalizePath;
@@ -75,7 +75,7 @@ public final class File extends AbstractOnyxFreeMarkerController {
             @Path("path") final String path,
             @Query("nocache") final Boolean noCache,
             final Session session,
-            final HttpServletResponse response,
+            final HttpResponse response,
             final AsyncContext context) throws Exception {
         final String normalizedPath = normalizePath(username, path);
 

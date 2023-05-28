@@ -26,7 +26,7 @@
 
 package onyx.exceptions.api;
 
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+import static curacao.core.servlet.HttpStatus.SC_UNAUTHORIZED;
 
 public final class ApiUnauthorizedException extends OnyxApiException {
 

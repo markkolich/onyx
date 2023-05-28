@@ -28,12 +28,13 @@ package onyx.util;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import curacao.core.servlet.HttpCookie;
+import curacao.core.servlet.HttpRequest;
+import curacao.core.servlet.HttpResponse;
+import curacao.servlet.javax.JavaxHttpCookie;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -68,10 +69,10 @@ public final class CookieBaker {
     }
 
     public void bake(
-            final HttpServletResponse response) {
+            final HttpResponse response) {
         checkNotNull(response, "HTTP response cannot be null.");
 
-        final Cookie cookie = new Cookie(name_, value_);
+        final HttpCookie cookie = new JavaxHttpCookie(name_, value_);
         cookie.setHttpOnly(true);
 
         if (maxAge_ != null) {
@@ -154,19 +155,19 @@ public final class CookieBaker {
     }
 
     @Nonnull
-    public static List<Cookie> getCookiesByName(
-            final HttpServletRequest request,
+    public static List<HttpCookie> getCookiesByName(
+            final HttpRequest request,
             final String cookieName) {
         return getCookiesByName(request.getCookies(), cookieName);
     }
 
     @Nonnull
-    public static List<Cookie> getCookiesByName(
-            final Cookie[] cookies,
+    public static List<HttpCookie> getCookiesByName(
+            final List<HttpCookie> cookies,
             final String cookieName) {
-        final ImmutableList.Builder<Cookie> result = ImmutableList.builder();
+        final ImmutableList.Builder<HttpCookie> result = ImmutableList.builder();
         if (cookies != null) {
-            for (final Cookie c : cookies) {
+            for (final HttpCookie c : cookies) {
                 if (cookieName.equals(c.getName())) {
                     result.add(c);
                 }
@@ -176,15 +177,15 @@ public final class CookieBaker {
     }
 
     @Nullable
-    public static Cookie getFirstCookieByName(
-            final HttpServletRequest request,
+    public static HttpCookie getFirstCookieByName(
+            final HttpRequest request,
             final String cookieName) {
         return getFirstCookieByName(request.getCookies(), cookieName);
     }
 
     @Nullable
-    public static Cookie getFirstCookieByName(
-            final Cookie[] cookies,
+    public static HttpCookie getFirstCookieByName(
+            final List<HttpCookie> cookies,
             final String cookieName) {
         return Iterables.getFirst(getCookiesByName(cookies, cookieName), null);
     }

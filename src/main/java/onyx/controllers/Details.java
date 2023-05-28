@@ -31,7 +31,7 @@ import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
-import curacao.util.ContentTypes;
+import curacao.util.http.ContentTypes;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.CacheManager;

@@ -28,16 +28,16 @@ package onyx.mappers.response.exceptions;
 
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpResponse;
 import onyx.components.FreeMarkerContentRenderer;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.exceptions.resource.ResourceForbiddenException;
 import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
 
 import javax.annotation.Nonnull;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static curacao.core.servlet.HttpStatus.SC_FORBIDDEN;
 
 @Mapper
 public final class ResourceForbiddenExceptionResponseMapper
@@ -52,7 +52,7 @@ public final class ResourceForbiddenExceptionResponseMapper
     @Override
     public void render(
             final AsyncContext context,
-            final HttpServletResponse response,
+            final HttpResponse response,
             @Nonnull final ResourceForbiddenException entity) throws Exception {
         final FreeMarkerContent content = new FreeMarkerContent.Builder("templates/errors/403.ftl", SC_FORBIDDEN)
                 .build();

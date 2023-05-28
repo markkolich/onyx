@@ -27,8 +27,8 @@
 package onyx;
 
 import com.google.common.io.Resources;
-import curacao.CuracaoContextListener;
-import curacao.CuracaoDispatcherServlet;
+import curacao.servlet.javax.CuracaoJavaxContextListener;
+import curacao.servlet.javax.CuracaoJavaxDispatcherServlet;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
@@ -130,9 +130,9 @@ public final class Application {
         context.setInitParameter(DefaultServlet.CONTEXT_INIT + "cacheControl", "public,max-age=3600");
         context.addServlet(defaultHolder, STATIC_SERVLET_MAPPING_UNDER_CONTEXT);
 
-        final ServletHolder curacaoHolder = new ServletHolder("curacao", CuracaoDispatcherServlet.class);
+        final ServletHolder curacaoHolder = new ServletHolder("curacao", CuracaoJavaxDispatcherServlet.class);
         curacaoHolder.setAsyncSupported(true); // Async supported = true
-        context.addEventListener(new CuracaoContextListener()); // Required
+        context.addEventListener(new CuracaoJavaxContextListener()); // Required
         context.addServlet(curacaoHolder, CURACAO_SERVLET_MAPPING_UNDER_CONTEXT);
 
         final ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();

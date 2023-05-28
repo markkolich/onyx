@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static javax.servlet.http.HttpServletResponse.SC_CREATED;
+import static curacao.core.servlet.HttpStatus.SC_CREATED;
 
 public interface CreateShortLinkResponse extends OnyxApiResponseEntity {
 

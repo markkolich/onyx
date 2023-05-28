@@ -29,6 +29,9 @@
     <logger name="org.apache.solr.core.SolrCore" additivity="false" level="ERROR">
         <appender-ref ref="STDOUT"/>
     </logger>
+    <logger name="org.apache.solr.logging.LogWatcher" additivity="false" level="ERROR">
+        <appender-ref ref="STDOUT"/>
+    </logger>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

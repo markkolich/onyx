@@ -33,12 +33,12 @@ import com.amazonaws.services.sns.model.PublishResult;
 import com.google.common.collect.ImmutableMap;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import curacao.core.servlet.HttpStatus;
 import onyx.components.aws.sns.SnsClient;
 import onyx.entities.authentication.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -93,7 +93,7 @@ public final class OnyxTwoFactorSmsAuthCodeManager implements TwoFactorAuthCodeM
             final PublishResult publishResult = sns_.publish(publishRequest);
 
             final int publishStatus = publishResult.getSdkHttpMetadata().getHttpStatusCode();
-            if (publishStatus != HttpServletResponse.SC_OK) {
+            if (publishStatus != HttpStatus.SC_OK) {
                 LOG.warn("AWS SNS publish failed while sending 2FA SMS text-message to user: "
                         + "{}: {} ({})", publishStatus, user.getUsername(), user.getMobileNumber());
             }

@@ -26,7 +26,7 @@
 
 package onyx.exceptions.api;
 
-import static javax.servlet.http.HttpServletResponse.SC_PRECONDITION_FAILED;
+import static curacao.core.servlet.HttpStatus.SC_PRECONDITION_FAILED;
 
 public final class ApiPreconditionFailedException extends OnyxApiException {
 

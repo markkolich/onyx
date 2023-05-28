@@ -23,7 +23,7 @@
 
           <div class="row">
 
-            <div class="col-xl-8 col-lg-12">
+            <div class="col-md-12 col-lg-8 col-xl-9">
 
               <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -65,7 +65,7 @@
                 <div class="card-body table-responsive">
 
                   <#if resource.getHtmlDescription()?has_content>
-                    <p class="text-muted mb-3">${resource.getHtmlDescription()}</p>
+                    <p class="text-muted mb-3" data-clipboard-text="${resource.getHtmlDescription()}">${resource.getHtmlDescription()}</p>
                   </#if>
 
                   <#if resource.getType() == "DIRECTORY">
@@ -79,9 +79,9 @@
                 </div>
               </div>
 
-            </div> <!-- /.col-xl-8 -->
+            </div> <!-- /.col-md-12 col-lg-8 col-xl-9 -->
 
-            <div class="col-xl-4 col-lg-12">
+            <div class="col-md-12 col-lg-4 col-xl-3">
 
               <#include "details/resource-owner-card.ftl">
 
@@ -101,7 +101,7 @@
 
               <#include "details/resource-attributes-card.ftl">
 
-            </div> <!-- /.col-xl-4 -->
+            </div> <!-- /.col-md-12 col-lg-4 col-xl-3 -->
 
         </div> <!-- /.row -->
 

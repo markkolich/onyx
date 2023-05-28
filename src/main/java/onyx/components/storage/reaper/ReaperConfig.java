@@ -24,21 +24,33 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.exceptions.api;
+package onyx.components.storage.reaper;
 
-import static curacao.core.servlet.HttpStatus.SC_BAD_REQUEST;
+import java.time.Duration;
 
-public final class ApiBadRequestException extends OnyxApiException {
+public interface ReaperConfig {
 
-    public ApiBadRequestException(
-            final String message,
-            final Exception cause) {
-        super(SC_BAD_REQUEST, message, cause);
-    }
+    String REAPER_CONFIG_PATH = "reaper";
 
-    public ApiBadRequestException(
-            final String message) {
-        super(SC_BAD_REQUEST, message);
-    }
+    String REAPER_RUN_ON_APP_STARTUP_PROP = "run-on-app-startup";
+    String REAPER_RUN_ON_SCHEDULE_PROP = "run-on-schedule";
+    String REAPER_RUN_CRON_EXPRESSION_PROP = "run-cron-expression";
+
+    String REAPER_BACKOFF_MAX_RETRIES_PROP = "backoff-max-retries";
+    String REAPER_BACKOFF_THROTTLE_DURATION_PROP = "backoff-throttle-duration";
+
+    String REAPER_ITERATION_THROTTLE_DURATION_PROP = "iteration-throttle-duration";
+
+    boolean getReaperRunOnAppStartup();
+
+    boolean getReaperRunOnSchedule();
+
+    String getReaperRunCronExpression();
+
+    int getBackoffMaxRetries();
+
+    Duration getBackoffThrottleDuration();
+
+    Duration getIterationThrottleDuration();
 
 }

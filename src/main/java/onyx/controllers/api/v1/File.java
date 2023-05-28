@@ -36,6 +36,7 @@ import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.RequestBody;
+import curacao.core.servlet.HttpResponse;
 import curacao.entities.CuracaoEntity;
 import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.aws.dynamodb.DynamoDbMapper;
@@ -59,7 +60,6 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
 import java.time.Instant;
 import java.util.List;
@@ -112,7 +112,7 @@ public final class File extends AbstractOnyxApiController {
             @Path("path") final String path,
             @Query("recursive") final Boolean recursive,
             @RequestBody final UploadFileRequest request,
-            final HttpServletResponse response,
+            final HttpResponse response,
             final Session session) {
         if (session == null) {
             throw new ApiUnauthorizedException("User not authenticated.");

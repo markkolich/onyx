@@ -26,13 +26,13 @@
 
 package onyx.mappers.response;
 
+import curacao.core.servlet.HttpResponse;
 import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 import onyx.components.FreeMarkerContentRenderer;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.entities.freemarker.Utf8TextEntity;
 
 import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletResponse;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -47,7 +47,7 @@ public abstract class AbstractFreeMarkerContentAwareResponseMapper<T>
     }
 
     protected final void renderFreeMarkerContent(
-            final HttpServletResponse response,
+            final HttpResponse response,
             final FreeMarkerContent content) throws Exception {
         final String rendered = fmcRenderer_.contentToString(content);
         renderEntity(response, new Utf8TextEntity(content.getEntityType(), content.getStatus(), rendered));

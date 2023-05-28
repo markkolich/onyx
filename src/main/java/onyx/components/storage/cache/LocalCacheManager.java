@@ -28,6 +28,7 @@ package onyx.components.storage.cache;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import curacao.core.servlet.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaders;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.cache.LocalCacheConfig;
@@ -43,7 +44,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
@@ -83,10 +83,7 @@ public final class LocalCacheManager implements CacheManager {
         asyncCacheExecutorService_ = asyncCacheThreadPool.getExecutorService();
 
         // Create the local cache directory if it does not exist.
-        final Path localCacheDir = localCacheConfig_.getLocalCacheDirectory();
-        if (Files.notExists(localCacheDir)) {
-            Files.createDirectories(localCacheDir);
-        }
+        createCacheDirectoryIfDoesNotExist();
     }
 
     @Override
@@ -230,6 +227,24 @@ public final class LocalCacheManager implements CacheManager {
     }
 
     /**
+     * Attempt to auto-create the local cache directory. If the creation fails for any
+     * reason, move on with a warning as this won't impact operation of the app. If the
+     * cache directory does not exist, resource caching won't work, but the service will
+     * continue to hum along just fine.
+     */
+    private void createCacheDirectoryIfDoesNotExist() {
+        final Path localCacheDir = localCacheConfig_.getLocalCacheDirectory();
+
+        try {
+            if (Files.notExists(localCacheDir)) {
+                Files.createDirectories(localCacheDir);
+            }
+        } catch (final Exception e) {
+            LOG.warn("Failed to auto-create resource cache directory: {}", localCacheDir, e);
+        }
+    }
+
+    /**
      * Builds & resolves a resource path into its hashed cache file equivalent.
      * This method does not check if the resulting {@link Path} exists.
      */
@@ -266,7 +281,7 @@ public final class LocalCacheManager implements CacheManager {
         @Override
         public State onStatusReceived(
                 final HttpResponseStatus responseStatus) throws Exception {
-            if (responseStatus.getStatusCode() != HttpServletResponse.SC_OK) {
+            if (responseStatus.getStatusCode() != HttpStatus.SC_OK) {
                 return State.ABORT;
             }
 

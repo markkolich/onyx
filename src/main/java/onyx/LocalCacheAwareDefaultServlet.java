@@ -27,6 +27,7 @@
 package onyx;
 
 import com.google.common.base.Splitter;
+import curacao.servlet.javax.JavaxServletContext;
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.cache.CachedResourceSigner;
@@ -43,7 +44,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.getComponentFromContext;
+import static curacao.core.CuracaoCoreObjectMap.getComponentFromContext;
 
 public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
 
@@ -61,10 +62,12 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
         }
 
         final ServletContext context = getServletContext();
+        final curacao.core.servlet.ServletContext curacaoServletContext =
+                new JavaxServletContext(context);
 
         // If the local cache is not enabled, immediately bail.
         final LocalCacheConfig localCacheConfig =
-                getComponentFromContext(context, LocalCacheConfig.class);
+                getComponentFromContext(curacaoServletContext, LocalCacheConfig.class);
         checkNotNull(localCacheConfig, "Local cache config cannot be null; context not initialized?");
         final boolean localCacheEnabled = localCacheConfig.localCacheEnabled();
         if (!localCacheEnabled) {
@@ -81,7 +84,7 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
 
         // Validate the signed cache token.
         final CachedResourceSigner cachedResourceSigner =
-                getComponentFromContext(context, CachedResourceSigner.class);
+                getComponentFromContext(curacaoServletContext, CachedResourceSigner.class);
         checkNotNull(cachedResourceSigner, "Cached resource signer cannot be null; context not initialized?");
         final String token = tokens.iterator().next();
         final CachedResourceToken cachedResourceToken =
@@ -92,7 +95,8 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
         }
 
         // Locate the cached asset/file for the resource token.
-        final CacheManager cacheManager = getComponentFromContext(context, CacheManager.class);
+        final CacheManager cacheManager =
+                getComponentFromContext(curacaoServletContext, CacheManager.class);
         checkNotNull(cacheManager, "Cache manager cannot be null; context not initialized?");
         final boolean hasResourceInCache = cacheManager.hasResourceInCache(cachedResourceToken.getPath());
         if (!hasResourceInCache) {

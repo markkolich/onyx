@@ -30,6 +30,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.io.Resources;
+import curacao.core.servlet.ServletContext;
 import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import org.eclipse.jetty.util.resource.Resource;
@@ -37,7 +38,6 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletContext;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ThreadLocalRandom;
@@ -89,10 +89,6 @@ public abstract class AbstractOnyxTest {
                 .thenReturn(baseResource);
 
         Mockito.when(servletContext_.getContextPath()).thenReturn(testContextPath);
-        Mockito.when(servletContext_.getRealPath(Mockito.anyString())).thenAnswer(invocation -> {
-            final String arg = invocation.getArgument(0);
-            return webAppRootPath + arg;
-        });
 
         onyxConfig_ = Mockito.mock(OnyxConfig.class);
         Mockito.when(onyxConfig_.getContextPath()).thenReturn(testContextPath);

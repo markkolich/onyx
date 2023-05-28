@@ -31,6 +31,7 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import curacao.core.servlet.HttpStatus;
 import onyx.BuildVersion;
 import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
@@ -43,7 +44,6 @@ import org.asynchttpclient.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
@@ -124,9 +124,9 @@ public final class BitlyShortLinkGenerator implements ShortLinkGenerator {
 
             final Response response = futureResponse.get(apiClientTimeoutInMs, TimeUnit.MILLISECONDS);
             final int statusCode = response.getStatusCode();
-            if (statusCode == HttpServletResponse.SC_OK) {
+            if (statusCode == HttpStatus.SC_OK) {
                 LOG.debug("Using existing bit.ly link for resource: {}", resource.getPath());
-            } else if (statusCode == HttpServletResponse.SC_CREATED) {
+            } else if (statusCode == HttpStatus.SC_CREATED) {
                 LOG.debug("Created new bit.ly link for resource: {}", resource.getPath());
             } else {
                 throw new OnyxException(String.format("Unsuccessful status code from bit.ly API: %s",

@@ -26,7 +26,7 @@
 
 package onyx.exceptions.api;
 
-import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
+import static curacao.core.servlet.HttpStatus.SC_CONFLICT;
 
 public final class ApiConflictException extends OnyxApiException {
 

@@ -26,10 +26,9 @@
 
 package onyx.controllers;
 
+import curacao.core.servlet.HttpStatus;
 import curacao.entities.empty.StatusCodeOnlyCuracaoEntity;
 import onyx.components.config.OnyxConfig;
-
-import javax.servlet.http.HttpServletResponse;
 
 public abstract class AbstractOnyxController {
 
@@ -50,69 +49,69 @@ public abstract class AbstractOnyxController {
 
     /**
      * Convenience method that returns an empty response entity with a preset HTTP 200 OK
-     * status code provided by {@link HttpServletResponse#SC_OK}.
+     * status code provided by {@link HttpStatus#SC_OK}.
      *
-     * This method is intended to be used when a {@link HttpServletResponse#SC_OK} response
+     * This method is intended to be used when a {@link HttpStatus#SC_OK} response
      * is desired with an empty response body.
      */
     protected static final StatusCodeOnlyCuracaoEntity ok() {
-        return status(HttpServletResponse.SC_OK);
+        return status(HttpStatus.SC_OK);
     }
 
     /**
      * Convenience method that returns an empty response entity with a preset HTTP 201 Created
-     * status code provided by {@link HttpServletResponse#SC_CREATED}.
+     * status code provided by {@link HttpStatus#SC_CREATED}.
      */
     protected static final StatusCodeOnlyCuracaoEntity created() {
-        return status(HttpServletResponse.SC_CREATED);
+        return status(HttpStatus.SC_CREATED);
     }
 
     /**
      * Convenience method that returns a response entity with a preset HTTP 204 No Content
-     * status code provided by {@link HttpServletResponse#SC_NO_CONTENT}.
+     * status code provided by {@link HttpStatus#SC_NO_CONTENT}.
      */
     protected static final StatusCodeOnlyCuracaoEntity noContent() {
-        return status(HttpServletResponse.SC_NO_CONTENT);
+        return status(HttpStatus.SC_NO_CONTENT);
     }
 
     /**
      * Convenience method that returns a response entity with a preset HTTP 401 Unauthorized
-     * status code provided by {@link HttpServletResponse#SC_UNAUTHORIZED}.
+     * status code provided by {@link HttpStatus#SC_UNAUTHORIZED}.
      */
     protected static final StatusCodeOnlyCuracaoEntity unauthorized() {
-        return status(HttpServletResponse.SC_UNAUTHORIZED);
+        return status(HttpStatus.SC_UNAUTHORIZED);
     }
 
     /**
      * Convenience method that returns a response entity with a preset HTTP 403 Forbidden
-     * status code provided by {@link HttpServletResponse#SC_FORBIDDEN}.
+     * status code provided by {@link HttpStatus#SC_FORBIDDEN}.
      */
     protected static final StatusCodeOnlyCuracaoEntity forbidden() {
-        return status(HttpServletResponse.SC_FORBIDDEN);
+        return status(HttpStatus.SC_FORBIDDEN);
     }
 
     /**
      * Convenience method that returns a response entity with a preset HTTP 400 Bad Request
-     * status code provided by {@link HttpServletResponse#SC_BAD_REQUEST}.
+     * status code provided by {@link HttpStatus#SC_BAD_REQUEST}.
      */
     protected static final StatusCodeOnlyCuracaoEntity badRequest() {
-        return status(HttpServletResponse.SC_BAD_REQUEST);
+        return status(HttpStatus.SC_BAD_REQUEST);
     }
 
     /**
      * Convenience method that returns a response entity with a preset HTTP 400 Bad Request
-     * status code provided by {@link HttpServletResponse#SC_INTERNAL_SERVER_ERROR}.
+     * status code provided by {@link HttpStatus#SC_INTERNAL_SERVER_ERROR}.
      */
     protected static final StatusCodeOnlyCuracaoEntity internalServerError() {
-        return status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        return status(HttpStatus.SC_INTERNAL_SERVER_ERROR);
     }
 
     /**
      * Convenience method that returns a response entity with a preset HTTP 503 Service Unavailable
-     * status code provided by {@link HttpServletResponse#SC_SERVICE_UNAVAILABLE}.
+     * status code provided by {@link HttpStatus#SC_SERVICE_UNAVAILABLE}.
      */
     protected static final StatusCodeOnlyCuracaoEntity unavailable() {
-        return status(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        return status(HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
 
 }

@@ -24,40 +24,54 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.mappers.response.exceptions;
+package onyx.components.storage.reaper;
 
+import com.typesafe.config.Config;
+import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.annotations.Mapper;
-import curacao.core.servlet.AsyncContext;
-import curacao.core.servlet.HttpResponse;
-import curacao.exceptions.routing.PathNotFoundException;
-import onyx.components.FreeMarkerContentRenderer;
-import onyx.entities.freemarker.FreeMarkerContent;
-import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
+import onyx.components.config.OnyxConfig;
 
-import javax.annotation.Nonnull;
+import java.time.Duration;
 
-import static curacao.core.servlet.HttpStatus.SC_NOT_FOUND;
+@Component
+public final class OnyxReaperConfig implements ReaperConfig {
 
-@Mapper
-public final class PathNotFoundExceptionResponseMapper
-        extends AbstractFreeMarkerContentAwareResponseMapper<PathNotFoundException> {
+    private final Config config_;
 
     @Injectable
-    public PathNotFoundExceptionResponseMapper(
-            @Nonnull final FreeMarkerContentRenderer fmcRenderer) {
-        super(fmcRenderer);
+    public OnyxReaperConfig(
+            final OnyxConfig onyxConfig) {
+        config_ = onyxConfig.getOnyxConfig().getConfig(REAPER_CONFIG_PATH);
     }
 
     @Override
-    public void render(
-            final AsyncContext context,
-            final HttpResponse response,
-            @Nonnull final PathNotFoundException entity) throws Exception {
-        final FreeMarkerContent content = new FreeMarkerContent.Builder("templates/errors/404.ftl", SC_NOT_FOUND)
-                .build();
+    public boolean getReaperRunOnAppStartup() {
+        return config_.getBoolean(REAPER_RUN_ON_APP_STARTUP_PROP);
+    }
 
-        renderFreeMarkerContent(response, content);
+    @Override
+    public boolean getReaperRunOnSchedule() {
+        return config_.getBoolean(REAPER_RUN_ON_SCHEDULE_PROP);
+    }
+
+    @Override
+    public String getReaperRunCronExpression() {
+        return config_.getString(REAPER_RUN_CRON_EXPRESSION_PROP);
+    }
+
+    @Override
+    public int getBackoffMaxRetries() {
+        return config_.getInt(REAPER_BACKOFF_MAX_RETRIES_PROP);
+    }
+
+    @Override
+    public Duration getBackoffThrottleDuration() {
+        return config_.getDuration(REAPER_BACKOFF_THROTTLE_DURATION_PROP);
+    }
+
+    @Override
+    public Duration getIterationThrottleDuration() {
+        return config_.getDuration(REAPER_ITERATION_THROTTLE_DURATION_PROP);
     }
 
 }

@@ -26,7 +26,7 @@
 
 package onyx.exceptions.api;
 
-import static javax.servlet.http.HttpServletResponse.SC_SERVICE_UNAVAILABLE;
+import static curacao.core.servlet.HttpStatus.SC_SERVICE_UNAVAILABLE;
 
 public final class ApiServiceUnavailableException extends OnyxApiException {
 
