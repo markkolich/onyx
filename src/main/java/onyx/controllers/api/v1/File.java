@@ -64,7 +64,9 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.List;
 
-import static curacao.annotations.RequestMapping.Method.*;
+import static curacao.annotations.RequestMapping.Method.DELETE;
+import static curacao.annotations.RequestMapping.Method.POST;
+import static curacao.annotations.RequestMapping.Method.PUT;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
@@ -277,6 +279,7 @@ public final class File extends AbstractOnyxApiController {
     public CuracaoEntity deleteFile(
             @Path("username") final String username,
             @Path("path") final String path,
+            @Query("permanent") final Boolean permanent,
             final Session session) {
         if (session == null) {
             throw new ApiUnauthorizedException("User not authenticated.");
@@ -308,7 +311,8 @@ public final class File extends AbstractOnyxApiController {
         resourceManager_.deleteResource(file);
 
         // Delete the asset asynchronously.
-        assetManager_.deleteResourceAsync(file);
+        final boolean deletePermanently = BooleanUtils.toBooleanDefaultIfNull(permanent, false);
+        assetManager_.deleteResourceAsync(file, deletePermanently);
 
         // Delete the asset from the cache asynchronously too.
         final boolean localCacheEnabled = localCacheConfig_.localCacheEnabled();

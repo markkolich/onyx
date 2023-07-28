@@ -53,9 +53,11 @@ public interface AssetManager {
             final Resource resource);
 
     void deleteResource(
-            final Resource resource);
+            final Resource resource,
+            final boolean permanent);
 
     void deleteResourceAsync(
-            final Resource resource);
+            final Resource resource,
+            final boolean permanent);
 
 }

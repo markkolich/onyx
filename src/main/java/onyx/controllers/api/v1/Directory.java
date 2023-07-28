@@ -227,6 +227,7 @@ public final class Directory extends AbstractOnyxApiController {
     public CuracaoEntity deleteDirectory(
             @Path("username") final String username,
             @Path("path") final String path,
+            @Query("permanent") final Boolean permanent,
             final Session session) {
         if (session == null) {
             throw new ApiUnauthorizedException("User not authenticated.");
@@ -258,7 +259,8 @@ public final class Directory extends AbstractOnyxApiController {
         resourceManager_.deleteResource(directory);
 
         // Recursively delete all assets under the directory, asynchronously.
-        assetManager_.deleteResourceAsync(directory);
+        final boolean deletePermanently = BooleanUtils.toBooleanDefaultIfNull(permanent, false);
+        assetManager_.deleteResourceAsync(directory, deletePermanently);
 
         return noContent();
     }

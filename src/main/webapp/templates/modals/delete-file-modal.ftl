@@ -10,7 +10,7 @@
     </div>
     <div class="modal-body">
         <p>Are you sure you want to delete this file?</p>
-        <p class="mb-0" data-modal="name"></p>
+        <code data-modal="name"></code>
     </div>
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>

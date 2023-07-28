@@ -23,6 +23,11 @@
     <rule ref="category/java/bestpractices.xml/UseVarargs" />
     <rule ref="category/java/bestpractices.xml/WhileLoopWithLiteralBoolean" />
     <rule ref="category/java/bestpractices.xml/PrimitiveWrapperInstantiation" />
+    <rule ref="category/java/bestpractices.xml/AvoidReassigningLoopVariables">
+        <properties>
+            <property name="forReassign" value="allow" />
+        </properties>
+    </rule>
 
     <rule ref="category/java/codestyle.xml/UseDiamondOperator" />
     <rule ref="category/java/codestyle.xml/MethodArgumentCouldBeFinal" />

@@ -31,6 +31,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.S3Link;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.*;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.net.MediaType;
 import curacao.annotations.Component;
@@ -162,12 +163,14 @@ public final class S3Manager implements AssetManager {
 
     @Override
     public void deleteResource(
-            final Resource resource) {
+            final Resource resource,
+            final boolean permanent) {
         final Resource.Type resourceType = resource.getType();
 
         if (Resource.Type.FILE.equals(resourceType)) {
             final S3Link s3Link = resource.getS3Link();
-            s3_.deleteObject(s3Link.getBucketName(), s3Link.getKey());
+
+            deleteObject(s3Link.getBucketName(), s3Link.getKey(), permanent);
         } else if (Resource.Type.DIRECTORY.equals(resourceType)) {
             final S3Link s3Link = resource.getS3Link();
 
@@ -178,14 +181,66 @@ public final class S3Manager implements AssetManager {
             final List<S3ObjectSummary> objectsToDelete = objectList.getObjectSummaries();
             objectsToDelete.stream()
                     .map(S3ObjectSummary::getKey)
-                    .forEach(key -> s3_.deleteObject(s3Link.getBucketName(), key));
+                    .forEach(key -> deleteObject(s3Link.getBucketName(), key, permanent));
         }
     }
 
     @Override
     public void deleteResourceAsync(
-            final Resource resource) {
-        asyncAssetExecutorService_.submit(() -> deleteResource(resource));
+            final Resource resource,
+            final boolean permanent) {
+        asyncAssetExecutorService_.submit(() -> deleteResource(resource, permanent));
+    }
+
+    private void deleteObject(
+            final String bucketName,
+            final String key,
+            final boolean permanent) {
+        final boolean versioningEnabled = awsConfig_.getAwsS3VersioningEnabled();
+
+        if (versioningEnabled && permanent) {
+            // Permanent deletion of an object in a versioning enabled S3 bucket requires us to
+            // fetch each version of the object at the given key and then explicitly delete each version.
+            // This is the only way to permanently delete objects in a versioning enabled S3 bucket.
+            final List<S3VersionSummary> versions = getAllVersionSummariesForObject(bucketName, key);
+            for (final S3VersionSummary version : versions) {
+                final DeleteVersionRequest dvr = new DeleteVersionRequest(
+                        bucketName,
+                        version.getKey(),
+                        version.getVersionId());
+
+                s3_.deleteVersion(dvr);
+            }
+        } else {
+            // Standard deletion; if done in a versioning enabled bucket this operation
+            // creates a delete marker in S3 and the object appears as it has been deleted.
+            s3_.deleteObject(bucketName, key);
+        }
+    }
+
+    /**
+     * Fetches a complete list of all object version summaries for the given key,
+     * iterating over the fetched object versions in batches as needed.
+     */
+    private List<S3VersionSummary> getAllVersionSummariesForObject(
+            final String bucketName,
+            final String key) {
+        final ImmutableList.Builder<S3VersionSummary> builder = ImmutableList.builder();
+
+        final ListVersionsRequest lvr = new ListVersionsRequest();
+        lvr.setBucketName(bucketName);
+        lvr.setPrefix(key);
+        lvr.setMaxResults(5);
+
+        VersionListing verList = s3_.listVersions(lvr);
+        for (boolean truncated = true; truncated; verList = s3_.listNextBatchOfVersions(verList)) {
+            for (final S3VersionSummary summary : verList.getVersionSummaries()) {
+                builder.add(summary);
+            }
+            truncated = verList.isTruncated();
+        }
+
+        return builder.build();
     }
 
 }

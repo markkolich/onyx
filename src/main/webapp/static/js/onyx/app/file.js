@@ -182,16 +182,37 @@
 
             var
                 modal = $('#delete-file-modal'),
+                permanent = false,
 
                 showModal = function(resource) {
                     var name = decodeURIComponent(resource.split('/').pop());
                     modal.find('[data-modal="name"]').html(name);
 
+                    var kpListener = new window.keypress.Listener();
+                    permanent = false;
+
                     modal.on('shown.bs.modal', function() {
+                        var submitButton = modal.find('button[type="submit"]');
+                        kpListener.register_combo({
+                            'keys': 'shift',
+                            'is_exclusive': true,
+                            'on_keydown': function() {
+                                submitButton.text('Delete Permanently');
+                                permanent = true;
+                            },
+                            'on_keyup': function() {
+                                submitButton.text('Delete');
+                                permanent = false;
+                            }
+                        });
+
                         modal.find('button[type="submit"]').unbind().click(function() {
+                            kpListener.stop_listening();
+
                             $.ajax({
                                 type: 'DELETE',
-                                url: parent.baseApiUrl + '/v1/file' + resource,
+                                url: parent.baseApiUrl + '/v1/file' + resource
+                                    + '?' + $.param({'permanent':permanent}),
                                 success: function(res, status, xhr) {
                                     modal.modal('hide');
 
@@ -199,6 +220,11 @@
                                 }
                             });
                         });
+                    });
+
+                    modal.on('hidden.bs.modal', function() {
+                        kpListener.reset();
+                        kpListener.destroy();
                     });
 
                     modal.modal('show');

@@ -86,6 +86,11 @@ public final class OnyxTypesafeAwsConfig implements AwsConfig {
     }
 
     @Override
+    public boolean getAwsS3VersioningEnabled() {
+        return config_.getBoolean(AWS_S3_VERSIONING_ENABLED_PROP);
+    }
+
+    @Override
     public long getAwsS3PresignedAssetUrlValidityDuration(
             final TimeUnit timeUnit) {
         return config_.getDuration(AWS_S3_ASSET_URL_VALIDITY_DURATION_PROP, timeUnit);

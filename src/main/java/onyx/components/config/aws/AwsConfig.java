@@ -44,6 +44,7 @@ public interface AwsConfig {
 
     String AWS_S3_REGION_PROP = "s3.region";
     String AWS_S3_BUCKET_NAME_PROP = "s3.bucket-name";
+    String AWS_S3_VERSIONING_ENABLED_PROP = "s3.versioning-enabled";
     String AWS_S3_ASSET_URL_VALIDITY_DURATION_PROP = "s3.asset-url-validity-duration";
     String AWS_S3_DEFAULT_STORAGE_CLASS_PROP = "s3.default-storage-class";
     String AWS_S3_MAX_UPLOAD_FILE_SIZE_PROP = "s3.max-upload-file-size";
@@ -67,6 +68,8 @@ public interface AwsConfig {
     Regions getAwsS3Region();
 
     String getAwsS3BucketName();
+
+    boolean getAwsS3VersioningEnabled();
 
     long getAwsS3PresignedAssetUrlValidityDuration(
             final TimeUnit timeUnit);
