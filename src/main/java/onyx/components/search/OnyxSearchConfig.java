@@ -68,6 +68,11 @@ public final class OnyxSearchConfig implements SearchConfig {
         return config_.getString(SOLR_NODE_NAME_PROP);
     }
 
+    @Override
+    public int getMaxResultsPerSearch() {
+        return config_.getInt(SOLR_MAX_ROWS_PER_SEARCH_PROP);
+    }
+
     // Indexer config
 
     @Override

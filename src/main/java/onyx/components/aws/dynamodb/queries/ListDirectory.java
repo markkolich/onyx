@@ -89,7 +89,7 @@ public final class ListDirectory {
         final List<Resource> directories = resources.get(Resource.Type.DIRECTORY);
         final List<Resource> files = resources.get(Resource.Type.FILE);
 
-        // Directories go first, then files and links sorted alphabetically.
+        // Directories go first, then files sorted alphabetically.
         return ImmutableList.copyOf(Iterables.concat(directories, files));
     }
 

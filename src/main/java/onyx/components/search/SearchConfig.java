@@ -37,6 +37,7 @@ public interface SearchConfig {
     String SOLR_CONFIG_DIR_PROP = "solr.config-dir";
     String SOLR_CORE_NAME_PROP = "solr.core-name";
     String SOLR_NODE_NAME_PROP = "solr.node-name";
+    String SOLR_MAX_ROWS_PER_SEARCH_PROP = "solr.max-rows-per-search";
 
     String INDEXER_RUN_ON_APP_STARTUP_PROP = "indexer.run-on-app-startup";
     String INDEXER_REBUILD_ON_SCHEDULE_PROP = "indexer.rebuild-on-schedule";
@@ -54,6 +55,8 @@ public interface SearchConfig {
     String getSolrCoreName();
 
     String getSolrNodeName();
+
+    int getMaxResultsPerSearch();
 
     // Indexer config
 

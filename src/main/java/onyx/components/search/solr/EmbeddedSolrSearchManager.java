@@ -34,6 +34,7 @@ import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.aws.dynamodb.DynamoDbMapper;
 import onyx.components.config.aws.AwsConfig;
+import onyx.components.search.SearchConfig;
 import onyx.components.search.SearchManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.search.SearchException;
@@ -49,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -59,9 +61,10 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(EmbeddedSolrSearchManager.class);
 
-    private static final int DEFAULT_ROW_COUNT = 25;
+    private static final int DEFAULT_ROW_COUNT = 100;
 
     private final AwsConfig awsConfig_;
+    private final SearchConfig searchConfig_;
 
     private final SolrClient solrClient_;
 
@@ -70,9 +73,11 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
     @Injectable
     public EmbeddedSolrSearchManager(
             final AwsConfig awsConfig,
+            final SearchConfig searchConfig,
             final SolrClientProvider solrClientProvider,
             final DynamoDbMapper dynamoDbMapper) {
         awsConfig_ = awsConfig;
+        searchConfig_ = searchConfig;
 
         solrClient_ = solrClientProvider.getSolrClient();
         dbMapper_ = dynamoDbMapper.getDbMapper();
@@ -195,12 +200,14 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
         try {
             final SolrQuery solrQuery = new SolrQuery(sb.toString())
                     .addSort(SearchManager.QUERY_FIELD_SCORE, SolrQuery.ORDER.desc)
-                    .setRows(DEFAULT_ROW_COUNT);
+                    .setRows(searchConfig_.getMaxResultsPerSearch());
             final QueryResponse response = solrClient_.query(solrQuery);
             final SolrDocumentList documents = response.getResults();
 
             return documents.stream()
                     .map(document -> mapSolrDocumentToResource(document, awsConfig_, dbMapper_))
+                    // Favorited results first.
+                    .sorted(Comparator.comparing(Resource::getFavorite).reversed())
                     .collect(ImmutableList.toImmutableList());
         } catch (final Exception e) {
             LOG.error("Failed to search index for query: {}", query, e);
