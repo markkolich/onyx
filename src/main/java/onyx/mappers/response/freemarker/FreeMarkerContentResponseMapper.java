@@ -31,43 +31,28 @@ import curacao.annotations.Mapper;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
 import onyx.components.FreeMarkerContentRenderer;
-import onyx.components.authentication.SessionManager;
-import onyx.components.authentication.UserAuthenticator;
-import onyx.components.config.OnyxConfig;
-import onyx.components.config.authentication.SessionConfig;
-import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
-import onyx.util.CookieBaker;
+import onyx.mappers.response.freemarker.helpers.FreeMarkerLinkHeaderDnsPrefetchHelper;
+import onyx.mappers.response.freemarker.helpers.FreeMarkerSessionRefresherHelper;
 
 import javax.annotation.Nonnull;
-import java.time.Instant;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 @Mapper
 public final class FreeMarkerContentResponseMapper
         extends AbstractFreeMarkerContentAwareResponseMapper<FreeMarkerContent> {
 
-    private final OnyxConfig onyxConfig_;
-
-    private final UserAuthenticator userAuthenticator_;
-
-    private final SessionConfig sessionConfig_;
-    private final SessionManager sessionManager_;
+    private final FreeMarkerSessionRefresherHelper sessionRefresherHelper_;
+    private final FreeMarkerLinkHeaderDnsPrefetchHelper linkHeaderDnsPrefetchHelper_;
 
     @Injectable
     public FreeMarkerContentResponseMapper(
             @Nonnull final FreeMarkerContentRenderer fmcRenderer,
-            @Nonnull final OnyxConfig onyxConfig,
-            @Nonnull final UserAuthenticator userAuthenticator,
-            @Nonnull final SessionConfig sessionConfig,
-            @Nonnull final SessionManager sessionManager) {
+            @Nonnull final FreeMarkerSessionRefresherHelper sessionRefresherHelper,
+            @Nonnull final FreeMarkerLinkHeaderDnsPrefetchHelper linkHeaderDnsPrefetchHelper) {
         super(fmcRenderer);
-        onyxConfig_ = onyxConfig;
-        userAuthenticator_ = userAuthenticator;
-        sessionConfig_ = sessionConfig;
-        sessionManager_ = sessionManager;
+        sessionRefresherHelper_ = sessionRefresherHelper;
+        this.linkHeaderDnsPrefetchHelper_ = linkHeaderDnsPrefetchHelper;
     }
 
     @Override
@@ -75,36 +60,10 @@ public final class FreeMarkerContentResponseMapper
             final AsyncContext context,
             final HttpResponse response,
             @Nonnull final FreeMarkerContent content) throws Exception {
-        final boolean shouldRefreshSessionAutomatically =
-                sessionConfig_.shouldRefreshSessionAutomatically();
-        final Session session = content.getAttribute(FreeMarkerContent.DATA_MAP_SESSION_ATTR);
-        if (shouldRefreshSessionAutomatically && session != null) {
-            refreshSessionIfNeeded(session, response);
-        }
+        sessionRefresherHelper_.refreshSession(response, content);
+        linkHeaderDnsPrefetchHelper_.addLinkHeader(response);
 
         renderFreeMarkerContent(response, content);
-    }
-
-    private void refreshSessionIfNeeded(
-            final Session session,
-            final HttpResponse response) {
-        checkNotNull(session, "Session to refresh cannot be null.");
-        checkNotNull(response, "HTTP servlet response cannot be null.");
-
-        final Instant refreshAfter = session.getRefreshAfter();
-        if (Instant.now().isAfter(refreshAfter)) {
-            final Session refreshed = userAuthenticator_.refreshSession(session);
-            final String signedRefreshedSession = sessionManager_.signSession(refreshed);
-
-            final CookieBaker refreshedSessionCookieBaker = new CookieBaker.Builder()
-                    .setName(SessionManager.SESSION_COOKIE_NAME)
-                    .setValue(signedRefreshedSession)
-                    .setDomain(sessionConfig_.getSessionDomain())
-                    .setContextPath(onyxConfig_.getContextPath())
-                    .setSecure(sessionConfig_.isSessionUsingHttps())
-                    .build();
-            refreshedSessionCookieBaker.bake(response);
-        }
     }
 
 }

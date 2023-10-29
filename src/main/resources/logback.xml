@@ -18,6 +18,9 @@
     <logger name="curacao.handlers.ReturnTypeMapperCallbackHandler" additivity="false" level="ERROR">
         <appender-ref ref="STDOUT"/>
     </logger>
+    <logger name="curacao.handlers.AbstractFutureCallbackHandler" additivity="false" level="ERROR">
+        <appender-ref ref="STDOUT"/>
+    </logger>
 
     <!-- Squelch noisy Solr logging; enable if needed in dev. -->
     <logger name="org.apache.solr.update.processor.LogUpdateProcessorFactory" additivity="false" level="ERROR">
