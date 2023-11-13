@@ -103,9 +103,11 @@
 
             </div> <!-- /.col-md-12 col-lg-4 col-xl-3 -->
 
-        </div> <!-- /.row -->
+          </div> <!-- /.row -->
 
-      </div> <!-- /.container-fluid -->
+        </div> <!-- /.container-fluid -->
+
+      </div> <!-- /main content -->
 
       <#include "common/nav/footer.ftl">
 
