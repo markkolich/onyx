@@ -153,7 +153,7 @@ aws s3api delete-objects --bucket "bucket-name" --delete "$(aws s3api list-objec
 
 ## Licensing
 
-Copyright (c) 2023 <a href="https://mark.koli.ch">Mark S. Kolich</a>.
+Copyright (c) 2024 <a href="https://mark.koli.ch">Mark S. Kolich</a>.
 
 All code in this project is freely available for use and redistribution under the <a href="http://opensource.org/comment/991">MIT License</a>.
 

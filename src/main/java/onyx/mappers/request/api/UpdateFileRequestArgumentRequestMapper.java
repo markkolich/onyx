@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
