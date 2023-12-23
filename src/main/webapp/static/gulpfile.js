@@ -57,6 +57,7 @@ gulp.task('concat-js', ['eslint-js'], function() {
         'vendor/jquery-easing/jquery.easing.min.js',
         'vendor/featherlight/featherlight.min.js',
         'vendor/keypress/keypress-2.1.5.min.js',
+        'vendor/underscore/underscore-1.9.2.min.js',
         'js/sb-admin-2.js',
         'js/onyx/onyx.js',
         'js/onyx/app/app.js',

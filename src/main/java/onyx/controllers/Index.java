@@ -50,7 +50,7 @@ public final class Index extends AbstractOnyxFreeMarkerController {
         super(onyxConfig, resourceManager);
     }
 
-    @RequestMapping(value = "^/$")
+    @RequestMapping("^/$")
     public FreeMarkerContent index(
             final Session session) {
         final List<Resource> homeDirectories = resourceManager_.listHomeDirectories();
@@ -63,7 +63,8 @@ public final class Index extends AbstractOnyxFreeMarkerController {
 
     @RequestMapping("^/robots\\.txt$")
     public FreeMarkerContent robots() {
-        return new FreeMarkerContent.Builder("templates/txt/robots.ftl", TEXT).build();
+        return new FreeMarkerContent.Builder("templates/txt/robots.ftl", TEXT)
+                .build();
     }
 
     @RequestMapping("^/sitemap\\.xml$")

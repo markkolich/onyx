@@ -8,7 +8,8 @@
     "ecmaVersion": 5
   },
   "globals": {
-    "Onyx": true
+    "Onyx": true,
+    "_": true
   },
   "rules": {
     "comma-dangle": "error",

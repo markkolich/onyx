@@ -40,6 +40,9 @@ public interface CachedResourceToken {
     @JsonProperty("path")
     String getPath();
 
+    @JsonProperty("cacheKey")
+    String getCacheKey();
+
     @JsonProperty("expiry")
     Instant getExpiry();
 
@@ -47,12 +50,14 @@ public interface CachedResourceToken {
     default Builder toBuilder() {
         return new Builder()
                 .setPath(getPath())
+                .setCacheKey(getCacheKey())
                 .setExpiry(getExpiry());
     }
 
     final class Builder {
 
         private String path_;
+        private String cacheKey_;
 
         private Instant expiry_;
 
@@ -60,6 +65,13 @@ public interface CachedResourceToken {
         public Builder setPath(
                 final String path) {
             path_ = path;
+            return this;
+        }
+
+        @JsonProperty("cacheKey")
+        public Builder setCacheKey(
+                final String cacheKey) {
+            cacheKey_ = cacheKey;
             return this;
         }
 
@@ -72,12 +84,18 @@ public interface CachedResourceToken {
 
         public CachedResourceToken build() {
             checkNotNull(path_, "Cached resource path cannot be null.");
+            checkNotNull(cacheKey_, "Cached resource cache key cannot be null.");
             checkNotNull(expiry_, "Cached resource expiry cannot be null.");
 
             return new CachedResourceToken() {
                 @Override
                 public String getPath() {
                     return path_;
+                }
+
+                @Override
+                public String getCacheKey() {
+                    return cacheKey_;
                 }
 
                 @Override

@@ -65,7 +65,7 @@ public final class Search extends AbstractOnyxFreeMarkerController {
         searchManager_ = searchManager;
     }
 
-    @RequestMapping(value = "^/search$")
+    @RequestMapping("^/search$")
     public FreeMarkerContent doSearch(
             @Query("query") final String query,
             final Session session) throws Exception {

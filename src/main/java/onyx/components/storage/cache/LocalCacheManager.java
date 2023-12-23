@@ -130,6 +130,7 @@ public final class LocalCacheManager implements CacheManager {
 
         final CachedResourceToken cachedResourceToken = new CachedResourceToken.Builder()
                 .setPath(resourcePath)
+                .setCacheKey(getCacheKey(resourcePath))
                 .setExpiry(Instant.now().plusSeconds(tokenValidityDurationInSeconds))
                 .build();
 
@@ -252,11 +253,18 @@ public final class LocalCacheManager implements CacheManager {
             final String resourcePath) {
         final Path localCacheDir = localCacheConfig_.getLocalCacheDirectory();
 
-        // SHA-256 hash the resource path; this should provide enough URL-safe
-        // uniqueness that there should not be any per-path conflicts when
-        // used in a URL or in the name of a file on disk.
-        final String hashedResourceName = DigestUtils.sha256Hex(resourcePath);
+        final String hashedResourceName = getCacheKey(resourcePath);
         return localCacheDir.resolve(hashedResourceName);
+    }
+
+    /**
+     * SHA-256 hash the resource path; this should provide enough URL-safe
+     * uniqueness that there should not be any per-path conflicts when used
+     * in a URL or in the name of a file on disk.
+     */
+    private String getCacheKey(
+            final String resourcePath) {
+        return DigestUtils.sha256Hex(resourcePath);
     }
 
     /**

@@ -100,7 +100,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
         twoFactorAuthCodeManager_ = twoFactorAuthCodeManager;
     }
 
-    @RequestMapping(value = "^/login$")
+    @RequestMapping("^/login$")
     public FreeMarkerContent login() {
         return new FreeMarkerContent.Builder("templates/login.ftl")
                 .build();
@@ -222,7 +222,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
         processLogin(session, response, context);
     }
 
-    @RequestMapping(value = "^/logout$")
+    @RequestMapping("^/logout$")
     public void logout(
             final HttpResponse response,
             final AsyncContext context) throws Exception {
