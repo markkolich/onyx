@@ -34,20 +34,20 @@
 
         <curacao.version>7.0.0</curacao.version>
 
-        <jetty.version>9.4.53.v20231009</jetty.version>
+        <jetty.version>9.4.54.v20240208</jetty.version>
 
         <typesafe-config.version>1.4.3</typesafe-config.version>
 
-        <jackson.version>2.16.1</jackson.version>
+        <jackson.version>2.17.0</jackson.version>
 
         <commons-lang3.version>3.14.0</commons-lang3.version>
         <commons-text.version>1.11.0</commons-text.version>
         <commons-io.version>2.15.1</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
 
-        <aws-sdk.version>1.12.674</aws-sdk.version>
+        <aws-sdk.version>1.12.686</aws-sdk.version>
 
-        <guava.version>33.0.0-jre</guava.version>
+        <guava.version>33.1.0-jre</guava.version>
 
         <freemarker.version>2.3.32</freemarker.version>
 
@@ -65,7 +65,7 @@
 
         <quartz.version>2.5.0-rc1</quartz.version>
 
-        <checkstyle.version>10.14.0</checkstyle.version>
+        <checkstyle.version>10.14.2</checkstyle.version>
 
         <!-- Test dependency versions -->
 
