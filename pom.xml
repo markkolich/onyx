@@ -22,7 +22,7 @@
         <maven-frontend-node.version>v8.17.0</maven-frontend-node.version>
         <maven-frontend-npm.version>6.4.1</maven-frontend-npm.version>
         <maven-checkstyle-plugin.version>3.3.0</maven-checkstyle-plugin.version>
-        <maven-pmd-plugin.version>3.21.0</maven-pmd-plugin.version>
+        <maven-pmd-plugin.version>3.21.2</maven-pmd-plugin.version>
         <maven-pmd-plugin.pmd.version>6.55.0</maven-pmd-plugin.pmd.version>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
@@ -42,10 +42,10 @@
 
         <commons-lang3.version>3.14.0</commons-lang3.version>
         <commons-text.version>1.11.0</commons-text.version>
-        <commons-io.version>2.15.1</commons-io.version>
+        <commons-io.version>2.16.0</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
 
-        <aws-sdk.version>1.12.686</aws-sdk.version>
+        <aws-sdk.version>1.12.696</aws-sdk.version>
 
         <guava.version>33.1.0-jre</guava.version>
 
@@ -65,7 +65,7 @@
 
         <quartz.version>2.5.0-rc1</quartz.version>
 
-        <checkstyle.version>10.14.2</checkstyle.version>
+        <checkstyle.version>10.15.0</checkstyle.version>
 
         <!-- Test dependency versions -->
 
