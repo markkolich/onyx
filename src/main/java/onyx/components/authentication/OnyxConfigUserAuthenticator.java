@@ -138,7 +138,7 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
         // Lookup the password from configuration.
         final User userFromConfig = userCredentials_.get(username);
         if (userFromConfig == null) {
-            LOG.warn("Found no user for username: {}", username);
+            LOG.debug("Found no user for username: {}", username);
             return null;
         }
 
@@ -146,7 +146,7 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
         final String passwordFromConfig = userFromConfig.getPassword();
         final boolean matches = pwHasher_.verify(password, passwordFromConfig);
         if (!matches) {
-            LOG.warn("Failed authentication attempt for user: {}", username);
+            LOG.debug("Failed authentication attempt for user: {}", username);
             return null;
         }
 
