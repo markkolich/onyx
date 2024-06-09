@@ -47,9 +47,9 @@
 
         <aws-sdk.version>1.12.700</aws-sdk.version>
 
-        <guava.version>33.2.0-jre</guava.version>
+        <guava.version>33.2.1-jre</guava.version>
 
-        <freemarker.version>2.3.32</freemarker.version>
+        <freemarker.version>2.3.33</freemarker.version>
 
         <htmlcompressor.version>1.5.2</htmlcompressor.version>
         <yuicompressor.version>2.4.8</yuicompressor.version>
@@ -65,7 +65,7 @@
 
         <quartz.version>2.5.0-rc1</quartz.version>
 
-        <checkstyle.version>10.16.0</checkstyle.version>
+        <checkstyle.version>10.17.0</checkstyle.version>
 
         <!-- Test dependency versions -->
 
