@@ -252,7 +252,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
             final User user,
             final onyx.entities.authentication.Session session) {
         final int randomCodeLength = twoFactorAuthConfig_.getRandomCodeLength();
-        final String randomCode = RandomStringUtils.randomNumeric(randomCodeLength);
+        final String randomCode = RandomStringUtils.secure().nextNumeric(randomCodeLength);
 
         final String tokenHash = twoFactorAuthTokenManager_.generateTokenHash(user.getUsername(), randomCode);
 
