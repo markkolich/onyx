@@ -24,34 +24,46 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.controllers;
+package onyx.components.storage.filter;
 
+import com.google.common.collect.ImmutableList;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigList;
+import com.typesafe.config.ConfigValue;
+import com.typesafe.config.ConfigValueType;
+import curacao.annotations.Component;
+import curacao.annotations.Injectable;
 import onyx.components.config.OnyxConfig;
-import onyx.components.storage.ResourceManager;
-import onyx.entities.authentication.Session;
-import onyx.entities.storage.aws.dynamodb.Resource;
 
-import javax.annotation.Nullable;
+import java.util.List;
 
-public abstract class AbstractOnyxFreeMarkerController extends AbstractOnyxController {
+@Component
+public final class OnyxFilterConfig implements FilterConfig {
 
-    protected final ResourceManager resourceManager_;
+    private final Config config_;
 
-    protected AbstractOnyxFreeMarkerController(
-            final OnyxConfig onyxConfig,
-            final ResourceManager resourceManager) {
-        super(onyxConfig);
-        resourceManager_ = resourceManager;
+    @Injectable
+    public OnyxFilterConfig(
+            final OnyxConfig onyxConfig) {
+        config_ = onyxConfig.getOnyxConfig().getConfig(FILTER_CONFIG_PATH);
     }
 
-    protected boolean userIsOwner(
-            final Resource resource,
-            @Nullable final Session session) {
-        if (session == null) {
-            return false;
+    @Override
+    public List<String> getExcludes() {
+        final ConfigList excludes = config_.getList(EXCLUDES_PROP);
+
+        final ImmutableList.Builder<String> excludesListBuilder =
+                ImmutableList.builder();
+        for (final ConfigValue exclude : excludes) {
+            if (!ConfigValueType.STRING.equals(exclude.valueType())) {
+                continue;
+            }
+
+            // cast intentional, and safe
+            excludesListBuilder.add((String) exclude.unwrapped());
         }
 
-        return session.getUsername().equals(resource.getOwner());
+        return excludesListBuilder.build();
     }
 
 }

@@ -29,7 +29,7 @@ package onyx.mappers.request.api;
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import onyx.components.OnyxJacksonObjectMapper;
-import onyx.entities.api.request.CreateDirectoryRequest;
+import onyx.entities.api.request.v1.CreateDirectoryRequest;
 
 @Mapper
 public final class CreateDirectoryRequestArgumentRequestMapper

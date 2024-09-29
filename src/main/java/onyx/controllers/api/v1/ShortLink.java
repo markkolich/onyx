@@ -36,7 +36,7 @@ import onyx.components.config.OnyxConfig;
 import onyx.components.shortlink.ShortLinkGenerator;
 import onyx.components.storage.ResourceManager;
 import onyx.controllers.api.AbstractOnyxApiController;
-import onyx.entities.api.response.CreateShortLinkResponse;
+import onyx.entities.api.response.v1.CreateShortLinkResponse;
 import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.api.*;

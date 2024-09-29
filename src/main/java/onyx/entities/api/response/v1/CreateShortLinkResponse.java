@@ -24,19 +24,20 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.entities.api.response;
+package onyx.entities.api.response.v1;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import onyx.entities.api.response.OnyxApiResponseEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static curacao.core.servlet.HttpStatus.SC_CREATED;
 
-public interface UploadFileResponse extends OnyxApiResponseEntity {
+public interface CreateShortLinkResponse extends OnyxApiResponseEntity {
 
-    @JsonProperty("presignedUploadUrl")
-    String getPresignedUploadUrl();
+    @JsonProperty("shortLinkUrl")
+    String getShortLinkUrl();
 
     @JsonIgnore
     @Override
@@ -46,27 +47,26 @@ public interface UploadFileResponse extends OnyxApiResponseEntity {
 
     final class Builder extends AbstractOnyxApiResponseEntityBuilder {
 
-        private String presignedUploadUrl_;
+        private String shortLinkUrl_;
 
         public Builder(
                 final ObjectMapper objectMapper) {
             super(objectMapper);
         }
 
-        @JsonProperty("presignedUploadUrl")
-        public Builder setPresignedUploadUrl(
-                final String presignedUploadUrl) {
-            presignedUploadUrl_ = presignedUploadUrl;
+        public Builder setShortLinkUrl(
+                final String shortLinkUrl) {
+            shortLinkUrl_ = shortLinkUrl;
             return this;
         }
 
-        public UploadFileResponse build() {
-            checkNotNull(presignedUploadUrl_, "Presigned upload URL cannot be null.");
+        public CreateShortLinkResponse build() {
+            checkNotNull(shortLinkUrl_, "Short link URL cannot be null.");
 
-            return new UploadFileResponse() {
+            return new CreateShortLinkResponse() {
                 @Override
-                public String getPresignedUploadUrl() {
-                    return presignedUploadUrl_;
+                public String getShortLinkUrl() {
+                    return shortLinkUrl_;
                 }
 
                 @Override

@@ -29,7 +29,7 @@ package onyx.mappers.request.api;
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import onyx.components.OnyxJacksonObjectMapper;
-import onyx.entities.api.request.UploadFileRequest;
+import onyx.entities.api.request.v1.UploadFileRequest;
 
 @Mapper
 public final class UploadFileRequestArgumentRequestMapper

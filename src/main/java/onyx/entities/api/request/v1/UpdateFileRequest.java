@@ -24,17 +24,18 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.entities.api.request;
+package onyx.entities.api.request.v1;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import onyx.entities.api.request.OnyxApiRequestEntity;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
 import javax.annotation.Nullable;
 
-@JsonDeserialize(builder = UpdateDirectoryRequest.Builder.class)
-public interface UpdateDirectoryRequest {
+@JsonDeserialize(builder = UpdateFileRequest.Builder.class)
+public interface UpdateFileRequest extends OnyxApiRequestEntity {
 
     @Nullable
     @JsonProperty("description")
@@ -72,7 +73,7 @@ public interface UpdateDirectoryRequest {
 
         @JsonProperty("visibility")
         public Builder setVisibility(
-                final Resource.Visibility visibility) {
+                @Nullable final Resource.Visibility visibility) {
             visibility_ = visibility;
             return this;
         }
@@ -84,8 +85,8 @@ public interface UpdateDirectoryRequest {
             return this;
         }
 
-        public UpdateDirectoryRequest build() {
-            return new UpdateDirectoryRequest() {
+        public UpdateFileRequest build() {
+            return new UpdateFileRequest() {
                 @Nullable
                 @Override
                 public String getDescription() {

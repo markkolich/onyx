@@ -24,44 +24,49 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.entities.api.request;
+package onyx.entities.api.request.v1;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import onyx.entities.api.request.OnyxApiRequestEntity;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
-@JsonDeserialize(builder = UpdateFileRequest.Builder.class)
-public interface UpdateFileRequest {
+@JsonDeserialize(builder = UploadFileRequest.Builder.class)
+public interface UploadFileRequest extends OnyxApiRequestEntity {
 
-    @Nullable
+    @JsonProperty("size")
+    long getSize();
+
     @JsonProperty("description")
     String getDescription();
 
-    @Nullable
     @JsonProperty("visibility")
     Resource.Visibility getVisibility();
-
-    @Nullable
-    @JsonProperty("favorite")
-    Boolean getFavorite();
 
     @JsonIgnore
     default Builder toBuilder() {
         return new Builder()
+                .setSize(getSize())
                 .setDescription(getDescription())
-                .setVisibility(getVisibility())
-                .setFavorite(getFavorite());
+                .setVisibility(getVisibility());
     }
 
     final class Builder {
 
+        private long size_;
         private String description_;
-
         private Resource.Visibility visibility_;
-        private Boolean favorite_;
+
+        @JsonProperty("size")
+        public Builder setSize(
+                final long size) {
+            size_ = size;
+            return this;
+        }
 
         @JsonProperty("description")
         public Builder setDescription(
@@ -72,36 +77,30 @@ public interface UpdateFileRequest {
 
         @JsonProperty("visibility")
         public Builder setVisibility(
-                @Nullable final Resource.Visibility visibility) {
+                final Resource.Visibility visibility) {
             visibility_ = visibility;
             return this;
         }
 
-        @JsonProperty("favorite")
-        public Builder setFavorite(
-                @Nullable final Boolean favorite) {
-            favorite_ = favorite;
-            return this;
-        }
+        public UploadFileRequest build() {
+            checkState(size_ >= 0L, "Size must be >= 0");
+            checkNotNull(description_, "Description cannot be null.");
+            checkNotNull(visibility_, "Visibility cannot be null.");
 
-        public UpdateFileRequest build() {
-            return new UpdateFileRequest() {
-                @Nullable
+            return new UploadFileRequest() {
+                @Override
+                public long getSize() {
+                    return size_;
+                }
+
                 @Override
                 public String getDescription() {
                     return description_;
                 }
 
-                @Nullable
                 @Override
                 public Resource.Visibility getVisibility() {
                     return visibility_;
-                }
-
-                @Nullable
-                @Override
-                public Boolean getFavorite() {
-                    return favorite_;
                 }
             };
         }

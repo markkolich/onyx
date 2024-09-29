@@ -38,6 +38,7 @@ import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.filter.ResourceFilter;
 import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.resource.ResourceForbiddenException;
@@ -51,6 +52,8 @@ import static onyx.util.PathUtils.normalizePath;
 @Controller
 public final class File extends AbstractOnyxFreeMarkerController {
 
+    private final ResourceFilter resourceFilter_;
+
     private final LocalCacheConfig localCacheConfig_;
 
     private final AssetManager assetManager_;
@@ -60,10 +63,12 @@ public final class File extends AbstractOnyxFreeMarkerController {
     public File(
             final OnyxConfig onyxConfig,
             final ResourceManager resourceManager,
+            final ResourceFilter resourceFilter,
             final LocalCacheConfig localCacheConfig,
             final AssetManager assetManager,
             final CacheManager cacheManager) {
         super(onyxConfig, resourceManager);
+        resourceFilter_ = resourceFilter;
         localCacheConfig_ = localCacheConfig;
         assetManager_ = assetManager;
         cacheManager_ = cacheManager;
@@ -81,6 +86,9 @@ public final class File extends AbstractOnyxFreeMarkerController {
 
         final Resource file = resourceManager_.getResourceAtPath(normalizedPath);
         if (file == null) {
+            throw new ResourceNotFoundException("Found no file resource at path: "
+                    + normalizedPath);
+        } else if (!resourceFilter_.test(file)) {
             throw new ResourceNotFoundException("Found no file resource at path: "
                     + normalizedPath);
         }

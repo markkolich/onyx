@@ -24,17 +24,18 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.entities.api.request;
+package onyx.entities.api.request.v1;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import onyx.entities.api.request.OnyxApiRequestEntity;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @JsonDeserialize(builder = CreateDirectoryRequest.Builder.class)
-public interface CreateDirectoryRequest {
+public interface CreateDirectoryRequest extends OnyxApiRequestEntity {
 
     @JsonProperty("description")
     String getDescription();

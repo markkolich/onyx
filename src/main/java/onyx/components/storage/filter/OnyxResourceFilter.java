@@ -24,34 +24,43 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.controllers;
+package onyx.components.storage.filter;
 
-import onyx.components.config.OnyxConfig;
-import onyx.components.storage.ResourceManager;
-import onyx.entities.authentication.Session;
+import com.google.common.annotations.VisibleForTesting;
+import curacao.annotations.Component;
+import curacao.annotations.Injectable;
+import curacao.util.helpers.WildcardMatchHelper;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
-import javax.annotation.Nullable;
+import java.util.List;
 
-public abstract class AbstractOnyxFreeMarkerController extends AbstractOnyxController {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    protected final ResourceManager resourceManager_;
+@Component
+public final class OnyxResourceFilter implements ResourceFilter {
 
-    protected AbstractOnyxFreeMarkerController(
-            final OnyxConfig onyxConfig,
-            final ResourceManager resourceManager) {
-        super(onyxConfig);
-        resourceManager_ = resourceManager;
+    private final List<String> excludes_;
+
+    @Injectable
+    public OnyxResourceFilter(
+            final FilterConfig filterConfig) {
+        this(filterConfig.getExcludes());
     }
 
-    protected boolean userIsOwner(
-            final Resource resource,
-            @Nullable final Session session) {
-        if (session == null) {
+    @VisibleForTesting
+    public OnyxResourceFilter(
+            final List<String> excludes) {
+        excludes_ = checkNotNull(excludes, "Excludes list cannot be null.");
+    }
+
+    @Override
+    public boolean test(
+            final Resource resource) {
+        if (resource == null) {
             return false;
         }
 
-        return session.getUsername().equals(resource.getOwner());
+        return !WildcardMatchHelper.matchesAny(excludes_, resource.getPath());
     }
 
 }

@@ -28,10 +28,6 @@ package onyx.components.authentication;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.amazonaws.services.s3.model.Region;
-import com.google.common.collect.ImmutableMap;
-import com.typesafe.config.ConfigList;
-import com.typesafe.config.ConfigValue;
-import com.typesafe.config.ConfigValueType;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentInitializable;
@@ -43,9 +39,7 @@ import onyx.entities.authentication.Session;
 import onyx.entities.authentication.Session.Type;
 import onyx.entities.authentication.User;
 import onyx.entities.storage.aws.dynamodb.Resource;
-import onyx.exceptions.OnyxException;
 import onyx.util.security.PasswordHasher;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +54,6 @@ import java.util.concurrent.TimeUnit;
 public final class OnyxConfigUserAuthenticator implements UserAuthenticator, ComponentInitializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(OnyxConfigUserAuthenticator.class);
-
-    private static final String USERS_USERNAME_PROP = "username";
-    private static final String USERS_PASSWORD_PROP = "password";
-    private static final String USERS_MOBILE_NUMBER_PROP = "mobileNumber";
 
     private final SessionConfig sessionConfig_;
     private final AwsConfig awsConfig_;
@@ -87,47 +77,7 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
         dbMapper_ = dynamoDbMapper.getDbMapper();
 
         pwHasher_ = PasswordHasher.getInstance();
-        userCredentials_ = buildUserCredentialsFromConfig();
-    }
-
-    private Map<String, User> buildUserCredentialsFromConfig() {
-        final ImmutableMap.Builder<String, User> userCredentialsBuilder =
-                ImmutableMap.builder();
-
-        final ConfigList userCredentialsInConfig = sessionConfig_.getUsers();
-        for (final ConfigValue configValue : userCredentialsInConfig) {
-            if (!ConfigValueType.OBJECT.equals(configValue.valueType())) {
-                continue;
-            }
-
-            @SuppressWarnings("unchecked") // intentional, and safe
-            final Map<String, String> configUser = (Map<String, String>) configValue.unwrapped();
-
-            final String username = configUser.get(USERS_USERNAME_PROP);
-            if (StringUtils.isBlank(username)) {
-                throw missingConfigKey(USERS_USERNAME_PROP);
-            }
-
-            final String password = configUser.get(USERS_PASSWORD_PROP);
-            if (StringUtils.isBlank(password)) {
-                throw missingConfigKey(USERS_PASSWORD_PROP);
-            }
-
-            final String mobileNumber = configUser.get(USERS_MOBILE_NUMBER_PROP);
-            if (StringUtils.isBlank(mobileNumber)) {
-                throw missingConfigKey(USERS_MOBILE_NUMBER_PROP);
-            }
-
-            final User user = new User.Builder()
-                    .setUsername(username)
-                    .setPassword(password)
-                    .setMobileNumber(mobileNumber)
-                    .build();
-
-            userCredentialsBuilder.put(username, user);
-        }
-
-        return userCredentialsBuilder.build();
+        userCredentials_ = sessionConfig_.getUsers();
     }
 
     @Nullable
@@ -220,11 +170,6 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
                         userDirectoryPath);
             }
         }
-    }
-
-    private static OnyxException missingConfigKey(
-            final String key) {
-        return new OnyxException("Blank or null user-authenticator config key: " + key);
     }
 
 }

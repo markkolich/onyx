@@ -32,6 +32,7 @@ import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.filter.ResourceFilter;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.DirectoryListing;
 import onyx.entities.freemarker.FreeMarkerContent;
@@ -44,13 +45,14 @@ import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
 
 @Controller
-public final class Browse extends AbstractOnyxFreeMarkerController {
+public final class Browse extends AbstractOnyxResourceFilterAwareController {
 
     @Injectable
     public Browse(
             final OnyxConfig onyxConfig,
-            final ResourceManager resourceManager) {
-        super(onyxConfig, resourceManager);
+            final ResourceManager resourceManager,
+            final ResourceFilter resourceFilter) {
+        super(onyxConfig, resourceManager, resourceFilter);
     }
 
     @RequestMapping(value = "^/browse/(?<username>[a-zA-Z0-9]+)$")
@@ -69,6 +71,9 @@ public final class Browse extends AbstractOnyxFreeMarkerController {
 
         final Resource resource = resourceManager_.getResourceAtPath(normalizedPath);
         if (resource == null) {
+            throw new ResourceNotFoundException("Found no directory resource at path: "
+                    + normalizedPath);
+        } else if (!resourceFilter_.test(resource)) {
             throw new ResourceNotFoundException("Found no directory resource at path: "
                     + normalizedPath);
         }

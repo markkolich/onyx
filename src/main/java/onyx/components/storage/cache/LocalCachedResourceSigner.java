@@ -80,6 +80,11 @@ public final class LocalCachedResourceSigner implements CachedResourceSigner {
 
         try {
             final String tokenString = stringSigner_.verifyAndGet(signedToken);
+            if (tokenString == null) {
+                LOG.warn("Failed to verify cached resource from signed token: {}", signedToken);
+                return null;
+            }
+
             final CachedResourceToken cachedResource = objectMapper_.readValue(tokenString,
                     CachedResourceToken.class);
 

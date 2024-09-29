@@ -27,8 +27,11 @@
 package onyx.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.filter.OnyxResourceFilter;
+import onyx.components.storage.filter.ResourceFilter;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.entities.storage.aws.dynamodb.Resource;
@@ -42,7 +45,12 @@ import org.mockito.Mockito;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class BrowseTest extends AbstractOnyxControllerTest {
 
@@ -53,6 +61,9 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
     @SuppressWarnings("unchecked")
     public void browseUserHomeDirectoryTest() throws Exception {
         final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
+
+        final ResourceFilter resourceFilter = Mockito.mock(ResourceFilter.class);
+        Mockito.when(resourceFilter.test(ArgumentMatchers.any())).thenReturn(true);
 
         final Resource homeDirectory =
                 resourceJsonToObject("mock/browse/foobar.json", Resource.class);
@@ -67,7 +78,7 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
         Mockito.when(resourceManager.listDirectory(ArgumentMatchers.eq(homeDirectory),
                 visibilityCaptor.capture(), ArgumentMatchers.any())).thenReturn(directoryList);
 
-        final Browse controller = new Browse(onyxConfig_, resourceManager);
+        final Browse controller = new Browse(onyxConfig_, resourceManager, resourceFilter);
 
         final Session session = generateNewSession("foobar");
         final FreeMarkerContent responseEntity = controller.browseUserHomeDirectory(session.getUsername(), session);
@@ -82,8 +93,11 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void browseUserRootTestUnauthenticated() throws Exception {
+    public void browseUserRootUnauthenticatedTest() throws Exception {
         final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
+
+        final ResourceFilter resourceFilter = Mockito.mock(ResourceFilter.class);
+        Mockito.when(resourceFilter.test(ArgumentMatchers.any())).thenReturn(true);
 
         final Resource homeDirectory =
                 resourceJsonToObject("mock/browse/foobar.json", Resource.class);
@@ -100,7 +114,7 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
         Mockito.when(resourceManager.listDirectory(ArgumentMatchers.eq(homeDirectory),
                 visibilityCaptor.capture(), sortCapture.capture())).thenReturn(directoryList);
 
-        final Browse controller = new Browse(onyxConfig_, resourceManager);
+        final Browse controller = new Browse(onyxConfig_, resourceManager, resourceFilter);
 
         final FreeMarkerContent responseEntity = controller.browseUserHomeDirectory("foobar", null);
         assertNotNull(responseEntity);
@@ -114,15 +128,56 @@ public final class BrowseTest extends AbstractOnyxControllerTest {
     }
 
     @Test
-    public void browseDirectoryTestPrivateDirectory() throws Exception {
+    @SuppressWarnings("unchecked")
+    public void browseUserRootUnauthenticatedWithFilteringTest() throws Exception {
         final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
+
+        final List<String> excludes = ImmutableList.of("/foobar/cat", "/foobar/cat/*");
+        final ResourceFilter resourceFilter = new OnyxResourceFilter(excludes);
+
+        final Resource homeDirectory =
+                resourceJsonToObject("mock/browse/foobar.json", Resource.class);
+        Mockito.when(resourceManager.getResourceAtPath(ArgumentMatchers.eq("/foobar")))
+                .thenReturn(homeDirectory);
+
+        final ArgumentCaptor<Set<Resource.Visibility>> visibilityCaptor =
+                ArgumentCaptor.forClass(Set.class);
+        final ArgumentCaptor<ResourceManager.Extensions.Sort> sortCapture =
+                ArgumentCaptor.forClass(ResourceManager.Extensions.Sort.class);
+
+        final List<Resource> directoryList =
+                resourceJsonToObject("mock/browse/foobar-dir-list.json", new TypeReference<>() {});
+        Mockito.when(resourceManager.listDirectory(ArgumentMatchers.eq(homeDirectory),
+                visibilityCaptor.capture(), sortCapture.capture())).thenReturn(directoryList);
+
+        final Browse controller = new Browse(onyxConfig_, resourceManager, resourceFilter);
+
+        final FreeMarkerContent responseEntity = controller.browseUserHomeDirectory("foobar", null);
+        assertNotNull(responseEntity);
+
+        assertEquals(ImmutableSet.of(Resource.Visibility.PUBLIC),
+                visibilityCaptor.getValue());
+        assertNull(sortCapture.getValue());
+
+        final String renderedHtml = fmcRenderer_.contentToString(responseEntity);
+        assertTrue(StringUtils.isNotBlank(renderedHtml));
+        assertFalse(renderedHtml.contains("/foobar/cat"),
+                "Directory listing should not contain filtered resource.");
+    }
+
+    @Test
+    public void browseDirectoryPrivateDirectoryTest() throws Exception {
+        final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
+
+        final ResourceFilter resourceFilter = Mockito.mock(ResourceFilter.class);
+        Mockito.when(resourceFilter.test(ArgumentMatchers.any())).thenReturn(true);
 
         final Resource privateDirectory =
                 resourceJsonToObject("mock/browse/foobar-private-dir.json", Resource.class);
         Mockito.when(resourceManager.getResourceAtPath(ArgumentMatchers.eq("/foobar/secret-stuff")))
                 .thenReturn(privateDirectory);
 
-        final Browse controller = new Browse(onyxConfig_, resourceManager);
+        final Browse controller = new Browse(onyxConfig_, resourceManager, resourceFilter);
 
         final Session session = generateNewSession("baz");
         assertThrows(ResourceForbiddenException.class,

@@ -24,19 +24,20 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.entities.api.response;
+package onyx.entities.api.response.v1;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import onyx.entities.api.response.OnyxApiResponseEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static curacao.core.servlet.HttpStatus.SC_CREATED;
 
-public interface CreateShortLinkResponse extends OnyxApiResponseEntity {
+public interface UploadFileResponse extends OnyxApiResponseEntity {
 
-    @JsonProperty("shortLinkUrl")
-    String getShortLinkUrl();
+    @JsonProperty("presignedUploadUrl")
+    String getPresignedUploadUrl();
 
     @JsonIgnore
     @Override
@@ -46,26 +47,27 @@ public interface CreateShortLinkResponse extends OnyxApiResponseEntity {
 
     final class Builder extends AbstractOnyxApiResponseEntityBuilder {
 
-        private String shortLinkUrl_;
+        private String presignedUploadUrl_;
 
         public Builder(
                 final ObjectMapper objectMapper) {
             super(objectMapper);
         }
 
-        public Builder setShortLinkUrl(
-                final String shortLinkUrl) {
-            shortLinkUrl_ = shortLinkUrl;
+        @JsonProperty("presignedUploadUrl")
+        public Builder setPresignedUploadUrl(
+                final String presignedUploadUrl) {
+            presignedUploadUrl_ = presignedUploadUrl;
             return this;
         }
 
-        public CreateShortLinkResponse build() {
-            checkNotNull(shortLinkUrl_, "Short link URL cannot be null.");
+        public UploadFileResponse build() {
+            checkNotNull(presignedUploadUrl_, "Presigned upload URL cannot be null.");
 
-            return new CreateShortLinkResponse() {
+            return new UploadFileResponse() {
                 @Override
-                public String getShortLinkUrl() {
-                    return shortLinkUrl_;
+                public String getPresignedUploadUrl() {
+                    return presignedUploadUrl_;
                 }
 
                 @Override

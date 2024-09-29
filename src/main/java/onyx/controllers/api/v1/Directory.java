@@ -41,8 +41,8 @@ import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.ResourceManager;
 import onyx.controllers.api.AbstractOnyxApiController;
-import onyx.entities.api.request.CreateDirectoryRequest;
-import onyx.entities.api.request.UpdateDirectoryRequest;
+import onyx.entities.api.request.v1.CreateDirectoryRequest;
+import onyx.entities.api.request.v1.UpdateDirectoryRequest;
 import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.api.*;
@@ -54,7 +54,9 @@ import org.apache.commons.lang3.tuple.Triple;
 import java.time.Instant;
 import java.util.List;
 
-import static curacao.annotations.RequestMapping.Method.*;
+import static curacao.annotations.RequestMapping.Method.DELETE;
+import static curacao.annotations.RequestMapping.Method.POST;
+import static curacao.annotations.RequestMapping.Method.PUT;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
 
@@ -64,6 +66,7 @@ public final class Directory extends AbstractOnyxApiController {
     private final AwsConfig awsConfig_;
 
     private final AssetManager assetManager_;
+
     private final ResourceManager resourceManager_;
 
     private final IDynamoDBMapper dbMapper_;
