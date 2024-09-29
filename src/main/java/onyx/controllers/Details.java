@@ -36,6 +36,7 @@ import onyx.components.config.OnyxConfig;
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.filter.ResourceFilter;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.DirectoryListing;
 import onyx.entities.freemarker.FreeMarkerContent;
@@ -49,7 +50,7 @@ import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
 
 @Controller
-public final class Details extends AbstractOnyxFreeMarkerController {
+public final class Details extends AbstractOnyxResourceFilterAwareController {
 
     private static final String DEFAULT_CONTENT_TYPE = MediaType.OCTET_STREAM.toString();
 
@@ -62,8 +63,9 @@ public final class Details extends AbstractOnyxFreeMarkerController {
             final OnyxConfig onyxConfig,
             final LocalCacheConfig localCacheConfig,
             final ResourceManager resourceManager,
+            final ResourceFilter resourceFilter,
             final CacheManager cacheManager) {
-        super(onyxConfig, resourceManager);
+        super(onyxConfig, resourceManager, resourceFilter);
         localCacheConfig_ = localCacheConfig;
         cacheManager_ = cacheManager;
     }
@@ -84,6 +86,9 @@ public final class Details extends AbstractOnyxFreeMarkerController {
 
         final Resource resource = resourceManager_.getResourceAtPath(normalizedPath);
         if (resource == null) {
+            throw new ResourceNotFoundException("Found no resource at path: "
+                    + normalizedPath);
+        } else if (!resourceFilter_.test(resource)) {
             throw new ResourceNotFoundException("Found no resource at path: "
                     + normalizedPath);
         }

@@ -97,6 +97,11 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
 
         try {
             final String tokenString = stringSigner_.verifyAndGet(signedToken);
+            if (tokenString == null) {
+                LOG.warn("Failed to verify 2FA token from signed token string: {}", signedToken);
+                return null;
+            }
+
             final TwoFactorAuthToken token =
                     objectMapper_.readValue(tokenString, TwoFactorAuthToken.class);
 
@@ -122,6 +127,12 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
         try {
             final String trustedDeviceString =
                     stringSigner_.verifyAndGet(signedTrustedDeviceToken);
+            if (trustedDeviceString == null) {
+                LOG.warn("Failed to verify trusted device token from signed string: {}",
+                        signedTrustedDeviceToken);
+                return null;
+            }
+
             final TrustedDeviceToken trustedDeviceToken =
                     objectMapper_.readValue(trustedDeviceString, TrustedDeviceToken.class);
 

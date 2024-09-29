@@ -34,6 +34,7 @@ import curacao.annotations.parameters.Query;
 import onyx.components.config.OnyxConfig;
 import onyx.components.search.SearchManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.filter.ResourceFilter;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.entities.storage.aws.dynamodb.Resource;
@@ -54,14 +55,18 @@ public final class Search extends AbstractOnyxFreeMarkerController {
 
     private static final Logger LOG = LoggerFactory.getLogger(Search.class);
 
+    private final ResourceFilter resourceFilter_;
+
     private final SearchManager searchManager_;
 
     @Injectable
     public Search(
             final OnyxConfig onyxConfig,
             final ResourceManager resourceManager,
+            final ResourceFilter resourceFilter,
             final SearchManager searchManager) {
         super(onyxConfig, resourceManager);
+        resourceFilter_ = resourceFilter;
         searchManager_ = searchManager;
     }
 
@@ -77,6 +82,7 @@ public final class Search extends AbstractOnyxFreeMarkerController {
                 searchManager_.searchIndex(session.getUsername(), query);
 
         final List<Pair<Resource, List<Triple<String, String, String>>>> results = resultsFromIndex.stream()
+                .filter(resourceFilter_)
                 .map(r -> Pair.of(r, splitNormalizedPathToElements(r.getPath())))
                 .collect(ImmutableList.toImmutableList());
 

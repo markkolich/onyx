@@ -40,6 +40,7 @@ import onyx.components.config.OnyxConfig;
 import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.filter.ResourceFilter;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.request.CreateDirectoryRequest;
 import onyx.entities.api.request.UpdateDirectoryRequest;
@@ -54,7 +55,9 @@ import org.apache.commons.lang3.tuple.Triple;
 import java.time.Instant;
 import java.util.List;
 
-import static curacao.annotations.RequestMapping.Method.*;
+import static curacao.annotations.RequestMapping.Method.DELETE;
+import static curacao.annotations.RequestMapping.Method.POST;
+import static curacao.annotations.RequestMapping.Method.PUT;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
 
@@ -64,7 +67,9 @@ public final class Directory extends AbstractOnyxApiController {
     private final AwsConfig awsConfig_;
 
     private final AssetManager assetManager_;
+
     private final ResourceManager resourceManager_;
+    private final ResourceFilter resourceFilter_;
 
     private final IDynamoDBMapper dbMapper_;
 
@@ -74,11 +79,13 @@ public final class Directory extends AbstractOnyxApiController {
             final AwsConfig awsConfig,
             final AssetManager assetManager,
             final ResourceManager resourceManager,
+            final ResourceFilter resourceFilter,
             final DynamoDbMapper dynamoDbMapper) {
         super(onyxConfig);
         awsConfig_ = awsConfig;
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
+        resourceFilter_ = resourceFilter;
         dbMapper_ = dynamoDbMapper.getDbMapper();
     }
 

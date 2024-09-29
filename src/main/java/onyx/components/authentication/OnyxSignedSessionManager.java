@@ -80,6 +80,11 @@ public final class OnyxSignedSessionManager implements SessionManager {
 
         try {
             final String sessionString = stringSigner_.verifyAndGet(signedSession);
+            if (sessionString == null) {
+                LOG.warn("Failed to verify session from signed session string: {}", signedSession);
+                return null;
+            }
+
             final Session session = objectMapper_.readValue(sessionString, Session.class);
 
             final Instant now = Instant.now();

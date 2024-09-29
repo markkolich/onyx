@@ -20,6 +20,16 @@
     "favorite": false
   },
   {
+    "path": "/foobar/cat/ozzie",
+    "parent": "/foobar/cat",
+    "size": 713,
+    "description": "OzZie",
+    "type": "FILE",
+    "visibility": "PUBLIC",
+    "owner": "foobar",
+    "favorite": false
+  },
+  {
     "path": "/foobar/dog",
     "parent": "/foobar",
     "size": 0,

@@ -46,6 +46,7 @@ import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.filter.ResourceFilter;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.request.UpdateFileRequest;
 import onyx.entities.api.request.UploadFileRequest;
@@ -81,6 +82,7 @@ public final class File extends AbstractOnyxApiController {
 
     private final AssetManager assetManager_;
     private final ResourceManager resourceManager_;
+    private final ResourceFilter resourceFilter_;
     private final CacheManager cacheManager_;
 
     private final IDynamoDBMapper dbMapper_;
@@ -94,6 +96,7 @@ public final class File extends AbstractOnyxApiController {
             final LocalCacheConfig localCacheConfig,
             final AssetManager assetManager,
             final ResourceManager resourceManager,
+            final ResourceFilter resourceFilter,
             final CacheManager cacheManager,
             final DynamoDbMapper dynamoDbMapper,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
@@ -102,6 +105,7 @@ public final class File extends AbstractOnyxApiController {
         localCacheConfig_ = localCacheConfig;
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
+        resourceFilter_ = resourceFilter;
         cacheManager_ = cacheManager;
         dbMapper_ = dynamoDbMapper.getDbMapper();
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();

@@ -26,17 +26,12 @@
 
 package onyx.components.authentication.api;
 
-import com.google.common.collect.ImmutableMap;
-import com.typesafe.config.ConfigList;
-import com.typesafe.config.ConfigValue;
-import com.typesafe.config.ConfigValueType;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.config.authentication.SessionConfig;
 import onyx.entities.authentication.Session;
 import onyx.entities.authentication.Session.Type;
-import onyx.exceptions.OnyxException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +48,6 @@ public final class OnyxConfigApiKeyAuthenticator implements ApiKeyAuthenticator 
 
     private static final Logger LOG = LoggerFactory.getLogger(OnyxConfigApiKeyAuthenticator.class);
 
-    private static final String API_KEY_USERNAME_PROP = "username";
-    private static final String API_KEY_KEY_PROP = "key";
-
     private final SessionConfig sessionConfig_;
 
     private final UserAuthenticator userAuthenticator_;
@@ -69,36 +61,7 @@ public final class OnyxConfigApiKeyAuthenticator implements ApiKeyAuthenticator 
         sessionConfig_ = sessionConfig;
         userAuthenticator_ = userAuthenticator;
 
-        apiKeys_ = buildApiKeysFromConfig();
-    }
-
-    private Map<String, String> buildApiKeysFromConfig() {
-        final ImmutableMap.Builder<String, String> apiKeysBuilder =
-                ImmutableMap.builder();
-
-        final ConfigList apiKeysInConfig = sessionConfig_.getApiKeys();
-        for (final ConfigValue configValue : apiKeysInConfig) {
-            if (!ConfigValueType.OBJECT.equals(configValue.valueType())) {
-                continue;
-            }
-
-            @SuppressWarnings("unchecked") // intentional, and safe
-            final Map<String, String> configUser = (Map<String, String>) configValue.unwrapped();
-
-            final String username = configUser.get(API_KEY_USERNAME_PROP);
-            if (StringUtils.isBlank(username)) {
-                throw missingConfigKey(API_KEY_USERNAME_PROP);
-            }
-
-            final String apiKey = configUser.get(API_KEY_KEY_PROP);
-            if (StringUtils.isBlank(apiKey)) {
-                throw missingConfigKey(API_KEY_KEY_PROP);
-            }
-
-            apiKeysBuilder.put(apiKey, username);
-        }
-
-        return apiKeysBuilder.build();
+        apiKeys_ = sessionConfig_.getApiKeys();
     }
 
     @Nullable
@@ -115,11 +78,6 @@ public final class OnyxConfigApiKeyAuthenticator implements ApiKeyAuthenticator 
         }
 
         return userAuthenticator_.getSessionForUsername(Type.API, usernameForKey);
-    }
-
-    private static OnyxException missingConfigKey(
-            final String key) {
-        return new OnyxException("Blank or null API key config key: " + key);
     }
 
 }

@@ -35,6 +35,7 @@ import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.shortlink.ShortLinkGenerator;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.filter.ResourceFilter;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.response.CreateShortLinkResponse;
 import onyx.entities.authentication.Session;
@@ -50,6 +51,7 @@ import static onyx.util.PathUtils.normalizePath;
 public final class ShortLink extends AbstractOnyxApiController {
 
     private final ResourceManager resourceManager_;
+    private final ResourceFilter resourceFilter_;
 
     private final ShortLinkGenerator shortLinkManager_;
 
@@ -59,10 +61,12 @@ public final class ShortLink extends AbstractOnyxApiController {
     public ShortLink(
             final OnyxConfig onyxConfig,
             final ResourceManager resourceManager,
+            final ResourceFilter resourceFilter,
             final ShortLinkGenerator shortLinkManager,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         super(onyxConfig);
         resourceManager_ = resourceManager;
+        resourceFilter_ = resourceFilter;
         shortLinkManager_ = shortLinkManager;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
@@ -90,6 +94,9 @@ public final class ShortLink extends AbstractOnyxApiController {
         final String normalizedPath = normalizePath(username, path);
         final Resource resource = resourceManager_.getResourceAtPath(normalizedPath);
         if (resource == null) {
+            throw new ApiNotFoundException("Found no resource at path: "
+                    + normalizedPath);
+        } else if (!resourceFilter_.test(resource)) {
             throw new ApiNotFoundException("Found no resource at path: "
                     + normalizedPath);
         } else if (!resource.getOwner().equals(session.getUsername())) {

@@ -26,8 +26,9 @@
 
 package onyx.components.config.authentication;
 
-import com.typesafe.config.ConfigList;
+import onyx.entities.authentication.User;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public interface SessionConfig {
@@ -43,9 +44,16 @@ public interface SessionConfig {
     String SESSION_REFRESH_AUTOMATICALLY_PROP = "refresh-automatically";
     String SESSION_REFRESH_AFTER_PROP = "refresh-after";
 
-    ConfigList getUsers();
+    String USERS_USERNAME_PROP = "username";
+    String USERS_PASSWORD_PROP = "password";
+    String USERS_MOBILE_NUMBER_PROP = "mobileNumber";
 
-    ConfigList getApiKeys();
+    String API_KEY_USERNAME_PROP = "username";
+    String API_KEY_KEY_PROP = "key";
+
+    Map<String, User> getUsers();
+
+    Map<String, String> getApiKeys();
 
     String getSessionDomain();
 
