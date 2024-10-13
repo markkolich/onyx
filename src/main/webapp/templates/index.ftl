@@ -45,7 +45,7 @@
                                         <#if child.getType() == "DIRECTORY">
                                             <a href="${contextPath}/browse${child.getPath()}">${child.getHtmlName()}</a>
                                         <#elseif child.getType() == "FILE">
-                                            <a href="${contextPath}/file${child.getPath()}">${child.getHtmlName()}</a>
+                                            <a href="${contextPath}/api/v1/download${child.getPath()}">${child.getHtmlName()}</a>
                                         </#if>
                                     </td>
                                     <td class="align-middle d-none d-lg-table-cell">

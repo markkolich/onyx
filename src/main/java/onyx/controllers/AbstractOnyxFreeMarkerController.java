@@ -28,10 +28,6 @@ package onyx.controllers;
 
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.ResourceManager;
-import onyx.entities.authentication.Session;
-import onyx.entities.storage.aws.dynamodb.Resource;
-
-import javax.annotation.Nullable;
 
 public abstract class AbstractOnyxFreeMarkerController extends AbstractOnyxController {
 
@@ -42,16 +38,6 @@ public abstract class AbstractOnyxFreeMarkerController extends AbstractOnyxContr
             final ResourceManager resourceManager) {
         super(onyxConfig);
         resourceManager_ = resourceManager;
-    }
-
-    protected boolean userIsOwner(
-            final Resource resource,
-            @Nullable final Session session) {
-        if (session == null) {
-            return false;
-        }
-
-        return session.getUsername().equals(resource.getOwner());
     }
 
 }

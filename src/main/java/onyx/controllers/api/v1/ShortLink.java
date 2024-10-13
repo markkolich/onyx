@@ -44,6 +44,7 @@ import onyx.exceptions.api.*;
 import java.net.URL;
 
 import static curacao.annotations.RequestMapping.Method.POST;
+import static onyx.util.UserUtils.userIsNotOwner;
 import static onyx.util.PathUtils.normalizePath;
 
 @Controller
@@ -92,7 +93,7 @@ public final class ShortLink extends AbstractOnyxApiController {
         if (resource == null) {
             throw new ApiNotFoundException("Found no resource at path: "
                     + normalizedPath);
-        } else if (!resource.getOwner().equals(session.getUsername())) {
+        } else if (userIsNotOwner(resource, session)) {
             throw new ApiForbiddenException("Authenticated user is not the owner of resource: "
                     + normalizedPath);
         } else if (Resource.Visibility.PRIVATE.equals(resource.getVisibility())) {

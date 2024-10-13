@@ -26,12 +26,14 @@
 
 package onyx.components;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import curacao.annotations.Component;
+import org.openapitools.jackson.nullable.JsonNullableModule;
 
 @Component
 public final class OnyxJacksonObjectMapper {
@@ -44,8 +46,12 @@ public final class OnyxJacksonObjectMapper {
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 // Write out Instants and Dates as human readable ISO-8601 strings.
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                // Required to support Instant annotated entity fields.
+                // Do not serialize null fields.
+                .serializationInclusion(JsonInclude.Include.NON_NULL)
+                // Required to support Instant typed entity fields.
                 .addModule(new JavaTimeModule())
+                // For JsonNullable<T> support.
+                .addModule(new JsonNullableModule())
                 .build();
     }
 

@@ -37,7 +37,6 @@ import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.RequestBody;
 import curacao.core.servlet.HttpResponse;
-import curacao.entities.CuracaoEntity;
 import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.aws.dynamodb.DynamoDbMapper;
 import onyx.components.config.OnyxConfig;
@@ -49,6 +48,7 @@ import onyx.components.storage.ResourceManager;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.request.v1.UpdateFileRequest;
 import onyx.entities.api.request.v1.UploadFileRequest;
+import onyx.entities.api.response.v1.ResourceResponse;
 import onyx.entities.api.response.v1.UploadFileResponse;
 import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
@@ -65,11 +65,13 @@ import java.time.Instant;
 import java.util.List;
 
 import static curacao.annotations.RequestMapping.Method.DELETE;
+import static curacao.annotations.RequestMapping.Method.GET;
 import static curacao.annotations.RequestMapping.Method.POST;
 import static curacao.annotations.RequestMapping.Method.PUT;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
+import static onyx.util.UserUtils.userIsNotOwner;
 
 @Controller
 public final class File extends AbstractOnyxApiController {
@@ -105,6 +107,38 @@ public final class File extends AbstractOnyxApiController {
         cacheManager_ = cacheManager;
         dbMapper_ = dynamoDbMapper.getDbMapper();
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
+    }
+
+    @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+            methods = GET)
+    public ResourceResponse getFile(
+            @Path("username") final String username,
+            @Path("path") final String path,
+            final Session session) {
+        final String normalizedPath = normalizePath(username, path);
+
+        final Resource file = resourceManager_.getResourceAtPath(normalizedPath);
+        if (file == null) {
+            throw new ApiNotFoundException("Found no file resource at path: "
+                    + normalizedPath);
+        }
+
+        if (!Resource.Type.FILE.equals(file.getType())) {
+            throw new ApiNotFoundException("Found no file resource at path: "
+                    + normalizedPath);
+        } else if (Resource.Visibility.PRIVATE.equals(file.getVisibility())) {
+            // If the file is a private file, we have to ensure that the authenticated user is the owner.
+            if (session == null) {
+                throw new ApiNotFoundException("Found no file resource at path: "
+                        + normalizedPath);
+            } else if (userIsNotOwner(file, session)) {
+                throw new ApiForbiddenException("Private file not visible to authenticated user: "
+                        + normalizedPath);
+            }
+        }
+
+        return ResourceResponse.Builder.fromResource(objectMapper_, file, session)
+                .build();
     }
 
     @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
@@ -181,7 +215,7 @@ public final class File extends AbstractOnyxApiController {
         } else if (!Resource.Type.DIRECTORY.equals(parent.getType())) {
             throw new ApiBadRequestException("Found no parent directory resource at path: "
                     + parentPath);
-        } else if (!parent.getOwner().equals(session.getUsername())) {
+        } else if (userIsNotOwner(parent, session)) {
             throw new ApiForbiddenException("Authenticated user is not the owner of parent directory: "
                     + parentPath);
         }
@@ -218,7 +252,7 @@ public final class File extends AbstractOnyxApiController {
 
     @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = PUT)
-    public CuracaoEntity updateFile(
+    public ResourceResponse updateFile(
             @Path("username") final String username,
             @Path("path") final String path,
             @RequestBody final UpdateFileRequest request,
@@ -237,7 +271,7 @@ public final class File extends AbstractOnyxApiController {
         } else if (!Resource.Type.FILE.equals(file.getType())) {
             throw new ApiBadRequestException("Found no file resource at path: "
                     + normalizedPath);
-        } else if (!file.getOwner().equals(session.getUsername())) {
+        } else if (userIsNotOwner(file, session)) {
             throw new ApiForbiddenException("Authenticated user is not the owner of file resource: "
                     + normalizedPath);
         }
@@ -271,12 +305,13 @@ public final class File extends AbstractOnyxApiController {
 
         resourceManager_.updateResource(file);
 
-        return noContent();
+        return ResourceResponse.Builder.fromResource(objectMapper_, file, session)
+                .build();
     }
 
     @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = DELETE)
-    public CuracaoEntity deleteFile(
+    public ResourceResponse deleteFile(
             @Path("username") final String username,
             @Path("path") final String path,
             @Query("permanent") final Boolean permanent,
@@ -295,7 +330,7 @@ public final class File extends AbstractOnyxApiController {
         } else if (!Resource.Type.FILE.equals(file.getType())) {
             throw new ApiBadRequestException("Found no file resource at path: "
                     + normalizedPath);
-        } else if (!file.getOwner().equals(session.getUsername())) {
+        } else if (userIsNotOwner(file, session)) {
             throw new ApiForbiddenException("Authenticated user is not the owner of file resource: "
                     + normalizedPath);
         }
@@ -320,7 +355,8 @@ public final class File extends AbstractOnyxApiController {
             cacheManager_.deleteResourceFromCacheAsync(file);
         }
 
-        return noContent();
+        return ResourceResponse.Builder.fromResource(objectMapper_, file, session)
+                .build();
     }
 
 }

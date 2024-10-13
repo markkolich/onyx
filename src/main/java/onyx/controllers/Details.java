@@ -45,6 +45,8 @@ import onyx.exceptions.resource.ResourceForbiddenException;
 import onyx.exceptions.resource.ResourceNotFoundException;
 import org.apache.commons.io.FilenameUtils;
 
+import static onyx.util.UserUtils.userIsNotOwner;
+import static onyx.util.UserUtils.userIsOwner;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
@@ -99,16 +101,14 @@ public final class Details extends AbstractOnyxResourceFilterAwareController {
             if (session == null) {
                 throw new ResourceNotFoundException("Found no resource at path: "
                         + normalizedPath);
-            } else if (!session.getUsername().equals(resource.getOwner())) {
+            } else if (userIsNotOwner(resource, session)) {
                 throw new ResourceForbiddenException("Private resource not visible to authenticated user: "
                         + normalizedPath);
             }
         }
 
-        // Whether the user is authenticated (has a valid session).
-        final boolean userAuthenticated = (session != null);
         // Whether the user is authenticated (has a valid session) AND is the resource owner.
-        final boolean userIsOwner = (userAuthenticated && session.getUsername().equals(resource.getOwner()));
+        final boolean userIsOwner = userIsOwner(resource, session);
 
         // Only directories have children; any other resource explicitly have none.
         final DirectoryListing listing;

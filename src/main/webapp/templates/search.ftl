@@ -61,7 +61,7 @@
                                             <#if result.getLeft().getType() == "DIRECTORY">
                                               <a href="${contextPath}/browse${crumb.getMiddle()}" data-resource-type="DIRECTORY" class="mr-1">${crumb.getRight()}</a>
                                             <#elseif result.getLeft().getType() == "FILE">
-                                              <a href="${contextPath}/file${crumb.getMiddle()}" data-resource-type="FILE" class="mr-1">${crumb.getRight()}</a>
+                                              <a href="${contextPath}/api/v1/download${crumb.getMiddle()}" data-resource-type="FILE" class="mr-1">${crumb.getRight()}</a>
                                             </#if>
                                           <#else>
                                             <a href="${contextPath}/browse${crumb.getMiddle()}" data-resource-type="DIRECTORY" class="mr-1">${crumb.getRight()}</a>

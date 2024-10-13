@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.controllers;
+package onyx.controllers.api.v1;
 
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
@@ -38,44 +38,45 @@ import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
-import onyx.components.storage.filter.ResourceFilter;
+import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
-import onyx.exceptions.resource.ResourceForbiddenException;
-import onyx.exceptions.resource.ResourceNotFoundException;
+import onyx.exceptions.api.ApiForbiddenException;
+import onyx.exceptions.api.ApiNotFoundException;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.net.URL;
 
+import static curacao.annotations.RequestMapping.Method.GET;
+import static onyx.util.UserUtils.userIsNotOwner;
 import static onyx.util.PathUtils.normalizePath;
 
 @Controller
-public final class File extends AbstractOnyxFreeMarkerController {
-
-    private final ResourceFilter resourceFilter_;
+public final class Download extends AbstractOnyxApiController {
 
     private final LocalCacheConfig localCacheConfig_;
 
+    private final ResourceManager resourceManager_;
     private final AssetManager assetManager_;
     private final CacheManager cacheManager_;
 
     @Injectable
-    public File(
+    public Download(
             final OnyxConfig onyxConfig,
-            final ResourceManager resourceManager,
-            final ResourceFilter resourceFilter,
             final LocalCacheConfig localCacheConfig,
+            final ResourceManager resourceManager,
             final AssetManager assetManager,
             final CacheManager cacheManager) {
-        super(onyxConfig, resourceManager);
-        resourceFilter_ = resourceFilter;
+        super(onyxConfig);
         localCacheConfig_ = localCacheConfig;
+        resourceManager_ = resourceManager;
         assetManager_ = assetManager;
         cacheManager_ = cacheManager;
     }
 
-    @RequestMapping(value = "^/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
-    public void redirectToFileDownload(
+    @RequestMapping(value = "^/api/v1/download/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+            methods = GET)
+    public void downloadFile(
             @Path("username") final String username,
             @Path("path") final String path,
             @Query("nocache") final Boolean noCache,
@@ -86,23 +87,20 @@ public final class File extends AbstractOnyxFreeMarkerController {
 
         final Resource file = resourceManager_.getResourceAtPath(normalizedPath);
         if (file == null) {
-            throw new ResourceNotFoundException("Found no file resource at path: "
-                    + normalizedPath);
-        } else if (!resourceFilter_.test(file)) {
-            throw new ResourceNotFoundException("Found no file resource at path: "
+            throw new ApiNotFoundException("Found no file resource at path: "
                     + normalizedPath);
         }
 
         if (!Resource.Type.FILE.equals(file.getType())) {
-            throw new ResourceNotFoundException("Found no file resource at path: "
+            throw new ApiNotFoundException("Found no file resource at path: "
                     + normalizedPath);
         } else if (Resource.Visibility.PRIVATE.equals(file.getVisibility())) {
             // If the file is a private file, we have to ensure that the authenticated user is the owner.
             if (session == null) {
-                throw new ResourceNotFoundException("Found no file resource at path: "
+                throw new ApiNotFoundException("Found no file resource at path: "
                         + normalizedPath);
-            } else if (!session.getUsername().equals(file.getOwner())) {
-                throw new ResourceForbiddenException("Private file not visible to authenticated user: "
+            } else if (userIsNotOwner(file, session)) {
+                throw new ApiForbiddenException("Private file not visible to authenticated user: "
                         + normalizedPath);
             }
         }

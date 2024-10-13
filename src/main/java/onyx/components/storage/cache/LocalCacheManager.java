@@ -48,6 +48,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -166,10 +167,14 @@ public final class LocalCacheManager implements CacheManager {
 
         final URL downloadUrl = assetManager_.getPresignedDownloadUrlForResource(resource);
 
+        final long readTimeoutMs =
+                localCacheConfig_.getLocalCacheDownloaderReadTimeout(TimeUnit.MILLISECONDS);
+        final long requestTimeoutMs =
+                localCacheConfig_.getLocalCacheDownloaderRequestTimeout(TimeUnit.MILLISECONDS);
         final DefaultAsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder()
-                // No read or download timeout; intentional.
-                .setReadTimeout(-1)
-                .setRequestTimeout(-1)
+                // Very long read & connect timeout; intentional.
+                .setReadTimeout(Duration.ofMillis(readTimeoutMs))
+                .setRequestTimeout(Duration.ofMillis(requestTimeoutMs))
                 .build();
 
         final Path cachedResource = generateCachedResourcePath(resource.getPath());

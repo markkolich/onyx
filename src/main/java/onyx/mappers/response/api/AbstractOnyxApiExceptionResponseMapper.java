@@ -24,33 +24,12 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.config.cache;
+package onyx.mappers.response.api;
 
-import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
+import curacao.mappers.response.AbstractControllerReturnTypeMapper;
+import onyx.exceptions.api.OnyxApiException;
 
-public interface LocalCacheConfig {
-
-    String LOCAL_CACHE_CONFIG_PATH = "local-cache";
-
-    String LOCAL_CACHE_ENABLED_PROP = "enabled";
-    String LOCAL_CACHE_DIRECTORY_PROP = "directory";
-    String LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP = "token-validity-duration";
-
-    String LOCAL_CACHE_DOWNLOADER_READ_TIMEOUT_DURATION_PROP = "cache-downloader-read-timeout-duration";
-    String LOCAL_CACHE_DOWNLOADER_REQUEST_TIMEOUT_DURATION_PROP = "cache-downloader-request-timeout-duration";
-
-    boolean localCacheEnabled();
-
-    Path getLocalCacheDirectory();
-
-    long getLocalCacheTokenValidityDuration(
-            final TimeUnit timeUnit);
-
-    long getLocalCacheDownloaderReadTimeout(
-            final TimeUnit timeUnit);
-
-    long getLocalCacheDownloaderRequestTimeout(
-            final TimeUnit timeUnit);
+public abstract class AbstractOnyxApiExceptionResponseMapper<T extends OnyxApiException>
+        extends AbstractControllerReturnTypeMapper<T> {
 
 }

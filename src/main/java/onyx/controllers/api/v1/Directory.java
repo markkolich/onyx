@@ -28,13 +28,14 @@ package onyx.controllers.api.v1;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.amazonaws.services.s3.model.Region;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.RequestBody;
-import curacao.entities.CuracaoEntity;
+import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.aws.dynamodb.DynamoDbMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.aws.AwsConfig;
@@ -43,6 +44,7 @@ import onyx.components.storage.ResourceManager;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.request.v1.CreateDirectoryRequest;
 import onyx.entities.api.request.v1.UpdateDirectoryRequest;
+import onyx.entities.api.response.v1.ResourceResponse;
 import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.api.*;
@@ -55,10 +57,12 @@ import java.time.Instant;
 import java.util.List;
 
 import static curacao.annotations.RequestMapping.Method.DELETE;
+import static curacao.annotations.RequestMapping.Method.GET;
 import static curacao.annotations.RequestMapping.Method.POST;
 import static curacao.annotations.RequestMapping.Method.PUT;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
+import static onyx.util.UserUtils.userIsNotOwner;
 
 @Controller
 public final class Directory extends AbstractOnyxApiController {
@@ -66,10 +70,11 @@ public final class Directory extends AbstractOnyxApiController {
     private final AwsConfig awsConfig_;
 
     private final AssetManager assetManager_;
-
     private final ResourceManager resourceManager_;
 
     private final IDynamoDBMapper dbMapper_;
+
+    private final ObjectMapper objectMapper_;
 
     @Injectable
     public Directory(
@@ -77,17 +82,52 @@ public final class Directory extends AbstractOnyxApiController {
             final AwsConfig awsConfig,
             final AssetManager assetManager,
             final ResourceManager resourceManager,
-            final DynamoDbMapper dynamoDbMapper) {
+            final DynamoDbMapper dynamoDbMapper,
+            final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         super(onyxConfig);
         awsConfig_ = awsConfig;
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
         dbMapper_ = dynamoDbMapper.getDbMapper();
+        objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
+    }
+
+    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+            methods = GET)
+    public ResourceResponse getDirectory(
+            @Path("username") final String username,
+            @Path("path") final String path,
+            final Session session) {
+        final String normalizedPath = normalizePath(username, path);
+
+        final Resource directory = resourceManager_.getResourceAtPath(normalizedPath);
+        if (directory == null) {
+            throw new ApiNotFoundException("Found no directory resource at path: "
+                    + normalizedPath);
+        }
+
+        if (!Resource.Type.DIRECTORY.equals(directory.getType())) {
+            throw new ApiNotFoundException("Found no directory resource at path: "
+                    + normalizedPath);
+        } else if (Resource.Visibility.PRIVATE.equals(directory.getVisibility())) {
+            // If the directory is a private directory, we have to ensure that the
+            // authenticated user is the owner.
+            if (session == null) {
+                throw new ApiNotFoundException("Found no directory resource at path: "
+                        + normalizedPath);
+            } else if (userIsNotOwner(directory, session)) {
+                throw new ApiForbiddenException("Private directory not visible to authenticated user: "
+                        + normalizedPath);
+            }
+        }
+
+        return ResourceResponse.Builder.fromResource(objectMapper_, directory, session)
+                .build();
     }
 
     @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = POST)
-    public CuracaoEntity createDirectory(
+    public ResourceResponse createDirectory(
             @Path("username") final String username,
             @Path("path") final String path,
             @Query("recursive") final Boolean recursive,
@@ -147,7 +187,7 @@ public final class Directory extends AbstractOnyxApiController {
         } else if (!Resource.Type.DIRECTORY.equals(parent.getType())) {
             throw new ApiBadRequestException("Found no parent directory resource at path: "
                     + parentPath);
-        } else if (!parent.getOwner().equals(session.getUsername())) {
+        } else if (userIsNotOwner(parent, session)) {
             throw new ApiForbiddenException("Authenticated user is not the owner of parent directory: "
                     + parentPath);
         }
@@ -167,12 +207,21 @@ public final class Directory extends AbstractOnyxApiController {
 
         resourceManager_.createResource(newDirectory);
 
-        return created();
+        return ResourceResponse.Builder.fromResource(objectMapper_, newDirectory, session)
+                .build();
+    }
+
+    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)$",
+            methods = GET)
+    public ResourceResponse getHomeDirectory(
+            @Path("username") final String username,
+            final Session session) {
+        return getDirectory(username, ResourceManager.ROOT_PATH, session);
     }
 
     @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)$",
             methods = PUT)
-    public CuracaoEntity updateHomeDirectory(
+    public ResourceResponse updateHomeDirectory(
             @Path("username") final String username,
             @RequestBody final UpdateDirectoryRequest request,
             final Session session) {
@@ -181,7 +230,7 @@ public final class Directory extends AbstractOnyxApiController {
 
     @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = PUT)
-    public CuracaoEntity updateDirectory(
+    public ResourceResponse updateDirectory(
             @Path("username") final String username,
             @Path("path") final String path,
             @RequestBody final UpdateDirectoryRequest request,
@@ -200,7 +249,7 @@ public final class Directory extends AbstractOnyxApiController {
         } else if (!Resource.Type.DIRECTORY.equals(directory.getType())) {
             throw new ApiBadRequestException("Found no directory resource at path: "
                     + normalizedPath);
-        } else if (!directory.getOwner().equals(session.getUsername())) {
+        } else if (userIsNotOwner(directory, session)) {
             throw new ApiForbiddenException("Authenticated user is not the owner of directory resource: "
                     + normalizedPath);
         }
@@ -222,12 +271,13 @@ public final class Directory extends AbstractOnyxApiController {
 
         resourceManager_.updateResource(directory);
 
-        return noContent();
+        return ResourceResponse.Builder.fromResource(objectMapper_, directory, session)
+                .build();
     }
 
     @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = DELETE)
-    public CuracaoEntity deleteDirectory(
+    public ResourceResponse deleteDirectory(
             @Path("username") final String username,
             @Path("path") final String path,
             @Query("permanent") final Boolean permanent,
@@ -246,7 +296,7 @@ public final class Directory extends AbstractOnyxApiController {
         } else if (!Resource.Type.DIRECTORY.equals(directory.getType())) {
             throw new ApiBadRequestException("Found no directory resource at path: "
                     + normalizedPath);
-        } else if (!directory.getOwner().equals(session.getUsername())) {
+        } else if (userIsNotOwner(directory, session)) {
             throw new ApiForbiddenException("Authenticated user is not the owner of directory resource: "
                     + normalizedPath);
         }
@@ -265,7 +315,8 @@ public final class Directory extends AbstractOnyxApiController {
         final boolean deletePermanently = BooleanUtils.toBooleanDefaultIfNull(permanent, false);
         assetManager_.deleteResourceAsync(directory, deletePermanently);
 
-        return noContent();
+        return ResourceResponse.Builder.fromResource(objectMapper_, directory, session)
+                .build();
     }
 
 }

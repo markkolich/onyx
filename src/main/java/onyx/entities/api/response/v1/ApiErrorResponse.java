@@ -26,47 +26,65 @@
 
 package onyx.entities.api.response.v1;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import onyx.entities.api.response.OnyxApiResponseEntity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.core.servlet.HttpStatus.SC_CREATED;
+public interface ApiErrorResponse extends OnyxApiResponseEntity {
 
-public interface UploadFileResponse extends OnyxApiResponseEntity {
+    @JsonProperty("statusCode")
+    int getStatusCode();
 
-    @JsonProperty("presignedUploadUrl")
-    String getPresignedUploadUrl();
+    @JsonProperty("message")
+    String getMessage();
 
-    @JsonIgnore
-    @Override
-    default int getStatus() {
-        return SC_CREATED;
-    }
+    @JsonProperty("stackTrace")
+    String getStackTrace();
 
     final class Builder extends AbstractOnyxApiResponseEntityBuilder {
 
-        private String presignedUploadUrl_;
+        private int statusCode_;
+        private String message_;
+        private String stackTrace_;
 
         public Builder(
                 final ObjectMapper objectMapper) {
             super(objectMapper);
         }
 
-        public Builder setPresignedUploadUrl(
-                final String presignedUploadUrl) {
-            presignedUploadUrl_ = presignedUploadUrl;
+        public Builder setStatusCode(
+                final int statusCode) {
+            statusCode_ = statusCode;
             return this;
         }
 
-        public UploadFileResponse build() {
-            checkNotNull(presignedUploadUrl_, "Presigned upload URL cannot be null.");
+        public Builder setMessage(
+                final String message) {
+            message_ = message;
+            return this;
+        }
 
-            return new UploadFileResponse() {
+        public Builder setStackTrace(
+                final String stackTrace) {
+            stackTrace_ = stackTrace;
+            return this;
+        }
+
+        public ApiErrorResponse build() {
+            return new ApiErrorResponse() {
                 @Override
-                public String getPresignedUploadUrl() {
-                    return presignedUploadUrl_;
+                public int getStatusCode() {
+                    return statusCode_;
+                }
+
+                @Override
+                public String getMessage() {
+                    return message_;
+                }
+
+                @Override
+                public String getStackTrace() {
+                    return stackTrace_;
                 }
 
                 @Override

@@ -26,47 +26,59 @@
 
 package onyx.entities.api.response.v1;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import onyx.entities.api.response.OnyxApiResponseEntity;
 
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.core.servlet.HttpStatus.SC_CREATED;
 
-public interface UploadFileResponse extends OnyxApiResponseEntity {
+public interface HomeResponse extends OnyxApiResponseEntity {
 
-    @JsonProperty("presignedUploadUrl")
-    String getPresignedUploadUrl();
+    @JsonProperty("path")
+    String getPath();
 
-    @JsonIgnore
-    @Override
-    default int getStatus() {
-        return SC_CREATED;
-    }
+    @JsonProperty("children")
+    List<ResourceResponse> getChildren();
 
     final class Builder extends AbstractOnyxApiResponseEntityBuilder {
 
-        private String presignedUploadUrl_;
+        private String path_;
+
+        private List<ResourceResponse> children_;
 
         public Builder(
                 final ObjectMapper objectMapper) {
             super(objectMapper);
         }
 
-        public Builder setPresignedUploadUrl(
-                final String presignedUploadUrl) {
-            presignedUploadUrl_ = presignedUploadUrl;
+        public Builder setPath(
+                final String path) {
+            path_ = path;
             return this;
         }
 
-        public UploadFileResponse build() {
-            checkNotNull(presignedUploadUrl_, "Presigned upload URL cannot be null.");
+        public Builder setChildren(
+                final List<ResourceResponse> children) {
+            children_ = children;
+            return this;
+        }
 
-            return new UploadFileResponse() {
+        public HomeResponse build() {
+            checkNotNull(path_, "Path cannot be null.");
+
+            checkNotNull(children_, "Children cannot be null.");
+
+            return new HomeResponse() {
                 @Override
-                public String getPresignedUploadUrl() {
-                    return presignedUploadUrl_;
+                public String getPath() {
+                    return path_;
+                }
+
+                @Override
+                public List<ResourceResponse> getChildren() {
+                    return children_;
                 }
 
                 @Override
@@ -74,6 +86,13 @@ public interface UploadFileResponse extends OnyxApiResponseEntity {
                     return objectMapper_;
                 }
             };
+        }
+
+        public static HomeResponse.Builder fromResource(
+                final ObjectMapper objectMapper) {
+            checkNotNull(objectMapper, "Object mapper cannot be null.");
+
+            return new HomeResponse.Builder(objectMapper);
         }
 
     }

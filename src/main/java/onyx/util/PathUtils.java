@@ -69,7 +69,8 @@ public final class PathUtils {
      */
     public static List<Triple<String, String, String>> splitNormalizedPathToElements(
             final String normalizedPath) {
-        final ImmutableList.Builder<Triple<String, String, String>> builder = ImmutableList.builder();
+        final ImmutableList.Builder<Triple<String, String, String>> builder =
+                ImmutableList.builder();
 
         final StringBuilder parentPathBuilder = new StringBuilder("/");
         final List<String> elements = SLASH_SPLITTER.splitToList(normalizedPath);

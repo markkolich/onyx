@@ -61,4 +61,16 @@ public final class OnyxTypesafeLocalCacheConfig implements LocalCacheConfig {
         return config_.getDuration(LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP, timeUnit);
     }
 
+    @Override
+    public long getLocalCacheDownloaderReadTimeout(
+            final TimeUnit timeUnit) {
+        return config_.getDuration(LOCAL_CACHE_DOWNLOADER_READ_TIMEOUT_DURATION_PROP, timeUnit);
+    }
+
+    @Override
+    public long getLocalCacheDownloaderRequestTimeout(
+            final TimeUnit timeUnit) {
+        return config_.getDuration(LOCAL_CACHE_DOWNLOADER_REQUEST_TIMEOUT_DURATION_PROP, timeUnit);
+    }
+
 }

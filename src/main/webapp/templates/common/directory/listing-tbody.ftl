@@ -20,7 +20,7 @@
       <#if child.getType() == "DIRECTORY">
           <a href="${contextPath}/<#if view == "browse">browse<#else>details</#if>${child.getPath()}" data-resource-type="DIRECTORY">${child.getHtmlName()?truncate(70, '...')}</a>
       <#elseif child.getType() == "FILE">
-          <a href="${contextPath}/file${child.getPath()}" data-resource-type="FILE">${child.getHtmlName()?truncate(70, '...')}</a>
+          <a href="${contextPath}/api/v1/download${child.getPath()}" data-resource-type="FILE">${child.getHtmlName()?truncate(70, '...')}</a>
       </#if>
   </td>
   <td class="align-middle d-none d-lg-table-cell">

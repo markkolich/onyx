@@ -27,7 +27,6 @@
 package onyx.controllers;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.filter.ResourceFilter;
@@ -37,8 +36,10 @@ import onyx.entities.storage.aws.dynamodb.Resource;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static onyx.util.UserUtils.getVisibilityForResourceAndSession;
 
 public abstract class AbstractOnyxResourceFilterAwareController extends AbstractOnyxFreeMarkerController {
 
@@ -57,18 +58,12 @@ public abstract class AbstractOnyxResourceFilterAwareController extends Abstract
             @Nullable final Session session) {
         checkNotNull(directory, "Directory resource cannot be null.");
 
-        final ImmutableSet.Builder<Resource.Visibility> visibility = ImmutableSet.builder();
-        visibility.add(Resource.Visibility.PUBLIC);
-        // Only show private resources inside the directory if the authenticated
-        // user is the directory owner.
-        final boolean userIsOwner = userIsOwner(directory, session);
-        if (userIsOwner) {
-            visibility.add(Resource.Visibility.PRIVATE);
-        }
+        final Set<Resource.Visibility> visibility =
+                getVisibilityForResourceAndSession(directory, session);
 
         final List<Resource> listing = resourceManager_.listDirectory(
                 directory,
-                visibility.build(),
+                visibility,
                 null);
 
         final List<Resource> filtered = listing.stream()

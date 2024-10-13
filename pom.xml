@@ -30,7 +30,7 @@
         <maven-duplicate-finder-plugin.version>1.4.0</maven-duplicate-finder-plugin.version>
 
         <slf4j.version>2.0.9</slf4j.version>
-        <logback.version>1.5.8</logback.version>
+        <logback.version>1.5.12</logback.version>
 
         <curacao.version>7.0.0</curacao.version>
 
@@ -38,7 +38,8 @@
 
         <typesafe-config.version>1.4.3</typesafe-config.version>
 
-        <jackson.version>2.18.0</jackson.version>
+        <jackson.version>2.18.1</jackson.version>
+        <jackson-databind-nullable.version>0.2.6</jackson-databind-nullable.version>
 
         <commons-lang3.version>3.17.0</commons-lang3.version>
         <commons-text.version>1.12.0</commons-text.version>
@@ -57,7 +58,7 @@
         <bcprov-ext-jdk15on.version>1.70</bcprov-ext-jdk15on.version>
         <jbcrypt.version>0.4</jbcrypt.version>
 
-        <async-http-client.version>2.12.3</async-http-client.version>
+        <async-http-client.version>3.0.0</async-http-client.version>
 
         <picocli.version>4.7.6</picocli.version>
 
@@ -65,12 +66,12 @@
 
         <quartz.version>2.5.0-rc1</quartz.version>
 
-        <checkstyle.version>10.18.2</checkstyle.version>
+        <checkstyle.version>10.19.0</checkstyle.version>
 
         <!-- Test dependency versions -->
 
-        <junit.jupiter.version>5.11.1</junit.jupiter.version>
-        <mockito-core.version>5.14.0</mockito-core.version>
+        <junit.jupiter.version>5.11.3</junit.jupiter.version>
+        <mockito-core.version>5.14.2</mockito-core.version>
     </properties>
 
     <issueManagement>
@@ -161,6 +162,11 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>${jackson-databind-nullable.version}</version>
         </dependency>
 
         <dependency>

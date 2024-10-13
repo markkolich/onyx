@@ -40,6 +40,8 @@ import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.resource.ResourceForbiddenException;
 import onyx.exceptions.resource.ResourceNotFoundException;
 
+import static onyx.util.UserUtils.userIsNotOwner;
+import static onyx.util.UserUtils.userIsOwner;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
@@ -87,7 +89,7 @@ public final class Browse extends AbstractOnyxResourceFilterAwareController {
             if (session == null) {
                 throw new ResourceNotFoundException("Found no directory resource at path: "
                         + normalizedPath);
-            } else if (!session.getUsername().equals(resource.getOwner())) {
+            } else if (userIsNotOwner(resource, session)) {
                 throw new ResourceForbiddenException("Private directory not visible to authenticated user: "
                         + normalizedPath);
             }

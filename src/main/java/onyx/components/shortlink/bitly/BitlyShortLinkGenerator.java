@@ -63,7 +63,7 @@ public final class BitlyShortLinkGenerator implements ShortLinkGenerator {
 
     private static final String JSON_UTF_8 = MediaType.JSON_UTF_8.toString();
 
-    private static final String FILE_RESOURCE_PATH_FORMAT = "%s/file%s";
+    private static final String DOWNLOAD_RESOURCE_PATH_FORMAT = "%s/api/v1/download%s";
     private static final String BROWSE_RESOURCE_PATH_FORMAT = "%s/browse%s";
 
     private final OnyxConfig onyxConfig_;
@@ -153,7 +153,7 @@ public final class BitlyShortLinkGenerator implements ShortLinkGenerator {
         final String resourcePath = resource.getPath();
 
         if (Resource.Type.FILE.equals(resource.getType())) {
-            return String.format(FILE_RESOURCE_PATH_FORMAT, visibleBaseAppUrl, resourcePath);
+            return String.format(DOWNLOAD_RESOURCE_PATH_FORMAT, visibleBaseAppUrl, resourcePath);
         } else if (Resource.Type.DIRECTORY.equals(resource.getType())) {
             return String.format(BROWSE_RESOURCE_PATH_FORMAT, visibleBaseAppUrl, resourcePath);
         } else {
