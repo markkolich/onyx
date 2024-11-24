@@ -5,7 +5,7 @@
     <#include "../common/css.ftl">
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-100 dark-mode">
 
   <!-- Page Wrapper -->
   <div id="wrapper">

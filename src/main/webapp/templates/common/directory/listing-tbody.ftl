@@ -30,7 +30,7 @@
           <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
       </#if>
   </td>
-  <td class="align-middle d-none d-lg-table-cell text-nowrap text-gray-500">
+  <td class="align-middle d-none d-lg-table-cell text-nowrap text-muted">
       <#if child.getType() == "FILE">
           ${child.getHtmlSize()}
       <#else>

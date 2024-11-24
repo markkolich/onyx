@@ -39,7 +39,7 @@
 
             // Collect all previewable media resources
             var $mediaLinks = data.$contentDiv.find('a[data-resource-type="FILE"]').filter(function() {
-                return this.href.match(/\.(mp4|mp3|pdf)$/i);
+                return this.href.match(/\.(mp4|mp3)$/i);
             });
             // Show media in a Magnific Popup iframe with gallery navigation
             $mediaLinks.magnificPopup({
@@ -60,6 +60,27 @@
                         }
                     },
                     srcAction: 'iframe_src'
+                },
+                callbacks: {
+                    open: function() {
+                        // Reach into the <iframe> and force the browser default video player
+                        // to 100% width & 100% height so the player fills the lightbox.
+                        var $iframe = $('.mfp-iframe');
+                        //$iframe.attr('allow', 'autoplay; fullscreen');
+                        //$iframe.attr('allowfullscreen', '');
+                        $iframe.on('load', function() {
+                            var $video = $(this).contents().find('video')
+                                .css('width', '100%')
+                                .css('height', '100%');
+
+                            // Attempt to autoplay the <video>
+                            if ($video.length) {
+                                $video[0].play().catch(function() {
+                                    // Autoplay was prevented, user must click play manually
+                                });
+                            }
+                        });
+                    }
                 },
                 showCloseBtn: false,
                 closeBtnInside: true,

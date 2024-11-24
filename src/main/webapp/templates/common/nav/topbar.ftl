@@ -9,7 +9,13 @@
   <!-- Topbar Navbar -->
   <ul class="navbar-nav ml-auto">
 
-    <!-- Nav Item - User Information -->
+    <!-- Nav Item - Dark Mode Toggle -->
+    <li class="nav-item no-arrow">
+      <a class="nav-link text-muted" href="#" id="darkModeToggle" role="button" title="Toggle Dark Mode">
+        <i class="fas fa-moon fa-fw"></i>
+      </a>
+    </li>
+
     <#if session?has_content>
         <!-- Nav Item - Search Dropdown -->
         <li class="nav-item dropdown no-arrow">
@@ -32,7 +38,7 @@
 
         <li class="nav-item dropdown no-arrow">
           <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span class="text-muted small">${session.getUsername()} <i class="fas fa-user ml-1"></i></span>
+            <span class="text-muted">${session.getUsername()} <i class="fas fa-user ml-1"></i></span>
           </a>
           <!-- Dropdown - User Information -->
           <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
@@ -62,9 +68,9 @@
           </div>
         </li>
     <#else>
-        <a class="nav-link" href="${contextPath}/login">
-          <span class="mr-2 text-gray-600 small">Login</span>
-        </a>
+        <li class="nav-item no-arrow">
+          <a class="nav-link text-muted" href="${contextPath}/login" class="mr-2 text-gray-600 small">Login</a>
+        </li>
     </#if>
 
   </ul>
