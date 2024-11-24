@@ -20,7 +20,8 @@ function concatCss() {
         'vendor/magnific-popup/magnific-popup.min.css',
         'css/magnific-popup.css',
         'css/nunito.css',
-        'css/sb-admin-2.css'
+        'css/sb-admin-2.css',
+        'css/sb-admin-2-dark.css'
     ];
 
     return gulp.src(cssResources)

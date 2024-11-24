@@ -5,7 +5,7 @@
     <#include "common/css.ftl">
 </head>
 
-<body class="bg-gray-100"<#if session?has_content> data-session="${session.id}"</#if>>
+<body class="bg-gray-100 dark-mode"<#if session?has_content> data-session="${session.id}"</#if>>
 
   <!-- Page Wrapper -->
   <div id="wrapper">
