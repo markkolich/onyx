@@ -61,6 +61,18 @@
                     },
                     srcAction: 'iframe_src'
                 },
+                callbacks: {
+                    open: function() {
+                        // Reach into the <iframe> and force the browser default video player
+                        // to 100% width & 100% height so the player fills the lightbox.
+                        var $iframe = $('.mfp-iframe');
+                        $iframe.on('load', function() {
+                            $(this).contents().find('video')
+                                .css('width', '100%')
+                                .css('height', '100%');
+                        });
+                    }
+                },
                 showCloseBtn: false,
                 closeBtnInside: true,
                 closeOnContentClick: false,

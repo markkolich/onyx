@@ -19,7 +19,7 @@
         <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
         <maven-frontend-plugin.version>2.0.0</maven-frontend-plugin.version>
-        <maven-frontend-node.version>v18.20.0</maven-frontend-node.version>
+        <maven-frontend-node.version>v20.18.0</maven-frontend-node.version>
         <maven-frontend-npm.version>10.5.0</maven-frontend-npm.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
@@ -489,12 +489,12 @@
                         </goals>
                         <configuration>
                             <!--
-                                NOTE: using `no-optional` to keep optional dependencies out of the
+                                NOTE: using `omit=optional` to keep optional dependencies out of the
                                 build which are incompatible with the build environment. E.g., the
                                 `fsevents` dependency is only compatible with macOS and doesn't
                                 work on Linux.
                             -->
-                            <arguments>install --no-color --no-optional --no-package-lock</arguments>
+                            <arguments>install --no-color --omit=optional --no-package-lock</arguments>
                         </configuration>
                     </execution>
                     <execution>

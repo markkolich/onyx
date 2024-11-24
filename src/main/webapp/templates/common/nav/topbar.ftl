@@ -9,7 +9,6 @@
   <!-- Topbar Navbar -->
   <ul class="navbar-nav ml-auto">
 
-    <!-- Nav Item - User Information -->
     <#if session?has_content>
         <!-- Nav Item - Search Dropdown -->
         <li class="nav-item dropdown no-arrow">
@@ -28,6 +27,13 @@
               </div>
             </form>
           </div>
+        </li>
+
+        <!-- Nav Item - Dark Mode Toggle -->
+        <li class="nav-item no-arrow">
+          <a class="nav-link text-muted" href="#" id="darkModeToggle" role="button" title="Toggle Dark Mode">
+            <i class="fas fa-moon fa-fw"></i>
+          </a>
         </li>
 
         <li class="nav-item dropdown no-arrow">

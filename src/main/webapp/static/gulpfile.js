@@ -20,7 +20,8 @@ function concatCss() {
         'vendor/magnific-popup/magnific-popup.min.css',
         'css/magnific-popup.css',
         'css/nunito.css',
-        'css/sb-admin-2.css'
+        'css/sb-admin-2.css',
+        'css/sb-admin-2-dark.css'
     ];
 
     return gulp.src(cssResources)
@@ -61,7 +62,8 @@ function concatJs() {
         'js/onyx/app/file.js',
         'js/onyx/app/directory.js',
         'js/onyx/app/shortlink.js',
-        'js/onyx/app/previewer.js'
+        'js/onyx/app/previewer.js',
+        'js/onyx/app/widgets/dark-mode.js'
     ];
 
     return gulp.src(jsResources)

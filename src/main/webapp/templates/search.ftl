@@ -5,7 +5,7 @@
     <#include "common/css.ftl">
 </head>
 
-<body class="bg-gray-100"<#if session?has_content> data-session="${session.id}"</#if>>
+<body class="bg-gray-100 dark-mode"<#if session?has_content> data-session="${session.id}"</#if>>
 
   <!-- Page Wrapper -->
   <div id="wrapper">
@@ -76,7 +76,7 @@
                                               <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
                                           </#if>
                                       </td>
-                                      <td class="align-middle d-none d-lg-table-cell text-nowrap text-gray-500">
+                                      <td class="align-middle d-none d-lg-table-cell text-nowrap">
                                           ${result.getLeft().getHtmlSize()}
                                       </td>
 
