@@ -5,7 +5,7 @@
     <#include "common/css.ftl">
 </head>
 
-<body class="bg-gray-100" data-path="${resource.getPath()}" data-description="<#if resource.getHtmlDescription()?has_content>${resource.getHtmlDescription()}</#if>"<#if session?has_content> data-session="${session.id}"</#if>>
+<body class="bg-gray-100 dark-mode" data-path="${resource.getPath()}" data-description="<#if resource.getHtmlDescription()?has_content>${resource.getHtmlDescription()}</#if>"<#if session?has_content> data-session="${session.id}"</#if>>
 
   <!-- Page Wrapper -->
   <div id="wrapper">

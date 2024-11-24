@@ -21,7 +21,8 @@ gulp.task('concat-css', function() {
         'vendor/fontawesome-free/css/all.css',
         'vendor/featherlight/featherlight.min.css',
         'css/nunito.css',
-        'css/sb-admin-2.css'
+        'css/sb-admin-2.css',
+        'css/sb-admin-2-dark.css'
     ];
 
     return gulp.src(cssResources)
