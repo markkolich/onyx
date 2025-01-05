@@ -147,6 +147,7 @@ public final class File extends AbstractOnyxApiController {
             @Path("username") final String username,
             @Path("path") final String path,
             @Query("recursive") final Boolean recursive,
+            @Query("overwrite") final Boolean overwrite,
             @RequestBody final UploadFileRequest request,
             final HttpResponse response,
             final Session session) {
@@ -158,7 +159,12 @@ public final class File extends AbstractOnyxApiController {
 
         final String normalizedPath = normalizePath(username, path);
         final Resource file = resourceManager_.getResourceAtPath(normalizedPath);
-        if (file != null) {
+        if (file != null && BooleanUtils.isTrue(overwrite)) {
+            LOG.warn("Overwrite is true - skipping existing resource check: {}",
+                    file.getPath());
+            // Delete the asset before overwriting the resource.
+            assetManager_.deleteResource(file, true);
+        } else if (file != null) {
             throw new ApiConflictException("File or other resource at path already exists: "
                     + normalizedPath);
         }

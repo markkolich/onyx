@@ -26,6 +26,7 @@
 
 package onyx.entities.api.response.v1;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import onyx.entities.api.response.OnyxApiResponseEntity;
@@ -34,6 +35,12 @@ public interface ApiErrorResponse extends OnyxApiResponseEntity {
 
     @JsonProperty("statusCode")
     int getStatusCode();
+
+    @JsonIgnore
+    @Override
+    default int getStatus() {
+        return getStatusCode();
+    }
 
     @JsonProperty("message")
     String getMessage();
