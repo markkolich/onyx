@@ -30,7 +30,7 @@
         <maven-duplicate-finder-plugin.version>1.4.0</maven-duplicate-finder-plugin.version>
 
         <slf4j.version>2.0.16</slf4j.version>
-        <logback.version>1.5.17</logback.version>
+        <logback.version>1.5.18</logback.version>
 
         <curacao.version>7.1.0</curacao.version>
 
@@ -48,7 +48,7 @@
 
         <aws-sdk.version>1.12.700</aws-sdk.version>
 
-        <guava.version>33.4.0-jre</guava.version>
+        <guava.version>33.4.6-jre</guava.version>
 
         <freemarker.version>2.3.34</freemarker.version>
 
