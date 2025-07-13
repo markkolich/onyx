@@ -55,7 +55,6 @@ public interface ResourceResponse extends OnyxApiResponseEntity {
         private String path_;
         private String parent_;
         private String name_;
-        private String description_;
 
         private MetadataResponse metadata_;
 

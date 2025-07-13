@@ -38,6 +38,7 @@ import onyx.components.authentication.api.ApiKeyAuthenticator;
 import onyx.entities.authentication.Session;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -70,7 +71,7 @@ public final class SessionArgumentRequestMapper
 
         // 1. If there's an API key on the request, validate it first.
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        final String apiKey = StringUtils.removeStart(authHeader, API_KEY_AUTH_HEADER_PREFIX);
+        final String apiKey = Strings.CS.removeStart(authHeader, API_KEY_AUTH_HEADER_PREFIX);
         if (StringUtils.isNotBlank(apiKey)) {
             final Session session = apiKeySessionManager_.getSessionForApiKey(apiKey);
             if (session != null) {

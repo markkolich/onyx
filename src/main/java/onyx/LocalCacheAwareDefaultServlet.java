@@ -32,7 +32,7 @@ import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.cache.CachedResourceSigner;
 import onyx.entities.storage.cache.CachedResourceToken;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.resource.Resource;
@@ -76,7 +76,7 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
         }
 
         // Remove the cache prefix & extract the resource token from the path.
-        final String resourceWithToken = StringUtils.removeStart(pathInContext, LOCAL_CACHE_URI_PATH_PREFIX);
+        final String resourceWithToken = Strings.CS.removeStart(pathInContext, LOCAL_CACHE_URI_PATH_PREFIX);
         final List<String> tokens = SLASH_SPLITTER.splitToList(resourceWithToken);
         if (tokens.size() != 2) {
             return null;

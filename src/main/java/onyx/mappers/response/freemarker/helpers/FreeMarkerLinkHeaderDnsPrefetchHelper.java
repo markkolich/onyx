@@ -33,7 +33,7 @@ import curacao.annotations.Injectable;
 import curacao.core.servlet.HttpResponse;
 import onyx.components.aws.s3.S3Client;
 import onyx.components.config.aws.AwsConfig;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import javax.annotation.Nonnull;
 
@@ -71,7 +71,7 @@ public final class FreeMarkerLinkHeaderDnsPrefetchHelper {
         final String s3BucketName = awsConfig_.getAwsS3BucketName();
         final String s3BucketUrl = s3_.getUrl(s3BucketName, null).toExternalForm();
         if (s3BucketUrl.endsWith("/")) {
-            return StringUtils.removeEnd(s3BucketUrl, "/");
+            return Strings.CS.removeEnd(s3BucketUrl, "/");
         }
 
         return s3BucketUrl;
