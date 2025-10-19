@@ -30,25 +30,25 @@
         <maven-duplicate-finder-plugin.version>1.4.0</maven-duplicate-finder-plugin.version>
 
         <slf4j.version>2.0.16</slf4j.version>
-        <logback.version>1.5.18</logback.version>
+        <logback.version>1.5.20</logback.version>
 
         <curacao.version>7.1.0</curacao.version>
 
-        <jetty.version>9.4.57.v20241219</jetty.version>
+        <jetty.version>9.4.58.v20250814</jetty.version>
 
-        <typesafe-config.version>1.4.4</typesafe-config.version>
+        <typesafe-config.version>1.4.5</typesafe-config.version>
 
-        <jackson.version>2.19.1</jackson.version>
-        <jackson-databind-nullable.version>0.2.6</jackson-databind-nullable.version>
+        <jackson.version>2.20.0</jackson.version>
+        <jackson-databind-nullable.version>0.2.7</jackson-databind-nullable.version>
 
-        <commons-lang3.version>3.18.0</commons-lang3.version>
-        <commons-text.version>1.13.1</commons-text.version>
-        <commons-io.version>2.19.0</commons-io.version>
+        <commons-lang3.version>3.19.0</commons-lang3.version>
+        <commons-text.version>1.14.0</commons-text.version>
+        <commons-io.version>2.20.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
 
         <aws-sdk.version>1.12.700</aws-sdk.version>
 
-        <guava.version>33.4.8-jre</guava.version>
+        <guava.version>33.5.0-jre</guava.version>
 
         <freemarker.version>2.3.34</freemarker.version>
 
@@ -58,7 +58,7 @@
         <bcprov-ext-jdk15on.version>1.70</bcprov-ext-jdk15on.version>
         <jbcrypt.version>0.4</jbcrypt.version>
 
-        <async-http-client.version>3.0.2</async-http-client.version>
+        <async-http-client.version>3.0.3</async-http-client.version>
 
         <picocli.version>4.7.7</picocli.version>
 
@@ -70,8 +70,8 @@
 
         <!-- Test dependency versions -->
 
-        <junit.jupiter.version>5.12.1</junit.jupiter.version>
-        <mockito-core.version>5.18.0</mockito-core.version>
+        <junit.jupiter.version>5.14.0</junit.jupiter.version>
+        <mockito-core.version>5.20.0</mockito-core.version>
     </properties>
 
     <issueManagement>
