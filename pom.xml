@@ -38,8 +38,8 @@
 
         <typesafe-config.version>1.4.5</typesafe-config.version>
 
-        <jackson.version>2.20.0</jackson.version>
-        <jackson-databind-nullable.version>0.2.7</jackson-databind-nullable.version>
+        <jackson.version>2.20.1</jackson.version>
+        <jackson-databind-nullable.version>0.2.8</jackson-databind-nullable.version>
 
         <commons-lang3.version>3.19.0</commons-lang3.version>
         <commons-text.version>1.14.0</commons-text.version>
@@ -64,7 +64,7 @@
 
         <solr.version>8.11.1</solr.version>
 
-        <quartz.version>2.5.0</quartz.version>
+        <quartz.version>2.5.1</quartz.version>
 
         <checkstyle.version>10.21.4</checkstyle.version>
 
@@ -569,7 +569,6 @@
                     <includeTests>true</includeTests>
                     <failOnViolation>true</failOnViolation>
                     <linkXRef>false</linkXRef>
-                    <sourceEncoding>utf-8</sourceEncoding>
                     <targetJdk>${project.java-source.version}</targetJdk>
                     <rulesets>
                         <ruleset>build/pmd/ruleset.xml</ruleset>
