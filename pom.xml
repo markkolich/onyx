@@ -30,7 +30,7 @@
         <maven-duplicate-finder-plugin.version>1.4.0</maven-duplicate-finder-plugin.version>
 
         <slf4j.version>2.0.16</slf4j.version>
-        <logback.version>1.5.20</logback.version>
+        <logback.version>1.5.24</logback.version>
 
         <curacao.version>7.1.0</curacao.version>
 
@@ -41,9 +41,9 @@
         <jackson.version>2.20.1</jackson.version>
         <jackson-databind-nullable.version>0.2.8</jackson-databind-nullable.version>
 
-        <commons-lang3.version>3.19.0</commons-lang3.version>
-        <commons-text.version>1.14.0</commons-text.version>
-        <commons-io.version>2.20.0</commons-io.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <commons-text.version>1.15.0</commons-text.version>
+        <commons-io.version>2.21.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
 
         <aws-sdk.version>1.12.700</aws-sdk.version>
@@ -58,20 +58,20 @@
         <bcprov-ext-jdk15on.version>1.70</bcprov-ext-jdk15on.version>
         <jbcrypt.version>0.4</jbcrypt.version>
 
-        <async-http-client.version>3.0.3</async-http-client.version>
+        <async-http-client.version>3.0.6</async-http-client.version>
 
         <picocli.version>4.7.7</picocli.version>
 
         <solr.version>8.11.1</solr.version>
 
-        <quartz.version>2.5.1</quartz.version>
+        <quartz.version>2.5.2</quartz.version>
 
         <checkstyle.version>10.21.4</checkstyle.version>
 
         <!-- Test dependency versions -->
 
         <junit.jupiter.version>5.14.0</junit.jupiter.version>
-        <mockito-core.version>5.20.0</mockito-core.version>
+        <mockito-core.version>5.21.0</mockito-core.version>
     </properties>
 
     <issueManagement>
