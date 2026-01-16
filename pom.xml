@@ -55,7 +55,7 @@
         <htmlcompressor.version>1.5.2</htmlcompressor.version>
         <yuicompressor.version>2.4.8</yuicompressor.version>
 
-        <bcprov-ext-jdk15on.version>1.70</bcprov-ext-jdk15on.version>
+        <bcprov-ext-jdk18on.version>1.78</bcprov-ext-jdk18on.version>
         <jbcrypt.version>0.4</jbcrypt.version>
 
         <async-http-client.version>3.0.6</async-http-client.version>
@@ -255,8 +255,8 @@
 
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-ext-jdk15on</artifactId>
-            <version>${bcprov-ext-jdk15on.version}</version>
+            <artifactId>bcprov-ext-jdk18on</artifactId>
+            <version>${bcprov-ext-jdk18on.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mindrot</groupId>

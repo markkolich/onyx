@@ -86,7 +86,7 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
         final CachedResourceSigner cachedResourceSigner =
                 getComponentFromContext(curacaoServletContext, CachedResourceSigner.class);
         checkNotNull(cachedResourceSigner, "Cached resource signer cannot be null; context not initialized?");
-        final String token = tokens.iterator().next();
+        final String token = tokens.get(0);
         final CachedResourceToken cachedResourceToken =
                 cachedResourceSigner.extractSignedCachedResourceToken(token);
         if (cachedResourceToken == null) {

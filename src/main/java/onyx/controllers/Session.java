@@ -53,6 +53,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +61,7 @@ import java.util.concurrent.TimeUnit;
 import static curacao.annotations.RequestMapping.Method.POST;
 import static onyx.components.authentication.SessionManager.SESSION_COOKIE_NAME;
 import static onyx.components.authentication.twofactor.TwoFactorAuthTokenManager.TRUSTED_DEVICE_COOKIE_NAME;
+import static org.apache.commons.codec.binary.StringUtils.getBytesUtf8;
 
 @Controller
 public final class Session extends AbstractOnyxFreeMarkerController {
@@ -181,9 +183,12 @@ public final class Session extends AbstractOnyxFreeMarkerController {
         final String username = session.getUsername();
 
         final String generatedTokenHash = twoFactorAuthTokenManager_.generateTokenHash(username, code);
-        if (!token.getHash().equals(generatedTokenHash)) {
-            LOG.warn("Provided 2FA token hash on request did not match generated 2FA token hash: "
-                    + "provided={}, generated={}", token.getHash(), generatedTokenHash);
+        // Use constant-time comparison to prevent timing attacks
+        final boolean hashesMatch = MessageDigest.isEqual(
+                getBytesUtf8(token.getHash()),
+                getBytesUtf8(generatedTokenHash));
+        if (!hashesMatch) {
+            LOG.warn("2FA token hash mismatch for user: {}", username);
             logout(response, context);
             return;
         }

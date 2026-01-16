@@ -95,11 +95,11 @@ public final class OnyxTwoFactorSmsAuthCodeManager implements TwoFactorAuthCodeM
             final int publishStatus = publishResult.getSdkHttpMetadata().getHttpStatusCode();
             if (publishStatus != HttpStatus.SC_OK) {
                 LOG.warn("AWS SNS publish failed while sending 2FA SMS text-message to user: "
-                        + "{}: {} ({})", publishStatus, user.getUsername(), user.getMobileNumber());
+                        + "{}, status: {}", user.getUsername(), publishStatus);
             }
         } catch (final Exception e) {
-            LOG.error("Failed to send send 2FA SMS text-message for user session: {} ({})",
-                    user.getUsername(), user.getMobileNumber(), e);
+            LOG.error("Failed to send 2FA SMS text-message for user: {}",
+                    user.getUsername(), e);
         }
     }
 
