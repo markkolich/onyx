@@ -1,0 +1,17 @@
+.mfp-iframe-holder .mfp-content {
+  max-width: none;
+}
+
+.mfp-iframe-scaler {
+  width: 90vw;
+  height: 90vh;
+  padding-top: 0;
+  overflow: visible;
+  margin: 0 auto;
+}
+
+.mfp-iframe-scaler iframe {
+  position: static;
+  width: 100%;
+  height: 100%;
+}
