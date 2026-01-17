@@ -1,0 +1,9 @@
+<ruleset comparisonMethod="maven"
+         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0 http://mojo.codehaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd">
+    <ignoreVersions>
+        <!-- Intentionally exclude alpha, beta, and RC versions of artifacts. -->
+        <ignoreVersion type="regex">.*[-_\.](alpha|Alpha|ALPHA|b|beta|Beta|BETA|rc|RC|M|EA)[0-9]*[-_\.]?[0-9]*</ignoreVersion>
+    </ignoreVersions>
+</ruleset>

@@ -4,7 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
 
-    <description>The default Havalo PMD check ruleset.</description>
+    <description>The default Onyx PMD check ruleset.</description>
 
     <rule ref="category/java/bestpractices.xml/CheckResultSet" />
     <rule ref="category/java/bestpractices.xml/UnusedFormalParameter" />
@@ -13,11 +13,17 @@
     <rule ref="category/java/bestpractices.xml/AvoidReassigningLoopVariables" />
     <rule ref="category/java/bestpractices.xml/AvoidReassigningParameters" />
     <rule ref="category/java/bestpractices.xml/AvoidStringBufferField" />
-    <rule ref="category/java/bestpractices.xml/DefaultLabelNotLastInSwitchStmt" />
-    <rule ref="category/java/bestpractices.xml/LooseCoupling" />
+    <rule ref="category/java/bestpractices.xml/DefaultLabelNotLastInSwitch" />
+    <rule ref="category/java/bestpractices.xml/LooseCoupling">
+        <properties>
+            <!-- Allow implementation types that don't have interfaces -->
+            <property name="allowedTypes"
+                      value="java.util.Properties,com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList,org.quartz.JobDataMap,org.apache.solr.common.SolrInputDocument,org.apache.solr.common.SolrDocumentList,org.apache.solr.common.SolrDocument" />
+        </properties>
+    </rule>
     <rule ref="category/java/bestpractices.xml/MissingOverride" />
     <rule ref="category/java/bestpractices.xml/OneDeclarationPerLine" />
-    <rule ref="category/java/bestpractices.xml/SwitchStmtsShouldHaveDefault" />
+    <rule ref="category/java/bestpractices.xml/NonExhaustiveSwitch" />
     <rule ref="category/java/bestpractices.xml/UseCollectionIsEmpty" />
     <rule ref="category/java/bestpractices.xml/UseTryWithResources" />
     <rule ref="category/java/bestpractices.xml/UseVarargs" />
@@ -33,7 +39,6 @@
     <rule ref="category/java/codestyle.xml/MethodArgumentCouldBeFinal" />
     <rule ref="category/java/codestyle.xml/LocalVariableNamingConventions" />
     <rule ref="category/java/codestyle.xml/ControlStatementBraces" />
-    <rule ref="category/java/codestyle.xml/GenericsNaming" />
     <rule ref="category/java/codestyle.xml/NoPackage" />
     <rule ref="category/java/codestyle.xml/PackageCase" />
     <rule ref="category/java/codestyle.xml/UnnecessaryImport" />
@@ -97,8 +102,6 @@
     <rule ref="category/java/errorprone.xml/UnconditionalIfStatement" />
     <rule ref="category/java/errorprone.xml/UnnecessaryConversionTemporary" />
     <rule ref="category/java/errorprone.xml/UnusedNullCheckInEquals" />
-    <rule ref="category/java/errorprone.xml/UselessOperationOnImmutable" />
-
     <rule ref="category/java/multithreading.xml/AvoidThreadGroup" />
     <rule ref="category/java/multithreading.xml/DontCallThreadRun" />
     <rule ref="category/java/multithreading.xml/DoubleCheckedLocking" />
