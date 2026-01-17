@@ -26,7 +26,6 @@
 
 package onyx.components.config.aws;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.model.StorageClass;
 import com.typesafe.config.Config;
 import curacao.annotations.Component;
@@ -59,8 +58,8 @@ public final class OnyxTypesafeAwsConfig implements AwsConfig {
     // DynamoDB config
 
     @Override
-    public Regions getAwsDynamoDbRegion() {
-        return Regions.fromName(config_.getString(AWS_DYNAMO_DB_REGION_PROP));
+    public String getAwsDynamoDbRegion() {
+        return config_.getString(AWS_DYNAMO_DB_REGION_PROP);
     }
 
     @Override
@@ -76,8 +75,8 @@ public final class OnyxTypesafeAwsConfig implements AwsConfig {
     // S3 config
 
     @Override
-    public Regions getAwsS3Region() {
-        return Regions.fromName(config_.getString(AWS_S3_REGION_PROP));
+    public String getAwsS3Region() {
+        return config_.getString(AWS_S3_REGION_PROP);
     }
 
     @Override
@@ -109,8 +108,8 @@ public final class OnyxTypesafeAwsConfig implements AwsConfig {
     // SNS config
 
     @Override
-    public Regions getAwsSnsRegion() {
-        return Regions.fromName(config_.getString(AWS_SNS_REGION_PROP));
+    public String getAwsSnsRegion() {
+        return config_.getString(AWS_SNS_REGION_PROP);
     }
 
 }

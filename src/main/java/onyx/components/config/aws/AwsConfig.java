@@ -26,7 +26,6 @@
 
 package onyx.components.config.aws;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.model.StorageClass;
 
 import java.util.concurrent.TimeUnit;
@@ -57,7 +56,7 @@ public interface AwsConfig {
 
     // DynamoDB config
 
-    Regions getAwsDynamoDbRegion();
+    String getAwsDynamoDbRegion();
 
     String getAwsDynamoDbTableName();
 
@@ -65,7 +64,7 @@ public interface AwsConfig {
 
     // S3 config
 
-    Regions getAwsS3Region();
+    String getAwsS3Region();
 
     String getAwsS3BucketName();
 
@@ -80,6 +79,6 @@ public interface AwsConfig {
 
     // SNS config
 
-    Regions getAwsSnsRegion();
+    String getAwsSnsRegion();
 
 }

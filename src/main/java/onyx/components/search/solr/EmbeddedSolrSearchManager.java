@@ -272,7 +272,7 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
                 .setOwner((String) document.get(INDEX_FIELD_OWNER))
                 .setCreatedAt(((Date) document.get(INDEX_FIELD_CREATED)).toInstant())
                 .setFavorite((Boolean) document.get(INDEX_FIELD_FAVORITE))
-                .withS3BucketRegion(Region.fromValue(awsConfig.getAwsS3Region().getName()))
+                .withS3BucketRegion(Region.fromValue(awsConfig.getAwsS3Region()))
                 .withS3Bucket(awsConfig.getAwsS3BucketName())
                 .withDbMapper(dbMapper)
                 .build();

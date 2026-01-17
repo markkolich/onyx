@@ -15,7 +15,6 @@
             var $imageLinks = data.$contentDiv.find('a[data-resource-type="FILE"]').filter(function() {
                 return this.href.match(/\.(gif|jpe?g|tiff|png|webp)$/i);
             });
-
             // Show image resources in a Magnific Popup lightbox with gallery navigation
             $imageLinks.magnificPopup({
                 type: 'image',
@@ -38,12 +37,11 @@
                 removalDelay: 100
             });
 
-            // Collect all previewable video and PDF resources
+            // Collect all previewable media resources
             var $mediaLinks = data.$contentDiv.find('a[data-resource-type="FILE"]').filter(function() {
                 return this.href.match(/\.(mp4|mp3|pdf)$/i);
             });
-
-            // Show video and PDF resources in a Magnific Popup iframe with gallery navigation
+            // Show media in a Magnific Popup iframe with gallery navigation
             $mediaLinks.magnificPopup({
                 type: 'iframe',
                 gallery: {

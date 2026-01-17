@@ -158,7 +158,7 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
                         .setVisibility(Resource.Visibility.PUBLIC)
                         .setOwner(username)
                         .setCreatedAt(Instant.now()) // now
-                        .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region().getName()))
+                        .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region()))
                         .withS3Bucket(awsConfig_.getAwsS3BucketName())
                         .withDbMapper(dbMapper_)
                         .build();

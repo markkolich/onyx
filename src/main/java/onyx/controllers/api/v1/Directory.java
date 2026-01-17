@@ -167,7 +167,7 @@ public final class Directory extends AbstractOnyxApiController {
                             .setVisibility(request.getVisibility())
                             .setOwner(session.getUsername())
                             .setCreatedAt(Instant.now()) // now
-                            .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region().getName()))
+                            .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region()))
                             .withS3Bucket(awsConfig_.getAwsS3BucketName())
                             .withDbMapper(dbMapper_)
                             .build();
@@ -200,7 +200,7 @@ public final class Directory extends AbstractOnyxApiController {
                 .setVisibility(request.getVisibility())
                 .setOwner(session.getUsername())
                 .setCreatedAt(Instant.now()) // now
-                .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region().getName()))
+                .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region()))
                 .withS3Bucket(awsConfig_.getAwsS3BucketName())
                 .withDbMapper(dbMapper_)
                 .build();

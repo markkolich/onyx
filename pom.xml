@@ -46,7 +46,7 @@
         <commons-io.version>2.21.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
 
-        <aws-sdk.version>1.12.700</aws-sdk.version>
+        <aws-sdk.version>1.12.797</aws-sdk.version>
 
         <guava.version>33.5.0-jre</guava.version>
 
@@ -55,7 +55,7 @@
         <htmlcompressor.version>1.5.2</htmlcompressor.version>
         <yuicompressor.version>2.4.8</yuicompressor.version>
 
-        <bcprov-ext-jdk18on.version>1.78</bcprov-ext-jdk18on.version>
+        <bcprov-ext-jdk18on.version>1.78.1</bcprov-ext-jdk18on.version>
         <jbcrypt.version>0.4</jbcrypt.version>
 
         <async-http-client.version>3.0.6</async-http-client.version>
