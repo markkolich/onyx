@@ -27,10 +27,12 @@
 package onyx.components.storage;
 
 import com.amazonaws.HttpMethod;
+import com.amazonaws.services.s3.model.PartETag;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
 import javax.annotation.Nullable;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
 public interface AssetManager {
@@ -59,5 +61,24 @@ public interface AssetManager {
     void deleteResourceAsync(
             final Resource resource,
             final boolean permanent);
+
+    // Multipart upload methods
+
+    String initiateMultipartUpload(
+            final Resource resource);
+
+    URL getPresignedUploadUrlForPart(
+            final Resource resource,
+            final String uploadId,
+            final int partNumber);
+
+    void completeMultipartUpload(
+            final Resource resource,
+            final String uploadId,
+            final List<PartETag> partETags);
+
+    void abortMultipartUpload(
+            final Resource resource,
+            final String uploadId);
 
 }

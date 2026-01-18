@@ -243,4 +243,97 @@ public final class S3Manager implements AssetManager {
         return builder.build();
     }
 
+    // Multipart upload implementation
+
+    @Override
+    public String initiateMultipartUpload(
+            final Resource resource) {
+        final S3Link s3Link = resource.getS3Link();
+
+        final String name = resource.getName();
+        final String extension = FilenameUtils.getExtension(s3Link.getKey()).toLowerCase();
+        final String contentType = ContentTypes.getContentTypeForExtension(extension,
+                DEFAULT_CONTENT_TYPE);
+
+        final StorageClass defaultStorageClass = awsConfig_.getAwsS3DefaultStorageClass();
+
+        final ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType(contentType);
+        metadata.setContentDisposition(String.format("inline; filename=\"%s\"", name));
+
+        final InitiateMultipartUploadRequest initRequest =
+                new InitiateMultipartUploadRequest(s3Link.getBucketName(), s3Link.getKey())
+                .withObjectMetadata(metadata)
+                .withStorageClass(defaultStorageClass);
+
+        final InitiateMultipartUploadResult initResult = s3_.initiateMultipartUpload(initRequest);
+
+        LOG.debug("Initiated multipart upload for resource: {} with uploadId: {}",
+                resource.getPath(), initResult.getUploadId());
+
+        return initResult.getUploadId();
+    }
+
+    @Override
+    public URL getPresignedUploadUrlForPart(
+            final Resource resource,
+            final String uploadId,
+            final int partNumber) {
+        final long linkValidityDurationInSeconds =
+                awsConfig_.getAwsS3PresignedAssetUrlValidityDuration(TimeUnit.SECONDS);
+
+        final S3Link s3Link = resource.getS3Link();
+
+        final Date expiration =
+                new Date(Instant.now().plusSeconds(linkValidityDurationInSeconds).toEpochMilli());
+
+        final GeneratePresignedUrlRequest presignedUrlRequest =
+                new GeneratePresignedUrlRequest(s3Link.getBucketName(), s3Link.getKey())
+                .withExpiration(expiration)
+                .withMethod(HttpMethod.PUT);
+
+        presignedUrlRequest.addRequestParameter("uploadId", uploadId);
+        presignedUrlRequest.addRequestParameter("partNumber", String.valueOf(partNumber));
+
+        return s3_.generatePresignedUrl(presignedUrlRequest);
+    }
+
+    @Override
+    public void completeMultipartUpload(
+            final Resource resource,
+            final String uploadId,
+            final List<PartETag> partETags) {
+        final S3Link s3Link = resource.getS3Link();
+
+        final CompleteMultipartUploadRequest completeRequest =
+                new CompleteMultipartUploadRequest(
+                s3Link.getBucketName(),
+                s3Link.getKey(),
+                uploadId,
+                partETags);
+
+        s3_.completeMultipartUpload(completeRequest);
+
+        LOG.debug("Completed multipart upload for resource: {} with uploadId: {}",
+                resource.getPath(), uploadId);
+    }
+
+    @Override
+    public void abortMultipartUpload(
+            final Resource resource,
+            final String uploadId) {
+        final S3Link s3Link = resource.getS3Link();
+
+        final AbortMultipartUploadRequest abortRequest =
+                new AbortMultipartUploadRequest(
+                s3Link.getBucketName(),
+                s3Link.getKey(),
+                uploadId);
+
+        s3_.abortMultipartUpload(abortRequest);
+
+        LOG.debug("Aborted multipart upload for resource: {} with uploadId: {}",
+                resource.getPath(), uploadId);
+    }
+
 }
