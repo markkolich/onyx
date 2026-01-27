@@ -13,13 +13,13 @@
         getShortLink = (function() {
 
             var
-                modal = $('#get-shortlink-modal'),
+                $modal = $('#get-shortlink-modal'),
 
                 showModal = function() {
                     // Clear any shortlink that may already be in the input field.
-                    modal.find('input[data-shortlink="link"]').val('');
+                    $modal.find('input[data-shortlink="link"]').val('');
 
-                    modal.on('shown.bs.modal', function() {
+                    $modal.on('shown.bs.modal', function() {
                         var path = $('body[data-path]').data('path');
 
                         $.ajax({
@@ -30,14 +30,14 @@
                                 var shortLinkUrl = res.shortLinkUrl;
 
                                 // Convenience
-                                modal.find('input[data-shortlink="link"]')
+                                $modal.find('input[data-shortlink="link"]')
                                     .val(shortLinkUrl)
                                     .select();
                             }
                         });
                     });
 
-                    modal.modal('show');
+                    $modal.modal('show');
                 };
 
             return {

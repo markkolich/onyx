@@ -28,6 +28,7 @@ package onyx.components.search.solr;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.amazonaws.services.s3.model.Region;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import curacao.annotations.Component;
@@ -50,7 +51,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -62,6 +62,10 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
     private static final Logger LOG = LoggerFactory.getLogger(EmbeddedSolrSearchManager.class);
 
     private static final int DEFAULT_ROW_COUNT = 100;
+
+    private static final Splitter WHITESPACE_SPLITTER = Splitter.on(' ')
+            .trimResults()
+            .omitEmptyStrings();
 
     private final AwsConfig awsConfig_;
     private final SearchConfig searchConfig_;
@@ -158,56 +162,76 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
     public List<Resource> searchIndex(
             final String owner,
             final String query) {
+        checkNotNull(owner, "Owner cannot be null.");
+
         if (StringUtils.isBlank(query)) {
             return ImmutableList.of();
         }
 
+        // Search for favorites first, then non-favorites, and concatenate the results.
+        final List<Resource> favoriteResults =
+                searchIndexWithFavoriteFilter(owner, query, true);
+        final List<Resource> nonFavoriteResults =
+                searchIndexWithFavoriteFilter(owner, query, false);
+
+        return ImmutableList.<Resource>builder()
+                .addAll(favoriteResults)
+                .addAll(nonFavoriteResults)
+                .build();
+    }
+
+    private List<Resource> searchIndexWithFavoriteFilter(
+            final String owner,
+            final String query,
+            final boolean favorite) {
         final StringBuilder sb = new StringBuilder();
         if (query.startsWith(":")) {
-            final String cleanedQuery = cleanQuery(query.substring(1));
+            final String fieldQuery = buildFieldQuery(query.substring(1), "nameLower");
             sb.append("type:").append(Resource.Type.FILE);
             sb.append(" AND ");
             sb.append("owner:").append(owner);
+            sb.append(" AND ");
+            sb.append("favorite:").append(favorite);
             sb.append(" AND ")
-                    .append("nameLower:*")
-                    .append(cleanedQuery)
-                    .append("*");
+                    .append(fieldQuery);
         } else if (query.startsWith("/")) {
-            final String cleanedQuery = cleanQuery(query.substring(1));
+            final String nameQuery = buildFieldQuery(query.substring(1), "nameLower");
+            final String pathQuery = buildFieldQuery(query.substring(1), "pathLower");
             sb.append("type:").append(Resource.Type.DIRECTORY);
             sb.append(" AND ");
             sb.append("owner:").append(owner);
+            sb.append(" AND ");
+            sb.append("favorite:").append(favorite);
             sb.append(" AND (");
-            sb.append("nameLower:*")
-                    .append(cleanedQuery)
-                    .append("*");
+            sb.append(nameQuery);
             sb.append(" OR ");
-            sb.append("pathLower:*")
-                    .append(cleanedQuery)
-                    .append("*");
+            sb.append(pathQuery);
             sb.append(")");
         } else {
-            final String cleanedQuery = cleanQuery(query);
+            final String nameQuery = buildFieldQuery(query, "nameLower");
+            final String descQuery = buildFieldQuery(query, "descriptionLower");
             sb.append("owner:").append(owner);
             sb.append(" AND ");
+            sb.append("favorite:").append(favorite);
+            sb.append(" AND ");
             sb.append("(")
-                    .append("nameLower:").append("*").append(cleanedQuery).append("*")
+                    .append(nameQuery)
                     .append(" OR ")
-                    .append("descriptionLower:").append("*").append(cleanedQuery).append("*")
+                    .append(descQuery)
                     .append(")");
         }
 
         try {
             final SolrQuery solrQuery = new SolrQuery(sb.toString())
                     .addSort(SearchManager.QUERY_FIELD_SCORE, SolrQuery.ORDER.desc)
+                    .addSort(SearchManager.INDEX_FIELD_CREATED, SolrQuery.ORDER.desc)
                     .setRows(searchConfig_.getMaxResultsPerSearch());
+
             final QueryResponse response = solrClient_.query(solrQuery);
             final SolrDocumentList documents = response.getResults();
 
             return documents.stream()
                     .map(document -> mapSolrDocumentToResource(document, awsConfig_, dbMapper_))
-                    // Favorited results first.
-                    .sorted(Comparator.comparing(Resource::getFavorite).reversed())
                     .collect(ImmutableList.toImmutableList());
         } catch (final Exception e) {
             LOG.error("Failed to search index for query: {}", query, e);
@@ -215,11 +239,67 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
         }
     }
 
-    private static String cleanQuery(
-            final String query) {
-        checkNotNull(query, "Query to clean cannot be null.");
+    /**
+     * Builds a field-specific query string for Solr searching with proper escaping to prevent
+     * query injection.
+     * - If query is wrapped in double quotes: strips quotes and returns phrase query for exact matching
+     * - Otherwise: tokenizes on whitespace and returns multi-term wildcard query for fuzzy matching
+     *
+     * All special Solr query characters are escaped to prevent injection attacks.
+     *
+     * Examples:
+     * - buildFieldQuery("foo", "nameLower") → "nameLower:*foo*"
+     * - buildFieldQuery("foo 2026", "nameLower") → "(nameLower:*foo* AND nameLower:*2026*)"
+     * - buildFieldQuery("\"foo-2026\"", "nameLower") → "nameLower:\"foo\-2026\""
+     *
+     * @param query the raw search query
+     * @param fieldName the Solr field name to search in
+     * @return the formatted Solr query string for the specified field
+     */
+    private static String buildFieldQuery(
+            final String query,
+            final String fieldName) {
+        checkNotNull(query, "Query string cannot be null.");
+        checkNotNull(fieldName, "Field name cannot be null.");
 
-        return ClientUtils.escapeQueryChars(StringUtils.trim(query));
+        final String trimmed = StringUtils.trim(query);
+
+        // Check if query is wrapped in quotes for exact match
+        if (trimmed.startsWith("\"") && trimmed.endsWith("\"") && trimmed.length() > 1) {
+            // Strip outer quotes and create phrase query for exact matching
+            final String unquoted = trimmed.substring(1, trimmed.length() - 1);
+            // For phrase queries, only escape backslashes and quotes (not all special chars)
+            // Other characters like dots, hyphens, etc. should be literal to match indexed tokens
+            final String escaped = unquoted.replace("\\", "\\\\").replace("\"", "\\\"");
+            // Return as phrase query - phrase queries match tokenized terms in sequence
+            // This handles "foo-2026" and "foo 2026" correctly as the tokenizer
+            // will process them appropriately
+            return fieldName + ":\"" + escaped.toLowerCase() + "\"";
+        } else {
+            // Fuzzy match: split on whitespace and create wildcard terms for each token
+            // This allows searching for "foo 2026" to match documents containing both terms
+            final List<String> tokens = WHITESPACE_SPLITTER.splitToList(trimmed);
+
+            if (tokens.size() == 1) {
+                // Single token - simple wildcard query
+                final String escaped = ClientUtils.escapeQueryChars(tokens.get(0));
+                return fieldName + ":*" + escaped.toLowerCase() + "*";
+            } else {
+                // Multiple tokens - AND them together, each as a wildcard on the field
+                final StringBuilder sb = new StringBuilder();
+                sb.append("(");
+                for (int i = 0, l = tokens.size(); i < l; i++) {
+                    if (i > 0) {
+                        sb.append(" AND ");
+                    }
+                    // Escape each token to prevent injection
+                    final String escaped = ClientUtils.escapeQueryChars(tokens.get(i));
+                    sb.append(fieldName).append(":*").append(escaped.toLowerCase()).append("*");
+                }
+                sb.append(")");
+                return sb.toString();
+            }
+        }
     }
 
     private static SolrInputDocument mapResourceToSolrInputDocument(

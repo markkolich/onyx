@@ -13,22 +13,35 @@
         upload = (function() {
 
             var
-                modal = $('#upload-file-modal'),
+                $modal = $('#upload-file-modal'),
+                uploadInProgress = false,
+
+                beforeUnloadHandler = function(e) {
+                    if (uploadInProgress) {
+                        var confirmationMessage = 'File upload in progress. Are you sure you ' +
+                            'want to leave? Upload will be interrupted.';
+                        e.returnValue = confirmationMessage;
+                        return confirmationMessage;
+                    }
+                },
 
                 showModal = function() {
-                    modal.on('shown.bs.modal', function() {
+                    $modal.on('shown.bs.modal', function() {
+                        // Reset upload state
+                        uploadInProgress = false;
+
                         // Convenience
-                        modal.find('input[data-file="description"]').focus();
+                        $modal.find('input[data-file="description"]').focus();
 
                         // Prevent the upload form from being submitted manually by the user,
                         // only the file upload plugin should be able to "submit" the form
                         // once a file has been selected.
-                        modal.find('form').unbind().on('submit', function(e) {
+                        $modal.find('form').unbind().on('submit', function(e) {
                             e.preventDefault();
                             return false;
                         });
 
-                        modal.find('input[data-upload="file"]').fileupload({
+                        $modal.find('input[data-upload="file"]').fileupload({
                             type: 'PUT',
                             singleFileUploads: true,
                             maxNumberOfFiles: 1,
@@ -38,8 +51,8 @@
                                 var resource = rootPath + '/' + encodeURIComponent(d.files[0].name);
 
                                 var size = d.files[0].size; // size in bytes
-                                var description = modal.find('input[data-file="description"]').val();
-                                var visibility = modal.find('select[data-file="visibility"]').val();
+                                var description = $modal.find('input[data-file="description"]').val();
+                                var visibility = $modal.find('select[data-file="visibility"]').val();
 
                                 $.ajax({
                                     type: 'POST',
@@ -53,7 +66,7 @@
                                     success: function(res, status, xhr) {
                                         d.url = res.presignedUploadUrl;
 
-                                        modal.find('[data-collapse="true"]').addClass('d-none');
+                                        $modal.find('[data-collapse="true"]').addClass('d-none');
 
                                         // Go, upload!
                                         d.submit();
@@ -61,35 +74,68 @@
                                 });
                             },
                             start: function() {
-                                modal.find('div.progress').removeClass('d-none');
-                                modal.find('div.progress .progress-bar')
+                                // Set upload in progress and attach beforeunload handler
+                                uploadInProgress = true;
+                                $(window).on('beforeunload', beforeUnloadHandler);
+
+                                $modal.find('div.progress').removeClass('d-none');
+                                $modal.find('div.progress .progress-bar')
                                     .css('width', '0%')
                                     .html('');
                             },
                             progressall: function(e, d) {
                                 var progress = parseInt(d.loaded / d.total * 100, 10);
-                                modal.find('div.progress .progress-bar')
+                                $modal.find('div.progress .progress-bar')
                                     .css('width', progress + '%')
                                     .html('Uploading: ' + progress + '%');
                             },
                             done: function(e) {
+                                // Upload complete - clear state and handler
+                                uploadInProgress = false;
+                                $(window).off('beforeunload', beforeUnloadHandler);
+
                                 // Hide the progress bar, but not needed cuz we refresh the page right
                                 // after a successful upload.
-                                //modal.find('div.progress').addClass('d-none');
+                                //$modal.find('div.progress').addClass('d-none');
 
                                 window.location.reload(true);
                             },
                             fail: function() {
-                                modal.find('[data-collapse="true"]').removeClass('d-none');
+                                // Upload failed - clear state and handler
+                                uploadInProgress = false;
+                                $(window).off('beforeunload', beforeUnloadHandler);
 
-                                modal.find('div.progress .progress-bar')
+                                $modal.find('[data-collapse="true"]').removeClass('d-none');
+
+                                $modal.find('div.progress .progress-bar')
                                     .css('width', '100%')
                                     .html('Oops, an error occurred: file upload failed.');
                             }
                         });
                     });
 
-                    modal.modal('show');
+                    // Prevent modal from being closed during upload
+                    $modal.on('hide.bs.modal', function(e) {
+                        if (uploadInProgress) {
+                            if (!confirm('File upload in progress. Are you sure you want to close? ' +
+                                    'Upload will be interrupted.')) {
+                                e.preventDefault();
+                                return false;
+                            } else {
+                                // User confirmed - clean up
+                                uploadInProgress = false;
+                                $(window).off('beforeunload', beforeUnloadHandler);
+                            }
+                        }
+                    });
+
+                    // Clean up handler if modal is closed without upload
+                    $modal.on('hidden.bs.modal', function() {
+                        uploadInProgress = false;
+                        $(window).off('beforeunload', beforeUnloadHandler);
+                    });
+
+                    $modal.modal('show');
                 };
 
             return {
@@ -101,20 +147,20 @@
         edit = (function() {
 
             var
-                modal = $('#edit-file-modal'),
+                $modal = $('#edit-file-modal'),
 
                 showModal = function() {
                     var description = $('body[data-description]').data('description');
-                    modal.find('input[data-file="description"]').val(description);
+                    $modal.find('input[data-file="description"]').val(description);
 
-                    modal.on('shown.bs.modal', function() {
+                    $modal.on('shown.bs.modal', function() {
                         // Convenience
-                        modal.find('input[data-file="description"]').focus();
+                        $modal.find('input[data-file="description"]').focus();
 
-                        modal.find('form').unbind().on('submit', function(e) {
+                        $modal.find('form').unbind().on('submit', function(e) {
                             var resource = $('body[data-path]').data('path');
 
-                            var newDescription = modal.find('input[data-file="description"]').val();
+                            var newDescription = $modal.find('input[data-file="description"]').val();
 
                             $.ajax({
                                 type: 'PUT',
@@ -124,7 +170,7 @@
                                     description: newDescription
                                 }),
                                 success: function(res, status, xhr) {
-                                    modal.modal('hide');
+                                    $modal.modal('hide');
 
                                     window.location.reload(true);
                                 }
@@ -135,7 +181,7 @@
                         });
                     });
 
-                    modal.modal('show');
+                    $modal.modal('show');
                 },
 
                 toggleVisibility = function(resource, visibility) {
@@ -181,32 +227,32 @@
         del = (function() {
 
             var
-                modal = $('#delete-file-modal'),
+                $modal = $('#delete-file-modal'),
                 permanent = false,
 
                 showModal = function(resource) {
                     var name = decodeURIComponent(resource.split('/').pop());
-                    modal.find('[data-modal="name"]').html(name);
+                    $modal.find('[data-modal="name"]').html(name);
 
                     var kpListener = new window.keypress.Listener();
                     permanent = false;
 
-                    modal.on('shown.bs.modal', function() {
-                        var submitButton = modal.find('button[type="submit"]');
+                    $modal.on('shown.bs.modal', function() {
+                        var $submitButton = $modal.find('button[type="submit"]');
                         kpListener.register_combo({
                             'keys': 'shift',
                             'is_exclusive': true,
                             'on_keydown': function() {
-                                submitButton.text('Delete Permanently');
+                                $submitButton.text('Delete Permanently');
                                 permanent = true;
                             },
                             'on_keyup': function() {
-                                submitButton.text('Delete');
+                                $submitButton.text('Delete');
                                 permanent = false;
                             }
                         });
 
-                        modal.find('button[type="submit"]').unbind().click(function() {
+                        $modal.find('button[type="submit"]').unbind().click(function() {
                             kpListener.stop_listening();
 
                             $.ajax({
@@ -214,7 +260,7 @@
                                 url: parent.baseApiUrl + '/v1/file' + resource
                                     + '?' + $.param({'permanent':permanent}),
                                 success: function(res, status, xhr) {
-                                    modal.modal('hide');
+                                    $modal.modal('hide');
 
                                     window.location.reload(true);
                                 }
@@ -222,12 +268,12 @@
                         });
                     });
 
-                    modal.on('hidden.bs.modal', function() {
+                    $modal.on('hidden.bs.modal', function() {
                         kpListener.reset();
                         kpListener.destroy();
                     });
 
-                    modal.modal('show');
+                    $modal.modal('show');
                 };
 
             return {

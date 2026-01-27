@@ -45,12 +45,25 @@
         </analyzer>
     </fieldType>
 
+    <!-- Text field that preserves hyphens and other punctuation within tokens -->
+    <!-- Only splits on whitespace, preserving hyphenated terms like "xmas-2026" -->
+    <fieldType name="text_lower_preserve_punct" class="solr.TextField" positionIncrementGap="100">
+        <analyzer type="index">
+            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
+        </analyzer>
+        <analyzer type="query">
+            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
+        </analyzer>
+    </fieldType>
+
     <!-- Defined fields -->
     <field name="path" type="string" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
-    <field name="pathLower" type="text_lower" indexed="true" stored="false" required="true" multiValued="false" docValues="false" />
+    <field name="pathLower" type="text_lower_preserve_punct" indexed="true" stored="false" required="true" multiValued="false" docValues="false" />
     <field name="parent" type="string" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
     <field name="description" type="string" indexed="true" stored="true" required="false" multiValued="false" docValues="false" />
-    <field name="descriptionLower" type="text_lower" indexed="true" stored="false" required="false" multiValued="false" docValues="false" />
+    <field name="descriptionLower" type="text_lower_preserve_punct" indexed="true" stored="false" required="false" multiValued="false" docValues="false" />
     <field name="size" type="long" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
     <field name="type" type="string" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
     <field name="visibility" type="string" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
@@ -60,7 +73,7 @@
     <field name="_version_" type="long" indexed="true" stored="false" required="false" />
 
     <field name="name" type="string" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
-    <field name="nameLower" type="text_lower" indexed="true" stored="false" required="true" multiValued="false" docValues="false" />
+    <field name="nameLower" type="text_lower_preserve_punct" indexed="true" stored="false" required="true" multiValued="false" docValues="false" />
 
     <uniqueKey>path</uniqueKey>
 

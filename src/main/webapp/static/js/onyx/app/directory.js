@@ -13,20 +13,20 @@
         create = (function() {
 
             var
-                modal = $('#create-directory-modal'),
+                $modal = $('#create-directory-modal'),
 
                 showModal = function() {
-                    modal.on('shown.bs.modal', function() {
+                    $modal.on('shown.bs.modal', function() {
                         // Convenience
-                        modal.find('input[data-directory="name"]').focus();
+                        $modal.find('input[data-directory="name"]').focus();
 
-                        modal.find('form').unbind().on('submit', function(e) {
+                        $modal.find('form').unbind().on('submit', function(e) {
                             var rootPath = $('body[data-path]').data('path');
-                            var name = modal.find('input[data-directory="name"]').val();
+                            var name = $modal.find('input[data-directory="name"]').val();
                             var resource = rootPath + '/' + encodeURIComponent(name);
 
-                            var description = modal.find('input[data-directory="description"]').val();
-                            var visibility = modal.find('select[data-directory="visibility"]').val();
+                            var description = $modal.find('input[data-directory="description"]').val();
+                            var visibility = $modal.find('select[data-directory="visibility"]').val();
 
                             $.ajax({
                                 type: 'POST',
@@ -37,7 +37,7 @@
                                     visibility: visibility
                                 }),
                                 success: function(res, status, xhr) {
-                                    modal.modal('hide');
+                                    $modal.modal('hide');
 
                                     window.location.reload(true);
                                 }
@@ -48,7 +48,7 @@
                         });
                     });
 
-                    modal.modal('show');
+                    $modal.modal('show');
                 };
 
             return {
@@ -60,20 +60,20 @@
         edit = (function() {
 
             var
-                modal = $('#edit-directory-modal'),
+                $modal = $('#edit-directory-modal'),
 
                 showModal = function() {
                     var description = $('body[data-description]').data('description');
-                    modal.find('input[data-directory="description"]').val(description);
+                    $modal.find('input[data-directory="description"]').val(description);
 
-                    modal.on('shown.bs.modal', function() {
+                    $modal.on('shown.bs.modal', function() {
                         // Convenience
-                        modal.find('input[data-directory="description"]').focus();
+                        $modal.find('input[data-directory="description"]').focus();
 
-                        modal.find('form').unbind().on('submit', function(e) {
+                        $modal.find('form').unbind().on('submit', function(e) {
                             var resource = $('body[data-path]').data('path');
 
-                            var newDescription = modal.find('input[data-directory="description"]').val();
+                            var newDescription = $modal.find('input[data-directory="description"]').val();
 
                             $.ajax({
                                 type: 'PUT',
@@ -83,7 +83,7 @@
                                     description: newDescription
                                 }),
                                 success: function(res, status, xhr) {
-                                    modal.modal('hide');
+                                    $modal.modal('hide');
 
                                     window.location.reload(true);
                                 }
@@ -94,7 +94,7 @@
                         });
                     });
 
-                    modal.modal('show');
+                    $modal.modal('show');
                 },
 
                 toggleVisibility = function(resource, visibility) {
@@ -140,32 +140,32 @@
         del = (function() {
 
             var
-                modal = $('#delete-directory-modal'),
+                $modal = $('#delete-directory-modal'),
                 permanent = false,
 
                 showModal = function(resource) {
                     var name = decodeURIComponent(resource.split('/').pop());
-                    modal.find('[data-modal="name"]').html(name);
+                    $modal.find('[data-modal="name"]').html(name);
 
                     var kpListener = new window.keypress.Listener();
                     permanent = false;
 
-                    modal.on('shown.bs.modal', function() {
-                        var submitButton = modal.find('button[type="submit"]');
+                    $modal.on('shown.bs.modal', function() {
+                        var $submitButton = $modal.find('button[type="submit"]');
                         kpListener.register_combo({
                             'keys': 'shift',
                             'is_exclusive': true,
                             'on_keydown': function() {
-                                submitButton.text('Delete Permanently');
+                                $submitButton.text('Delete Permanently');
                                 permanent = true;
                             },
                             'on_keyup': function() {
-                                submitButton.text('Delete');
+                                $submitButton.text('Delete');
                                 permanent = false;
                             }
                         });
 
-                        modal.find('button[type="submit"]').unbind().click(function() {
+                        $modal.find('button[type="submit"]').unbind().click(function() {
                             kpListener.stop_listening();
 
                             $.ajax({
@@ -173,7 +173,7 @@
                                 url: parent.baseApiUrl + '/v1/directory' + resource
                                     + '?' + $.param({'permanent':permanent}),
                                 success: function(res, status, xhr) {
-                                    modal.modal('hide');
+                                    $modal.modal('hide');
 
                                     window.location.reload(true);
                                 }
@@ -181,12 +181,12 @@
                         });
                     });
 
-                    modal.on('hidden.bs.modal', function() {
+                    $modal.on('hidden.bs.modal', function() {
                         kpListener.reset();
                         kpListener.destroy();
                     });
 
-                    modal.modal('show');
+                    $modal.modal('show');
                 };
 
             return {
