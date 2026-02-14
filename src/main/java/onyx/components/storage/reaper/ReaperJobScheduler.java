@@ -28,7 +28,7 @@ package onyx.components.storage.reaper;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.aws.s3.S3Client;
+import onyx.components.aws.s3.OnyxS3Client;
 import onyx.components.config.aws.AwsConfig;
 import onyx.components.quartz.QuartzSchedulerFactory;
 import onyx.components.storage.ResourceManager;
@@ -49,14 +49,14 @@ public final class ReaperJobScheduler {
             final ReaperConfig reaperConfig,
             final AwsConfig awsConfig,
             final ResourceManager resourceManager,
-            final S3Client s3Client) throws Exception {
+            final OnyxS3Client s3Client) throws Exception {
         quartzScheduler_ = quartzSchedulerFactory.getScheduler();
 
         final JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put(ReaperConfig.class.getSimpleName(), reaperConfig);
         jobDataMap.put(AwsConfig.class.getSimpleName(), awsConfig);
         jobDataMap.put(ResourceManager.class.getSimpleName(), resourceManager);
-        jobDataMap.put(S3Client.class.getSimpleName(), s3Client);
+        jobDataMap.put(OnyxS3Client.class.getSimpleName(), s3Client);
 
         final JobDetail job = newJob(ReaperJob.class)
                 .withIdentity(ReaperJob.class.getSimpleName())

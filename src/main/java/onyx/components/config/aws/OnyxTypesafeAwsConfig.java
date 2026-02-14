@@ -26,7 +26,6 @@
 
 package onyx.components.config.aws;
 
-import com.amazonaws.services.s3.model.StorageClass;
 import com.typesafe.config.Config;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
@@ -96,8 +95,8 @@ public final class OnyxTypesafeAwsConfig implements AwsConfig {
     }
 
     @Override
-    public StorageClass getAwsS3DefaultStorageClass() {
-        return StorageClass.fromValue(config_.getString(AWS_S3_DEFAULT_STORAGE_CLASS_PROP));
+    public String getAwsS3DefaultStorageClass() {
+        return config_.getString(AWS_S3_DEFAULT_STORAGE_CLASS_PROP);
     }
 
     @Override

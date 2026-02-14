@@ -26,11 +26,6 @@
 
 package onyx;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.services.dynamodbv2.datamodeling.S3Link;
-import com.amazonaws.services.s3.model.Region;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -56,8 +51,6 @@ public final class ResourceDeserializer extends StdDeserializer<Resource> {
     private static final String OWNER = "owner";
     private static final String FAVORITE = "favorite";
 
-    private final S3Link.Factory s3LinkFactory_;
-
     public ResourceDeserializer() {
         this(null);
     }
@@ -65,20 +58,6 @@ public final class ResourceDeserializer extends StdDeserializer<Resource> {
     public ResourceDeserializer(
             final Class<?> vc) {
         super(vc);
-
-        final AWSCredentialsProvider credentialsProvider =
-                new AWSStaticCredentialsProvider(new AWSCredentials() {
-                    @Override
-                    public String getAWSAccessKeyId() {
-                        return "unit-test";
-                    }
-
-                    @Override
-                    public String getAWSSecretKey() {
-                        return "unit-test";
-                    }
-                });
-        s3LinkFactory_ = S3Link.Factory.of(credentialsProvider);
     }
 
     @Override
@@ -106,7 +85,6 @@ public final class ResourceDeserializer extends StdDeserializer<Resource> {
                 .setOwner(owner)
                 .setCreatedAt(Instant.now()) // now
                 .setFavorite(favorite)
-                .setS3Link(s3LinkFactory_.createS3Link(Region.US_West, "unit-test", path))
                 .build();
     }
 

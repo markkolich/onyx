@@ -26,7 +26,6 @@
 
 package onyx.mappers.response.exceptions;
 
-import com.amazonaws.AmazonServiceException;
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import curacao.core.servlet.AsyncContext;
@@ -34,17 +33,18 @@ import curacao.core.servlet.HttpResponse;
 import onyx.components.FreeMarkerContentRenderer;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 
 import javax.annotation.Nonnull;
 
 import static curacao.core.servlet.HttpStatus.SC_BAD_GATEWAY;
 
 @Mapper
-public final class AmazonServiceExceptionResponseMapper
-        extends AbstractFreeMarkerContentAwareResponseMapper<AmazonServiceException> {
+public final class AwsServiceExceptionResponseMapper
+        extends AbstractFreeMarkerContentAwareResponseMapper<AwsServiceException> {
 
     @Injectable
-    public AmazonServiceExceptionResponseMapper(
+    public AwsServiceExceptionResponseMapper(
             @Nonnull final FreeMarkerContentRenderer fmcRenderer) {
         super(fmcRenderer);
     }
@@ -53,7 +53,7 @@ public final class AmazonServiceExceptionResponseMapper
     public void render(
             final AsyncContext context,
             final HttpResponse response,
-            @Nonnull final AmazonServiceException entity) throws Exception {
+            @Nonnull final AwsServiceException entity) throws Exception {
         final FreeMarkerContent content = new FreeMarkerContent.Builder("templates/errors/502.ftl", SC_BAD_GATEWAY)
                 .build();
 

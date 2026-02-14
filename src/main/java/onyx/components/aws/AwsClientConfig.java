@@ -26,18 +26,19 @@
 
 package onyx.components.aws;
 
-import com.amazonaws.ClientConfiguration;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.BuildVersion;
 import onyx.components.config.OnyxConfig;
+import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
+import software.amazon.awssdk.core.client.config.SdkAdvancedClientOption;
 
 @Component
 public final class AwsClientConfig {
 
     private static final String USER_AGENT_PREFIX_FORMAT = "Onyx/%s (+%s)";
 
-    private final ClientConfiguration clientConfiguration_;
+    private final ClientOverrideConfiguration clientOverrideConfiguration_;
 
     @Injectable
     public AwsClientConfig(
@@ -46,12 +47,13 @@ public final class AwsClientConfig {
 
         final String userAgentPrefix = String.format(USER_AGENT_PREFIX_FORMAT,
                 buildVersion.getBuildNumber(), onyxConfig.getViewSafeFullUri());
-        clientConfiguration_ = new ClientConfiguration()
-                .withUserAgentPrefix(userAgentPrefix);
+        clientOverrideConfiguration_ = ClientOverrideConfiguration.builder()
+                .putAdvancedOption(SdkAdvancedClientOption.USER_AGENT_PREFIX, userAgentPrefix)
+                .build();
     }
 
-    public ClientConfiguration getClientConfiguration() {
-        return clientConfiguration_;
+    public ClientOverrideConfiguration getClientOverrideConfiguration() {
+        return clientOverrideConfiguration_;
     }
 
 }

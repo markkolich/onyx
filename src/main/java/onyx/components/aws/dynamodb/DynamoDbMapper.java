@@ -26,34 +26,39 @@
 
 package onyx.components.aws.dynamodb;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.aws.AwsCredentials;
 import onyx.components.config.aws.AwsConfig;
+import onyx.entities.storage.aws.dynamodb.Resource;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
 @Component
 public final class DynamoDbMapper {
 
-    private final IDynamoDBMapper dbMapper_;
+    private final DynamoDbEnhancedClient enhancedClient_;
+    private final DynamoDbTable<Resource> resourceTable_;
 
     @Injectable
     public DynamoDbMapper(
             final AwsConfig awsConfig,
-            final AwsCredentials awsCredentials,
-            final DynamoDbClient dynamoDbClient) {
-        final DynamoDBMapperConfig dbMapperConfig = DynamoDBMapperConfig.builder()
-                .withTableNameResolver((clazz, config) -> awsConfig.getAwsDynamoDbTableName())
+            final OnyxDynamoDbClient dynamoDbClient) {
+        enhancedClient_ = DynamoDbEnhancedClient.builder()
+                .dynamoDbClient(dynamoDbClient.getDbClient())
                 .build();
 
-        dbMapper_ = new DynamoDBMapper(dynamoDbClient.getDbClient(), dbMapperConfig,
-                awsCredentials.getCredentialsProvider());
+        resourceTable_ = enhancedClient_.table(
+                awsConfig.getAwsDynamoDbTableName(),
+                TableSchema.fromBean(Resource.class));
     }
 
-    public IDynamoDBMapper getDbMapper() {
-        return dbMapper_;
+    public DynamoDbEnhancedClient getEnhancedClient() {
+        return enhancedClient_;
+    }
+
+    public DynamoDbTable<Resource> getResourceTable() {
+        return resourceTable_;
     }
 
 }

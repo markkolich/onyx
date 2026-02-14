@@ -26,39 +26,53 @@
 
 package onyx.components.aws.s3;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentDestroyable;
 import onyx.components.aws.AwsClientConfig;
 import onyx.components.aws.AwsCredentials;
 import onyx.components.config.aws.AwsConfig;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Component
-public final class S3Client implements ComponentDestroyable {
+public final class OnyxS3Client implements ComponentDestroyable {
 
-    private final AmazonS3 s3_;
+    private final S3Client s3_;
+    private final S3Presigner presigner_;
 
     @Injectable
-    public S3Client(
+    public OnyxS3Client(
             final AwsConfig awsConfig,
             final AwsCredentials awsCredentials,
             final AwsClientConfig awsClientConfig) {
-        s3_ = AmazonS3ClientBuilder.standard()
-                .withCredentials(awsCredentials.getCredentialsProvider())
-                .withClientConfiguration(awsClientConfig.getClientConfiguration())
-                .withRegion(awsConfig.getAwsS3Region())
+        final Region region = Region.of(awsConfig.getAwsS3Region());
+
+        s3_ = S3Client.builder()
+                .credentialsProvider(awsCredentials.getCredentialsProvider())
+                .overrideConfiguration(awsClientConfig.getClientOverrideConfiguration())
+                .region(region)
+                .build();
+
+        presigner_ = S3Presigner.builder()
+                .credentialsProvider(awsCredentials.getCredentialsProvider())
+                .region(region)
                 .build();
     }
 
-    public AmazonS3 getS3Client() {
+    public S3Client getS3Client() {
         return s3_;
+    }
+
+    public S3Presigner getPresigner() {
+        return presigner_;
     }
 
     @Override
     public void destroy() throws Exception {
-        s3_.shutdown();
+        s3_.close();
+        presigner_.close();
     }
 
 }

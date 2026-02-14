@@ -26,14 +26,11 @@
 
 package onyx.mappers.response.freemarker.helpers;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.net.HttpHeaders;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.core.servlet.HttpResponse;
-import onyx.components.aws.s3.S3Client;
 import onyx.components.config.aws.AwsConfig;
-import org.apache.commons.lang3.Strings;
 
 import javax.annotation.Nonnull;
 
@@ -44,19 +41,13 @@ public final class FreeMarkerLinkHeaderDnsPrefetchHelper {
 
     private static final String DNS_PREFETCH_LINK_HEADER_FORMAT = "<%s>; rel=dns-prefetch";
 
-    private final AwsConfig awsConfig_;
-    private final AmazonS3 s3_;
-
     private final String dnsPrefetchLinkHeader_;
 
     @Injectable
     public FreeMarkerLinkHeaderDnsPrefetchHelper(
-            @Nonnull final AwsConfig awsConfig,
-            @Nonnull final S3Client s3Client) {
-        awsConfig_ = awsConfig;
-        s3_ = s3Client.getS3Client();
-
-        final String dnsPrefetchLinkHeaderUrl = getDnsPrefetchLinkHeaderUrl();
+            @Nonnull final AwsConfig awsConfig) {
+        final String dnsPrefetchLinkHeaderUrl = String.format("https://%s.s3.%s.amazonaws.com",
+                awsConfig.getAwsS3BucketName(), awsConfig.getAwsS3Region());
         dnsPrefetchLinkHeader_ = String.format(DNS_PREFETCH_LINK_HEADER_FORMAT, dnsPrefetchLinkHeaderUrl);
     }
 
@@ -65,16 +56,6 @@ public final class FreeMarkerLinkHeaderDnsPrefetchHelper {
         checkNotNull(response, "HTTP servlet response cannot be null.");
 
         response.addHeader(HttpHeaders.LINK, dnsPrefetchLinkHeader_);
-    }
-
-    private String getDnsPrefetchLinkHeaderUrl() {
-        final String s3BucketName = awsConfig_.getAwsS3BucketName();
-        final String s3BucketUrl = s3_.getUrl(s3BucketName, null).toExternalForm();
-        if (s3BucketUrl.endsWith("/")) {
-            return Strings.CS.removeEnd(s3BucketUrl, "/");
-        }
-
-        return s3BucketUrl;
     }
 
 }

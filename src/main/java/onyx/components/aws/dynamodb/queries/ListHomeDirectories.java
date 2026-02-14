@@ -26,75 +26,63 @@
 
 package onyx.components.aws.dynamodb.queries;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static onyx.components.aws.dynamodb.DynamoDbManager.PARENT_INDEX_NAME;
 
 public final class ListHomeDirectories {
 
     private static final Logger LOG = LoggerFactory.getLogger(ListHomeDirectories.class);
 
-    private final AwsConfig awsConfig_;
-
-    private final String parentIndexName_;
-
-    public ListHomeDirectories(
-            final AwsConfig awsConfig) {
-        awsConfig_ = checkNotNull(awsConfig, "AWS config cannot be null.");
-
-        parentIndexName_ = awsConfig_.getAwsDynamoDbParentIndexName();
-    }
-
     public List<Resource> run(
-            final IDynamoDBMapper dbMapper) {
-        final DynamoDBQueryExpression<Resource> qe = new DynamoDBQueryExpression<Resource>()
-                .withIndexName(parentIndexName_)
-                .withConsistentRead(false)
-                .withExpressionAttributeNames(buildExpressionAttributes())
-                .withExpressionAttributeValues(buildExpressionAttributeValues())
-                .withKeyConditionExpression(buildKeyConditionExpression())
-                .withFilterExpression(buildFilterExpression());
+            final DynamoDbTable<Resource> resourceTable) {
+        final DynamoDbIndex<Resource> parentIndex = resourceTable.index(PARENT_INDEX_NAME);
 
-        final PaginatedQueryList<Resource> queryResult = dbMapper.query(Resource.class, qe);
+        final QueryConditional queryConditional = QueryConditional.keyEqualTo(
+                Key.builder().partitionValue(ResourceManager.ROOT_PATH).build());
 
-        return queryResult.stream()
+        final Expression filterExpression = Expression.builder()
+                .expression("#type = :type")
+                .expressionNames(buildExpressionNames())
+                .expressionValues(buildExpressionValues())
+                .build();
+
+        final QueryEnhancedRequest request = QueryEnhancedRequest.builder()
+                .queryConditional(queryConditional)
+                .filterExpression(filterExpression)
+                .build();
+
+        return parentIndex.query(request)
+                .stream()
+                .flatMap(page -> page.items().stream())
                 // Sort the results alphabetically based on path.
                 .sorted(Comparator.comparing(Resource::getPath))
                 .collect(ImmutableList.toImmutableList());
     }
 
-    private static Map<String, String> buildExpressionAttributes() {
-        return ImmutableMap.of(
-                "#name0", "parent",
-                "#name1", "type");
+    private static Map<String, String> buildExpressionNames() {
+        return ImmutableMap.of("#type", "type");
     }
 
-    private static Map<String, AttributeValue> buildExpressionAttributeValues() {
-        return ImmutableMap.of(
-                ":value0", new AttributeValue().withS(ResourceManager.ROOT_PATH),
-                ":value1", new AttributeValue().withS(Resource.Type.DIRECTORY.toString()));
-    }
-
-    private static String buildKeyConditionExpression() {
-        return "#name0 = :value0";
-    }
-
-    private static String buildFilterExpression() {
-        return "#name1 = :value1";
+    private static Map<String, AttributeValue> buildExpressionValues() {
+        return ImmutableMap.of(":type",
+                AttributeValue.builder().s(Resource.Type.DIRECTORY.toString()).build());
     }
 
 }

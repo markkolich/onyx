@@ -24,41 +24,41 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.aws.dynamodb;
+package onyx.components.aws.sns;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentDestroyable;
 import onyx.components.aws.AwsClientConfig;
 import onyx.components.aws.AwsCredentials;
 import onyx.components.config.aws.AwsConfig;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sns.SnsClient;
 
 @Component
-public final class DynamoDbClient implements ComponentDestroyable {
+public final class OnyxSnsClient implements ComponentDestroyable {
 
-    private final AmazonDynamoDB dynamoDb_;
+    private final SnsClient sns_;
 
     @Injectable
-    public DynamoDbClient(
+    public OnyxSnsClient(
             final AwsConfig awsConfig,
             final AwsCredentials awsCredentials,
             final AwsClientConfig awsClientConfig) {
-        dynamoDb_ = AmazonDynamoDBClientBuilder.standard()
-                .withCredentials(awsCredentials.getCredentialsProvider())
-                .withClientConfiguration(awsClientConfig.getClientConfiguration())
-                .withRegion(awsConfig.getAwsDynamoDbRegion())
+        sns_ = SnsClient.builder()
+                .credentialsProvider(awsCredentials.getCredentialsProvider())
+                .overrideConfiguration(awsClientConfig.getClientOverrideConfiguration())
+                .region(Region.of(awsConfig.getAwsSnsRegion()))
                 .build();
     }
 
-    public AmazonDynamoDB getDbClient() {
-        return dynamoDb_;
+    public SnsClient getSnsClient() {
+        return sns_;
     }
 
     @Override
     public void destroy() throws Exception {
-        dynamoDb_.shutdown();
+        sns_.close();
     }
 
 }

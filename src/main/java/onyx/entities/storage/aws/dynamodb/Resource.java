@@ -26,22 +26,24 @@
 
 package onyx.entities.storage.aws.dynamodb;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.*;
-import com.amazonaws.services.s3.model.Region;
 import onyx.components.aws.dynamodb.converters.InstantToStringTypeConverter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 
-import static com.amazonaws.util.SdkHttpUtils.urlDecode;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static onyx.components.aws.dynamodb.DynamoDbManager.PARENT_INDEX_NAME;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
+@DynamoDbBean
 public final class Resource {
 
     public enum Type {
@@ -62,9 +64,8 @@ public final class Resource {
     private Instant createdAt_;
     private Boolean favorite_;
 
-    private S3Link s3Link_;
-
-    @DynamoDBHashKey(attributeName = "path")
+    @DynamoDbPartitionKey
+    @DynamoDbAttribute("path")
     public String getPath() {
         return path_;
     }
@@ -75,7 +76,9 @@ public final class Resource {
         return this;
     }
 
-    @DynamoDBRangeKey(attributeName = "parent")
+    @DynamoDbSecondaryPartitionKey(indexNames = PARENT_INDEX_NAME)
+    @DynamoDbSortKey
+    @DynamoDbAttribute("parent")
     public String getParent() {
         return parent_;
     }
@@ -86,7 +89,7 @@ public final class Resource {
         return this;
     }
 
-    @DynamoDBAttribute(attributeName = "description")
+    @DynamoDbAttribute("description")
     public String getDescription() {
         return description_;
     }
@@ -97,7 +100,7 @@ public final class Resource {
         return this;
     }
 
-    @DynamoDBAttribute(attributeName = "size")
+    @DynamoDbAttribute("size")
     public long getSize() {
         return size_;
     }
@@ -108,8 +111,7 @@ public final class Resource {
         return this;
     }
 
-    @DynamoDBTypeConvertedEnum
-    @DynamoDBAttribute(attributeName = "type")
+    @DynamoDbAttribute("type")
     public Type getType() {
         return type_;
     }
@@ -120,8 +122,7 @@ public final class Resource {
         return this;
     }
 
-    @DynamoDBTypeConvertedEnum
-    @DynamoDBAttribute(attributeName = "visibility")
+    @DynamoDbAttribute("visibility")
     public Visibility getVisibility() {
         return visibility_;
     }
@@ -132,7 +133,7 @@ public final class Resource {
         return this;
     }
 
-    @DynamoDBAttribute(attributeName = "owner")
+    @DynamoDbAttribute("owner")
     public String getOwner() {
         return owner_;
     }
@@ -143,8 +144,8 @@ public final class Resource {
         return this;
     }
 
-    @DynamoDBTypeConverted(converter = InstantToStringTypeConverter.class)
-    @DynamoDBAttribute(attributeName = "created")
+    @DynamoDbConvertedBy(InstantToStringTypeConverter.class)
+    @DynamoDbAttribute("created")
     public Instant getCreatedAt() {
         return createdAt_;
     }
@@ -155,7 +156,7 @@ public final class Resource {
         return this;
     }
 
-    @DynamoDBAttribute(attributeName = "favorite")
+    @DynamoDbAttribute("favorite")
     public Boolean getFavorite() {
         return BooleanUtils.isTrue(favorite_);
     }
@@ -166,26 +167,24 @@ public final class Resource {
         return this;
     }
 
-    @DynamoDBAttribute(attributeName = "s3")
-    public S3Link getS3Link() {
-        return s3Link_;
-    }
-
-    public Resource setS3Link(
-            final S3Link s3Link) {
-        s3Link_ = s3Link;
-        return this;
-    }
-
     // Derived fields
+
+    /**
+     * Returns the S3 object key for this resource, derived from the path
+     * by stripping the leading "/".
+     */
+    @DynamoDbIgnore
+    public String getS3Key() {
+        return (path_ != null && path_.startsWith("/")) ? path_.substring(1) : path_;
+    }
 
     /**
      * Returns the complete path of a resource, properly URL decoded and HTML escaped,
      * safe for injection into an HTML template.
      */
-    @DynamoDBIgnore
+    @DynamoDbIgnore
     public String getHtmlPath() {
-        return escapeHtml4(urlDecode(path_));
+        return escapeHtml4(URLDecoder.decode(path_, StandardCharsets.UTF_8));
     }
 
     /**
@@ -194,7 +193,7 @@ public final class Resource {
      * return "baz". Note, this method does not URL decode or HTML escape
      * the resulting filename; for that, see {@link #getHtmlName()}.
      */
-    @DynamoDBIgnore
+    @DynamoDbIgnore
     public String getName() {
         return FilenameUtils.getName(path_);
     }
@@ -205,15 +204,15 @@ public final class Resource {
      * return "baz". This method handles all URL decoding and HTML escaping of
      * the resulting name safe for injection into an HTML template.
      */
-    @DynamoDBIgnore
+    @DynamoDbIgnore
     public String getHtmlName() {
-        return escapeHtml4(urlDecode(getName()));
+        return escapeHtml4(URLDecoder.decode(getName(), StandardCharsets.UTF_8));
     }
 
     /**
      * Returns a human readable/friendly size of the resource.
      */
-    @DynamoDBIgnore
+    @DynamoDbIgnore
     public String getHtmlSize() {
         return humanReadableByteCountBin(size_);
     }
@@ -222,7 +221,7 @@ public final class Resource {
      * Returns the description of a resource, properly HTML escaped safe for injection
      * into an HTML template.
      */
-    @DynamoDBIgnore
+    @DynamoDbIgnore
     public String getHtmlDescription() {
         return escapeHtml4(description_);
     }
@@ -234,13 +233,13 @@ public final class Resource {
      * {@link #getCreatedAt()} instead.
      */
     @Deprecated
-    @DynamoDBIgnore
+    @DynamoDbIgnore
     public Date getCreatedDate() {
         return new Date(getCreatedAt().toEpochMilli());
     }
 
     @Override
-    @DynamoDBIgnore
+    @DynamoDbIgnore
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
@@ -256,12 +255,6 @@ public final class Resource {
         private String owner_;
         private Instant createdAt_;
         private Boolean favorite_;
-
-        private S3Link s3Link_;
-
-        private Region s3BucketRegion_;
-        private String s3BucketName_;
-        private IDynamoDBMapper dbMapper_;
 
         public Builder setPath(
                 final String path) {
@@ -318,30 +311,6 @@ public final class Resource {
             return this;
         }
 
-        public Builder setS3Link(
-                final S3Link s3Link) {
-            s3Link_ = checkNotNull(s3Link, "Resource S3 link cannot be null.");
-            return this;
-        }
-
-        public Builder withS3BucketRegion(
-                final Region region) {
-            s3BucketRegion_ = checkNotNull(region, "S3 bucket region cannot be null.");
-            return this;
-        }
-
-        public Builder withS3Bucket(
-                final String bucketName) {
-            s3BucketName_ = checkNotNull(bucketName, "S3 bucket name cannot be null.");
-            return this;
-        }
-
-        public Builder withDbMapper(
-                final IDynamoDBMapper dbMapper) {
-            dbMapper_ = checkNotNull(dbMapper, "Dynamo DB mapper cannot be null.");
-            return this;
-        }
-
         public Resource build() {
             checkNotNull(path_, "Resource path cannot be null.");
             checkState(path_.startsWith("/"), "Resource path must start with a '/'.");
@@ -353,18 +322,6 @@ public final class Resource {
             checkNotNull(owner_, "Resource owner cannot be null.");
             checkNotNull(createdAt_, "Resource created at cannot be null.");
 
-            if (s3Link_ == null) {
-                // If we're going to generate an S3 link at the time the resource is built
-                // then we need to have a region, bucket name, and DB mapper set on the builder.
-                checkNotNull(s3BucketRegion_, "S3 bucket region cannot be null.");
-                checkNotNull(s3BucketName_, "S3 bucket name cannot be null.");
-                checkNotNull(dbMapper_, "Dynamo DB mapper cannot be null.");
-
-                // When used as part of an S3 key, we need to strip the leading "/".
-                final String key = (path_.startsWith("/")) ? path_.substring(1) : path_;
-                s3Link_ = dbMapper_.createS3Link(s3BucketRegion_, s3BucketName_, key);
-            }
-
             return new Resource()
                     .setPath(path_)
                     .setParent(parent_)
@@ -374,8 +331,7 @@ public final class Resource {
                     .setVisibility(visibility_)
                     .setOwner(owner_)
                     .setCreatedAt(createdAt_)
-                    .setFavorite(favorite_)
-                    .setS3Link(s3Link_);
+                    .setFavorite(favorite_);
         }
 
     }

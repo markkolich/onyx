@@ -26,11 +26,7 @@
 
 package onyx.components.storage.reaper;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.iterable.S3Objects;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-import onyx.components.aws.s3.S3Client;
+import onyx.components.aws.s3.OnyxS3Client;
 import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.ResourceManager;
@@ -42,6 +38,12 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
@@ -71,9 +73,9 @@ public final class ReaperJob implements Job {
                 (AwsConfig) jobDataMap.get(AwsConfig.class.getSimpleName());
         final ResourceManager resourceManager =
                 (ResourceManager) jobDataMap.get(ResourceManager.class.getSimpleName());
-        final S3Client s3Client =
-                (S3Client) jobDataMap.get(S3Client.class.getSimpleName());
-        final AmazonS3 s3 = s3Client.getS3Client();
+        final OnyxS3Client onyxS3Client =
+                (OnyxS3Client) jobDataMap.get(OnyxS3Client.class.getSimpleName());
+        final S3Client s3 = onyxS3Client.getS3Client();
 
         final int backoffMaxRetries = reaperConfig.getBackoffMaxRetries();
         final Duration backoffThrottle = reaperConfig.getBackoffThrottleDuration();
@@ -87,15 +89,23 @@ public final class ReaperJob implements Job {
         try {
             final long start = System.currentTimeMillis();
 
-            S3Objects.inBucket(s3, bucketName).forEach((S3ObjectSummary objSummary) -> {
-                final String resourcePath = ResourceManager.ROOT_PATH + objSummary.getKey();
+            final ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
+                    .bucket(bucketName)
+                    .build();
+
+            s3.listObjectsV2Paginator(listRequest).contents().forEach((S3Object objSummary) -> {
+                final String resourcePath = ResourceManager.ROOT_PATH + objSummary.key();
 
                 final Resource resource = callWithRetry(backoffMaxRetries, backoffThrottle,
                         () -> resourceManager.getResourceAtPath(resourcePath));
                 if (resource == null) {
                     // If we got here, the resource was found in S3 but not Dynamo.
-                    final ObjectMetadata objMeta = s3.getObjectMetadata(bucketName, objSummary.getKey());
-                    if (objMeta == null) {
+                    try {
+                        s3.headObject(HeadObjectRequest.builder()
+                                .bucket(bucketName)
+                                .key(objSummary.key())
+                                .build());
+                    } catch (final NoSuchKeyException e) {
                         LOG.error("Failed to load object metadata from S3 for key: {}", resourcePath);
                         return;
                     }
@@ -105,7 +115,10 @@ public final class ReaperJob implements Job {
                     // be deleted and replaced with a delete marker so the object can be recovered later if
                     // needed. S3 lifecycle rules within the bucket itself can be configured to permanently
                     // delete the object and corresponding delete marker if desired.
-                    s3.deleteObject(bucketName, objSummary.getKey());
+                    s3.deleteObject(DeleteObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(objSummary.key())
+                            .build());
 
                     LOG.info("Successfully deleted dangling resource in S3: {}", resourcePath);
                 }

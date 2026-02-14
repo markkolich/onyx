@@ -26,29 +26,42 @@
 
 package onyx.components.aws.dynamodb.converters;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverter;
+import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
+import software.amazon.awssdk.enhanced.dynamodb.AttributeValueType;
+import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * A {@link DynamoDBTypeConverter} implementation that converts an {@link Instant}
+ * An {@link AttributeConverter} implementation that converts an {@link Instant}
  * to and from its string equivalent. The expected format is the same format used
  * by {@link Instant} internally: {@link DateTimeFormatter#ISO_INSTANT}.
  */
 public final class InstantToStringTypeConverter
-        implements DynamoDBTypeConverter<String, Instant> {
+        implements AttributeConverter<Instant> {
 
     @Override
-    public String convert(
+    public AttributeValue transformFrom(
             final Instant instant) {
-        return instant.toString();
+        return AttributeValue.fromS(instant.toString());
     }
 
     @Override
-    public Instant unconvert(
-            final String string) {
-        return Instant.parse(string);
+    public Instant transformTo(
+            final AttributeValue attributeValue) {
+        return Instant.parse(attributeValue.s());
+    }
+
+    @Override
+    public EnhancedType<Instant> type() {
+        return EnhancedType.of(Instant.class);
+    }
+
+    @Override
+    public AttributeValueType attributeValueType() {
+        return AttributeValueType.S;
     }
 
 }

@@ -26,18 +26,18 @@
 
 package onyx.components.authentication.twofactor;
 
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.model.MessageAttributeValue;
-import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.PublishResult;
 import com.google.common.collect.ImmutableMap;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.core.servlet.HttpStatus;
-import onyx.components.aws.sns.SnsClient;
+import onyx.components.aws.sns.OnyxSnsClient;
 import onyx.entities.authentication.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.PublishResponse;
 
 import java.util.Map;
 
@@ -45,26 +45,44 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A {@link TwoFactorAuthCodeManager} implementation that sends a 2FA verification
- * code as an SMS/text-message via {@link AmazonSNS}.
+ * code as an SMS/text-message via {@link SnsClient}.
  */
 @Component
 public final class OnyxTwoFactorSmsAuthCodeManager implements TwoFactorAuthCodeManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(OnyxTwoFactorSmsAuthCodeManager.class);
 
-    private static final String AWS_SNS_DATA_TYPE_STRING = "String";
-
-    private static final String AWS_SNS_SMS_SMSTYPE = "AWS.SNS.SMS.SMSType";
-    private static final String AWS_SNS_SMS_SMSTYPE_PROMOTIONAL = "Promotional";
-    private static final String AWS_SNS_SMS_SMSTYPE_TRANSACTIONAL = "Transactional";
-
     private static final String SMS_VERIFICATION_MESSAGE = "Onyx verification code: %s";
 
-    private final AmazonSNS sns_;
+    private final SnsClient sns_;
+
+    private static final class Extensions {
+
+        private static final String AWS_SNS_DATA_TYPE_STRING = "String";
+
+        private static final String AWS_SNS_SMS_SMSTYPE = "AWS.SNS.SMS.SMSType";
+        private static final String AWS_SNS_SMS_SMSTYPE_PROMOTIONAL = "Promotional";
+        private static final String AWS_SNS_SMS_SMSTYPE_TRANSACTIONAL = "Transactional";
+
+        private static MessageAttributeValue promotionalSms() {
+            return MessageAttributeValue.builder()
+                    .stringValue(AWS_SNS_SMS_SMSTYPE_PROMOTIONAL)
+                    .dataType(AWS_SNS_DATA_TYPE_STRING)
+                    .build();
+        }
+
+        private static MessageAttributeValue transactionalSms() {
+            return MessageAttributeValue.builder()
+                    .stringValue(AWS_SNS_SMS_SMSTYPE_TRANSACTIONAL)
+                    .dataType(AWS_SNS_DATA_TYPE_STRING)
+                    .build();
+        }
+
+    }
 
     @Injectable
     public OnyxTwoFactorSmsAuthCodeManager(
-            final SnsClient snsClient) {
+            final OnyxSnsClient snsClient) {
         sns_ = snsClient.getSnsClient();
     }
 
@@ -78,21 +96,19 @@ public final class OnyxTwoFactorSmsAuthCodeManager implements TwoFactorAuthCodeM
         try {
             final String smsMessage = String.format(SMS_VERIFICATION_MESSAGE, code);
 
-            final MessageAttributeValue smsAttributeType = new MessageAttributeValue()
-                    .withStringValue(AWS_SNS_SMS_SMSTYPE_TRANSACTIONAL)
-                    .withDataType(AWS_SNS_DATA_TYPE_STRING);
             final Map<String, MessageAttributeValue> smsAttributes =
-                    ImmutableMap.of(AWS_SNS_SMS_SMSTYPE, smsAttributeType);
+                    ImmutableMap.of(Extensions.AWS_SNS_SMS_SMSTYPE, Extensions.transactionalSms());
 
-            final PublishRequest publishRequest = new PublishRequest()
-                    .withMessageAttributes(smsAttributes)
-                    .withPhoneNumber(user.getMobileNumber()) // E.164 formatted phone number
-                    .withMessage(smsMessage);
+            final PublishRequest publishRequest = PublishRequest.builder()
+                    .messageAttributes(smsAttributes)
+                    .phoneNumber(user.getMobileNumber()) // E.164 formatted phone number
+                    .message(smsMessage)
+                    .build();
 
             // Send the text-message!
-            final PublishResult publishResult = sns_.publish(publishRequest);
+            final PublishResponse publishResponse = sns_.publish(publishRequest);
 
-            final int publishStatus = publishResult.getSdkHttpMetadata().getHttpStatusCode();
+            final int publishStatus = publishResponse.sdkHttpResponse().statusCode();
             if (publishStatus != HttpStatus.SC_OK) {
                 LOG.warn("AWS SNS publish failed while sending 2FA SMS text-message to user: "
                         + "{}, status: {}", user.getUsername(), publishStatus);

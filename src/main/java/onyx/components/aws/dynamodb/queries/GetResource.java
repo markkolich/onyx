@@ -26,16 +26,15 @@
 
 package onyx.components.aws.dynamodb.queries;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
-import java.util.Map;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -51,13 +50,15 @@ public final class GetResource {
     }
 
     public Resource run(
-            final IDynamoDBMapper dbMapper) {
-        final DynamoDBQueryExpression<Resource> qe = new DynamoDBQueryExpression<Resource>()
-                .withExpressionAttributeNames(buildExpressionAttributes())
-                .withExpressionAttributeValues(buildExpressionAttributeValues(path_))
-                .withKeyConditionExpression(buildKeyConditionExpression());
+            final DynamoDbTable<Resource> resourceTable) {
+        final QueryConditional queryConditional = QueryConditional.keyEqualTo(
+                Key.builder().partitionValue(path_).build());
 
-        final PaginatedQueryList<Resource> resources = dbMapper.query(Resource.class, qe);
+        final List<Resource> resources = resourceTable.query(queryConditional)
+                .items()
+                .stream()
+                .collect(ImmutableList.toImmutableList());
+
         if (resources.isEmpty()) {
             LOG.debug("Found no resource at path: {}", path_);
             return null;
@@ -67,19 +68,6 @@ public final class GetResource {
         }
 
         return resources.iterator().next();
-    }
-
-    private static Map<String, String> buildExpressionAttributes() {
-        return ImmutableMap.of("#name0", "path");
-    }
-
-    private static Map<String, AttributeValue> buildExpressionAttributeValues(
-            final String path) {
-        return ImmutableMap.of(":value0", new AttributeValue().withS(path));
-    }
-
-    private static String buildKeyConditionExpression() {
-        return "#name0 = :value0";
     }
 
 }

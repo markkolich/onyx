@@ -31,7 +31,7 @@
         <maven-versions-plugin.version>2.20.1</maven-versions-plugin.version>
 
         <slf4j.version>2.0.17</slf4j.version>
-        <logback.version>1.5.27</logback.version>
+        <logback.version>1.5.30</logback.version>
 
         <curacao.version>7.1.0</curacao.version>
 
@@ -40,14 +40,14 @@
         <typesafe-config.version>1.4.5</typesafe-config.version>
 
         <jackson.version>2.21.0</jackson.version>
-        <jackson-databind-nullable.version>0.2.8</jackson-databind-nullable.version>
+        <jackson-databind-nullable.version>0.2.9</jackson-databind-nullable.version>
 
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-text.version>1.15.0</commons-text.version>
         <commons-io.version>2.21.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
 
-        <aws-sdk.version>1.12.797</aws-sdk.version>
+        <aws-sdk-v2.version>2.41.29</aws-sdk-v2.version>
 
         <guava.version>33.5.0-jre</guava.version>
 
@@ -59,7 +59,7 @@
         <bcprov-jdk18on.version>1.83</bcprov-jdk18on.version>
         <jbcrypt.version>0.4</jbcrypt.version>
 
-        <async-http-client.version>3.0.6</async-http-client.version>
+        <async-http-client.version>3.0.7</async-http-client.version>
 
         <picocli.version>4.7.7</picocli.version>
 
@@ -67,7 +67,7 @@
 
         <quartz.version>2.5.2</quartz.version>
 
-        <checkstyle.version>13.1.0</checkstyle.version>
+        <checkstyle.version>13.2.0</checkstyle.version>
 
         <!-- Test dependency versions -->
 
@@ -192,29 +192,24 @@
         </dependency>
 
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-s3</artifactId>
-            <version>${aws-sdk.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>${aws-sdk-v2.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-dynamodb</artifactId>
-            <version>${aws-sdk.version}</version>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>dynamodb</artifactId>
+            <version>${aws-sdk-v2.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-sns</artifactId>
-            <version>${aws-sdk.version}</version>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>dynamodb-enhanced</artifactId>
+            <version>${aws-sdk-v2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sns</artifactId>
+            <version>${aws-sdk-v2.version}</version>
         </dependency>
 
         <dependency>

@@ -30,9 +30,10 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.tuple.Triple;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static com.amazonaws.util.SdkHttpUtils.urlDecode;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 public final class PathUtils {
@@ -87,7 +88,7 @@ public final class PathUtils {
             final String path = pathBuilder.toString();
             // IMPORTANT: note the URL decoding followed by HTML escaping to safely
             // decode and escape any non-HTML safe characters in a resource name.
-            final String name = escapeHtml4(urlDecode(elements.get(i)));
+            final String name = escapeHtml4(URLDecoder.decode(elements.get(i), StandardCharsets.UTF_8));
 
             builder.add(Triple.of(parentPath, path, name));
 

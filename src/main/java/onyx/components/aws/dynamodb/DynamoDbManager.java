@@ -26,18 +26,18 @@
 
 package onyx.components.aws.dynamodb;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.aws.dynamodb.queries.*;
-import onyx.components.config.aws.AwsConfig;
 import onyx.components.search.SearchManager;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.async.AsyncResourceThreadPool;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.OnyxException;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -50,9 +50,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Component
 public final class DynamoDbManager implements ResourceManager {
 
-    private final AwsConfig awsConfig_;
+    public static final String PARENT_INDEX_NAME = "parent-index";
 
-    private final IDynamoDBMapper dbMapper_;
+    private final DynamoDbEnhancedClient enhancedClient_;
+    private final DynamoDbTable<Resource> resourceTable_;
 
     private final SearchManager searchManager_;
 
@@ -60,22 +61,21 @@ public final class DynamoDbManager implements ResourceManager {
 
     @Injectable
     public DynamoDbManager(
-            final AwsConfig awsConfig,
             final DynamoDbMapper dynamoDbMapper,
             final SearchManager searchManager,
             final AsyncResourceThreadPool asyncResourceThreadPool) {
-        this(awsConfig, dynamoDbMapper.getDbMapper(), searchManager,
-                asyncResourceThreadPool.getExecutorService());
+        this(dynamoDbMapper.getEnhancedClient(), dynamoDbMapper.getResourceTable(),
+                searchManager, asyncResourceThreadPool.getExecutorService());
     }
 
     @VisibleForTesting
     public DynamoDbManager(
-            final AwsConfig awsConfig,
-            final IDynamoDBMapper dbMapper,
+            final DynamoDbEnhancedClient enhancedClient,
+            final DynamoDbTable<Resource> resourceTable,
             final SearchManager searchManager,
             final ExecutorService executorService) {
-        awsConfig_ = awsConfig;
-        dbMapper_ = dbMapper;
+        enhancedClient_ = enhancedClient;
+        resourceTable_ = resourceTable;
         searchManager_ = searchManager;
         asyncResourceExecutorService_ = executorService;
     }
@@ -84,13 +84,13 @@ public final class DynamoDbManager implements ResourceManager {
     @Override
     public Resource getResourceAtPath(
             final String path) {
-        return new GetResource(path).run(dbMapper_);
+        return new GetResource(path).run(resourceTable_);
     }
 
     @Override
     public void createResource(
             final Resource resource) {
-        new CreateResource(resource).run(dbMapper_, r -> {
+        new CreateResource(resource).run(resourceTable_, r -> {
             // Index the addition of the resource asynchronously.
             searchManager_.addResourceToIndexAsync(r, asyncResourceExecutorService_);
 
@@ -108,7 +108,7 @@ public final class DynamoDbManager implements ResourceManager {
     @Override
     public void updateResource(
             final Resource resource) {
-        new UpdateResource(resource).run(dbMapper_, r -> {
+        new UpdateResource(resource).run(resourceTable_, r -> {
             // Index the update of the resource asynchronously.
             searchManager_.addResourceToIndexAsync(r, asyncResourceExecutorService_);
         });
@@ -123,7 +123,7 @@ public final class DynamoDbManager implements ResourceManager {
     @Override
     public void deleteResource(
             final Resource resource) {
-        new DeleteResource(awsConfig_, resource).run(dbMapper_, r -> {
+        new DeleteResource(resource).run(enhancedClient_, resourceTable_, r -> {
             // Index the deletion of the resource asynchronously.
             searchManager_.deleteResourceFromIndexAsync(r, asyncResourceExecutorService_);
 
@@ -144,7 +144,7 @@ public final class DynamoDbManager implements ResourceManager {
             final Resource directory,
             final Set<Resource.Visibility> visibility,
             @Nullable final Extensions.Sort sort) {
-        final List<Resource> resources = new ListDirectory(awsConfig_, directory, visibility).run(dbMapper_);
+        final List<Resource> resources = new ListDirectory(directory, visibility).run(resourceTable_);
 
         final List<Resource> sorted;
         if (Extensions.Sort.FAVORITE.equals(sort)) {
@@ -176,7 +176,7 @@ public final class DynamoDbManager implements ResourceManager {
     @Nonnull
     @Override
     public List<Resource> listHomeDirectories() {
-        return new ListHomeDirectories(awsConfig_).run(dbMapper_);
+        return new ListHomeDirectories().run(resourceTable_);
     }
 
     // Helpers

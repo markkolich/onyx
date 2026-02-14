@@ -26,8 +26,6 @@
 
 package onyx.controllers.api.v1;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import com.amazonaws.services.s3.model.Region;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import curacao.annotations.Controller;
@@ -38,7 +36,6 @@ import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.RequestBody;
 import curacao.core.servlet.HttpResponse;
 import onyx.components.OnyxJacksonObjectMapper;
-import onyx.components.aws.dynamodb.DynamoDbMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.aws.AwsConfig;
 import onyx.components.config.cache.LocalCacheConfig;
@@ -85,8 +82,6 @@ public final class File extends AbstractOnyxApiController {
     private final ResourceManager resourceManager_;
     private final CacheManager cacheManager_;
 
-    private final IDynamoDBMapper dbMapper_;
-
     private final ObjectMapper objectMapper_;
 
     @Injectable
@@ -97,7 +92,6 @@ public final class File extends AbstractOnyxApiController {
             final AssetManager assetManager,
             final ResourceManager resourceManager,
             final CacheManager cacheManager,
-            final DynamoDbMapper dynamoDbMapper,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         super(onyxConfig);
         awsConfig_ = awsConfig;
@@ -105,7 +99,6 @@ public final class File extends AbstractOnyxApiController {
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
         cacheManager_ = cacheManager;
-        dbMapper_ = dynamoDbMapper.getDbMapper();
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
@@ -201,9 +194,6 @@ public final class File extends AbstractOnyxApiController {
                             .setVisibility(request.getVisibility())
                             .setOwner(session.getUsername())
                             .setCreatedAt(Instant.now()) // now
-                            .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region()))
-                            .withS3Bucket(awsConfig_.getAwsS3BucketName())
-                            .withDbMapper(dbMapper_)
                             .build();
 
                     resourceManager_.createResource(newDirectory);
@@ -235,9 +225,6 @@ public final class File extends AbstractOnyxApiController {
                 .setVisibility(request.getVisibility())
                 .setOwner(session.getUsername())
                 .setCreatedAt(Instant.now()) // now
-                .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region()))
-                .withS3Bucket(awsConfig_.getAwsS3BucketName())
-                .withDbMapper(dbMapper_)
                 .build();
 
         resourceManager_.createResource(newFile);

@@ -26,12 +26,9 @@
 
 package onyx.components.storage;
 
-import com.amazonaws.HttpMethod;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
-import javax.annotation.Nullable;
 import java.net.URL;
-import java.util.Map;
 
 public interface AssetManager {
 
@@ -43,11 +40,6 @@ public interface AssetManager {
 
     URL getPresignedUploadUrlForResource(
             final Resource resource);
-
-    URL getPresignedUrlForResource(
-            final Resource resource,
-            final HttpMethod method,
-            @Nullable final Map<String, String> requestParameters);
 
     long getResourceObjectSize(
             final Resource resource);

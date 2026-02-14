@@ -26,15 +26,11 @@
 
 package onyx.components.search.solr;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import com.amazonaws.services.s3.model.Region;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.aws.dynamodb.DynamoDbMapper;
-import onyx.components.config.aws.AwsConfig;
 import onyx.components.search.SearchConfig;
 import onyx.components.search.SearchManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
@@ -67,24 +63,17 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
             .trimResults()
             .omitEmptyStrings();
 
-    private final AwsConfig awsConfig_;
     private final SearchConfig searchConfig_;
 
     private final SolrClient solrClient_;
 
-    private final IDynamoDBMapper dbMapper_;
-
     @Injectable
     public EmbeddedSolrSearchManager(
-            final AwsConfig awsConfig,
             final SearchConfig searchConfig,
-            final SolrClientProvider solrClientProvider,
-            final DynamoDbMapper dynamoDbMapper) {
-        awsConfig_ = awsConfig;
+            final SolrClientProvider solrClientProvider) {
         searchConfig_ = searchConfig;
 
         solrClient_ = solrClientProvider.getSolrClient();
-        dbMapper_ = dynamoDbMapper.getDbMapper();
     }
 
     @Override
@@ -231,7 +220,7 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
             final SolrDocumentList documents = response.getResults();
 
             return documents.stream()
-                    .map(document -> mapSolrDocumentToResource(document, awsConfig_, dbMapper_))
+                    .map(EmbeddedSolrSearchManager::mapSolrDocumentToResource)
                     .collect(ImmutableList.toImmutableList());
         } catch (final Exception e) {
             LOG.error("Failed to search index for query: {}", query, e);
@@ -327,12 +316,8 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
     }
 
     private static Resource mapSolrDocumentToResource(
-            final SolrDocument document,
-            final AwsConfig awsConfig,
-            final IDynamoDBMapper dbMapper) {
+            final SolrDocument document) {
         checkNotNull(document, "Solr document to map cannot be null.");
-        checkNotNull(awsConfig, "AWS config cannot be null.");
-        checkNotNull(dbMapper, "DB mapper cannot be null.");
 
         final Resource.Type type =
                 Resource.Type.valueOf((String) document.get(INDEX_FIELD_TYPE));
@@ -352,9 +337,6 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
                 .setOwner((String) document.get(INDEX_FIELD_OWNER))
                 .setCreatedAt(((Date) document.get(INDEX_FIELD_CREATED)).toInstant())
                 .setFavorite((Boolean) document.get(INDEX_FIELD_FAVORITE))
-                .withS3BucketRegion(Region.fromValue(awsConfig.getAwsS3Region()))
-                .withS3Bucket(awsConfig.getAwsS3BucketName())
-                .withDbMapper(dbMapper)
                 .build();
     }
 

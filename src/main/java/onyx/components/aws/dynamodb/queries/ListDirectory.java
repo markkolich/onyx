@@ -26,59 +26,55 @@
 
 package onyx.components.aws.dynamodb.queries;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.google.common.collect.*;
-import onyx.components.config.aws.AwsConfig;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static onyx.components.aws.dynamodb.DynamoDbManager.PARENT_INDEX_NAME;
 import static onyx.components.storage.ResourceManager.ROOT_PATH;
 
 public final class ListDirectory {
 
     private static final Logger LOG = LoggerFactory.getLogger(ListDirectory.class);
 
-    private final AwsConfig awsConfig_;
-
     private final Resource directory_;
     private final Set<Resource.Visibility> visibility_;
 
-    private final String parentIndexName_;
-
     public ListDirectory(
-            final AwsConfig awsConfig,
             final Resource directory,
             final Set<Resource.Visibility> visibility) {
-        awsConfig_ = checkNotNull(awsConfig, "AWS config cannot be null.");
         directory_ = checkNotNull(directory, "Resource directory cannot be null.");
         visibility_ = checkNotNull(visibility, "Resource directory child visibility cannot be null.");
-
-        parentIndexName_ = awsConfig_.getAwsDynamoDbParentIndexName();
     }
 
     public List<Resource> run(
-            final IDynamoDBMapper dbMapper) {
-        final DynamoDBQueryExpression<Resource> qe = new DynamoDBQueryExpression<Resource>()
-                .withIndexName(parentIndexName_)
-                .withConsistentRead(false)
-                .withExpressionAttributeNames(buildExpressionAttributes(visibility_))
-                .withExpressionAttributeValues(buildExpressionAttributeValues(directory_.getPath(), visibility_))
-                .withKeyConditionExpression(buildKeyConditionExpression())
-                .withFilterExpression(buildFilterExpression(visibility_));
+            final DynamoDbTable<Resource> resourceTable) {
+        final DynamoDbIndex<Resource> parentIndex = resourceTable.index(PARENT_INDEX_NAME);
 
-        final PaginatedQueryList<Resource> queryResult = dbMapper.query(Resource.class, qe);
+        final QueryConditional queryConditional = QueryConditional.keyEqualTo(
+                Key.builder().partitionValue(directory_.getPath()).build());
 
-        final ListMultimap<Resource.Type, Resource> resources = queryResult.stream()
+        final QueryEnhancedRequest request = QueryEnhancedRequest.builder()
+                .queryConditional(queryConditional)
+                .filterExpression(buildFilterExpression(visibility_))
+                .build();
+
+        final ListMultimap<Resource.Type, Resource> resources = parentIndex.query(request)
+                .stream()
+                .flatMap(page -> page.items().stream())
                 // Intentionally keep the root "/" out of the listing.
                 .filter(resource -> !ROOT_PATH.equals(resource.getPath()))
                 // Sort the results alphabetically based on path, prior to partitioning by type.
@@ -93,44 +89,30 @@ public final class ListDirectory {
         return ImmutableList.copyOf(Iterables.concat(directories, files));
     }
 
-    private static Map<String, String> buildExpressionAttributes(
+    private static Expression buildFilterExpression(
             final Set<Resource.Visibility> visibility) {
-        final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put("#name0", "parent");
-        for (int i = 0, l = visibility.size(); i < l; i++) {
-            builder.put("#name" + (i + 1), "visibility");
-        }
+        final ImmutableMap.Builder<String, String> nameBuilder = ImmutableMap.builder();
+        final ImmutableMap.Builder<String, AttributeValue> valueBuilder = ImmutableMap.builder();
+        final StringBuilder expression = new StringBuilder();
 
-        return builder.build();
-    }
-
-    private static Map<String, AttributeValue> buildExpressionAttributeValues(
-            final String path,
-            final Set<Resource.Visibility> visibility) {
-        final ImmutableMap.Builder<String, AttributeValue> builder = ImmutableMap.builder();
-        builder.put(":value0", new AttributeValue().withS(path));
         int idx = 0;
         for (final Resource.Visibility v : visibility) {
-            builder.put(":value" + (idx + 1), new AttributeValue().withS(v.toString()));
+            if (idx > 0) {
+                expression.append(" OR ");
+            }
+            final String namePlaceholder = "#vis" + idx;
+            final String valuePlaceholder = ":vis" + idx;
+            expression.append(namePlaceholder).append(" = ").append(valuePlaceholder);
+            nameBuilder.put(namePlaceholder, "visibility");
+            valueBuilder.put(valuePlaceholder, AttributeValue.builder().s(v.toString()).build());
             idx++;
         }
 
-        return builder.build();
-    }
-
-    private static String buildKeyConditionExpression() {
-        return "#name0 = :value0";
-    }
-
-    private static String buildFilterExpression(
-            final Set<Resource.Visibility> visibility) {
-        final StringBuilder builder = new StringBuilder();
-        for (int i = 0, l = visibility.size(); i < l; i++) {
-            builder.append("#name").append(i + 1).append(" = :value").append(i + 1);
-            builder.append((i < l - 1) ? " OR " : "");
-        }
-
-        return builder.toString();
+        return Expression.builder()
+                .expression(expression.toString())
+                .expressionNames(nameBuilder.build())
+                .expressionValues(valueBuilder.build())
+                .build();
     }
 
 }

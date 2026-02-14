@@ -26,84 +26,77 @@
 
 package onyx.components.aws.dynamodb.queries;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper.FailedBatch;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.google.common.collect.*;
-import onyx.components.config.aws.AwsConfig;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static onyx.components.aws.dynamodb.DynamoDbManager.PARENT_INDEX_NAME;
 import static onyx.components.storage.ResourceManager.ROOT_PATH;
 
 public final class DeleteResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(DeleteResource.class);
 
-    private final AwsConfig awsConfig_;
+    private static final int BATCH_WRITE_MAX_SIZE = 25;
 
     private final Resource resource_;
 
-    private final String parentIndexName_;
-
     public DeleteResource(
-            final AwsConfig awsConfig,
             final Resource resource) {
-        awsConfig_ = checkNotNull(awsConfig, "AWS config cannot be null.");
         resource_ = checkNotNull(resource, "Resource cannot be null.");
-
-        parentIndexName_ = awsConfig_.getAwsDynamoDbParentIndexName();
     }
 
     public void run(
-            final IDynamoDBMapper dbMapper,
+            final DynamoDbEnhancedClient enhancedClient,
+            final DynamoDbTable<Resource> resourceTable,
             @Nullable final Consumer<Resource> callback) {
-        final List<FailedBatch> failedBatches = deleteResource(resource_, callback, dbMapper);
-        if (CollectionUtils.isNotEmpty(failedBatches)) {
-            LOG.error("Failed to delete one or more resource batches in backing store: {}",
-                    failedBatches.size());
-        }
+        deleteResource(resource_, callback, enhancedClient, resourceTable);
     }
 
-    private List<FailedBatch> deleteResource(
+    private void deleteResource(
             final Resource resource,
             final Consumer<Resource> callback,
-            final IDynamoDBMapper dbMapper) {
-        final ImmutableList.Builder<FailedBatch> failedBatchesBuilder = ImmutableList.builder();
-
+            final DynamoDbEnhancedClient enhancedClient,
+            final DynamoDbTable<Resource> resourceTable) {
         final Resource.Type resourceType = resource.getType();
         if (Resource.Type.FILE.equals(resourceType)) {
-            dbMapper.delete(resource);
+            resourceTable.deleteItem(resource);
             if (callback != null) {
                 callback.accept(resource);
             }
         } else if (Resource.Type.DIRECTORY.equals(resourceType)) {
             // First, delete the parent directory itself.
-            dbMapper.delete(resource);
+            resourceTable.deleteItem(resource);
             if (callback != null) {
                 callback.accept(resource);
             }
 
-            final DynamoDBQueryExpression<Resource> qe = new DynamoDBQueryExpression<Resource>()
-                    .withIndexName(parentIndexName_)
-                    .withConsistentRead(false)
-                    .withExpressionAttributeNames(buildExpressionAttributes())
-                    .withExpressionAttributeValues(buildExpressionAttributeValues(resource.getPath()))
-                    .withKeyConditionExpression(buildKeyConditionExpression());
-            final PaginatedQueryList<Resource> queryResult = dbMapper.query(Resource.class, qe);
+            final DynamoDbIndex<Resource> parentIndex = resourceTable.index(PARENT_INDEX_NAME);
 
-            final ListMultimap<Resource.Type, Resource> resources = queryResult.stream()
+            final QueryConditional queryConditional = QueryConditional.keyEqualTo(
+                    Key.builder().partitionValue(resource.getPath()).build());
+
+            final QueryEnhancedRequest request = QueryEnhancedRequest.builder()
+                    .queryConditional(queryConditional)
+                    .build();
+
+            final ListMultimap<Resource.Type, Resource> resources = parentIndex.query(request)
+                    .stream()
+                    .flatMap(page -> page.items().stream())
                     // Intentionally always skip the root "/" directory.
                     .filter(r -> !ROOT_PATH.equals(r.getPath()))
                     // Sort the results alphabetically based on path.
@@ -114,7 +107,7 @@ public final class DeleteResource {
             // Then, batch delete any files.
             final List<Resource> files = resources.get(Resource.Type.FILE);
             if (CollectionUtils.isNotEmpty(files)) {
-                failedBatchesBuilder.addAll(dbMapper.batchDelete(files));
+                batchDeleteResources(files, enhancedClient, resourceTable);
                 if (callback != null) {
                     files.forEach(callback);
                 }
@@ -124,25 +117,35 @@ public final class DeleteResource {
             final List<Resource> directories = resources.get(Resource.Type.DIRECTORY);
             if (CollectionUtils.isNotEmpty(directories)) {
                 for (final Resource directory : directories) {
-                    failedBatchesBuilder.addAll(deleteResource(directory, callback, dbMapper));
+                    deleteResource(directory, callback, enhancedClient, resourceTable);
                 }
             }
         }
-
-        return failedBatchesBuilder.build();
     }
 
-    private static Map<String, String> buildExpressionAttributes() {
-        return ImmutableMap.of("#name0", "parent");
-    }
+    private void batchDeleteResources(
+            final List<Resource> resources,
+            final DynamoDbEnhancedClient enhancedClient,
+            final DynamoDbTable<Resource> resourceTable) {
+        final List<List<Resource>> batches = Lists.partition(resources, BATCH_WRITE_MAX_SIZE);
+        for (final List<Resource> batch : batches) {
+            final WriteBatch.Builder<Resource> writeBatchBuilder = WriteBatch.builder(Resource.class)
+                    .mappedTableResource(resourceTable);
+            for (final Resource resource : batch) {
+                writeBatchBuilder.addDeleteItem(resource);
+            }
 
-    private static Map<String, AttributeValue> buildExpressionAttributeValues(
-            final String path) {
-        return ImmutableMap.of(":value0", new AttributeValue().withS(path));
-    }
+            final BatchWriteItemEnhancedRequest batchRequest = BatchWriteItemEnhancedRequest.builder()
+                    .writeBatches(writeBatchBuilder.build())
+                    .build();
 
-    private static String buildKeyConditionExpression() {
-        return "#name0 = :value0";
+            final BatchWriteResult result = enhancedClient.batchWriteItem(batchRequest);
+            final List<Key> unprocessedItems = result.unprocessedDeleteItemsForTable(resourceTable);
+            if (CollectionUtils.isNotEmpty(unprocessedItems)) {
+                LOG.error("Failed to delete {} resources in batch delete operation.",
+                        unprocessedItems.size());
+            }
+        }
     }
 
 }

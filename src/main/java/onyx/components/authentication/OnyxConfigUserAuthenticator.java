@@ -26,14 +26,10 @@
 
 package onyx.components.authentication;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import com.amazonaws.services.s3.model.Region;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentInitializable;
-import onyx.components.aws.dynamodb.DynamoDbMapper;
 import onyx.components.config.authentication.SessionConfig;
-import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
 import onyx.entities.authentication.Session.Type;
@@ -56,11 +52,8 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
     private static final Logger LOG = LoggerFactory.getLogger(OnyxConfigUserAuthenticator.class);
 
     private final SessionConfig sessionConfig_;
-    private final AwsConfig awsConfig_;
 
     private final ResourceManager resourceManager_;
-
-    private final IDynamoDBMapper dbMapper_;
 
     private final PasswordHasher pwHasher_;
     private final Map<String, User> userCredentials_;
@@ -68,13 +61,9 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
     @Injectable
     public OnyxConfigUserAuthenticator(
             final SessionConfig sessionConfig,
-            final AwsConfig awsConfig,
-            final ResourceManager resourceManager,
-            final DynamoDbMapper dynamoDbMapper) {
+            final ResourceManager resourceManager) {
         sessionConfig_ = sessionConfig;
-        awsConfig_ = awsConfig;
         resourceManager_ = resourceManager;
-        dbMapper_ = dynamoDbMapper.getDbMapper();
 
         pwHasher_ = PasswordHasher.getInstance();
         userCredentials_ = sessionConfig_.getUsers();
@@ -158,9 +147,6 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
                         .setVisibility(Resource.Visibility.PUBLIC)
                         .setOwner(username)
                         .setCreatedAt(Instant.now()) // now
-                        .withS3BucketRegion(Region.fromValue(awsConfig_.getAwsS3Region()))
-                        .withS3Bucket(awsConfig_.getAwsS3BucketName())
-                        .withDbMapper(dbMapper_)
                         .build();
 
                 resourceManager_.createResource(newHome);

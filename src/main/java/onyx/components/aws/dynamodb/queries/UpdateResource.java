@@ -26,10 +26,10 @@
 
 package onyx.components.aws.dynamodb.queries;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
@@ -48,9 +48,9 @@ public final class UpdateResource {
     }
 
     public void run(
-            final IDynamoDBMapper dbMapper,
+            final DynamoDbTable<Resource> resourceTable,
             @Nullable final Consumer<Resource> callback) {
-        dbMapper.save(resource_);
+        resourceTable.putItem(resource_);
         if (callback != null) {
             callback.accept(resource_);
         }

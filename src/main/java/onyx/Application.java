@@ -52,12 +52,6 @@ import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SESSIONS;
 
 public final class Application {
 
-    static {
-        // Suppress AWS SDK v1 deprecation warning on startup.
-        // See https://aws.amazon.com/blogs/developer/the-aws-sdk-for-java-1-x-is-in-maintenance-mode-effective-july-31-2024/
-        System.setProperty("aws.java.v1.disableDeprecationAnnouncement", "true");
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
     private static final String CONTEXT_PATH = "/onyx";

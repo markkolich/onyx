@@ -26,8 +26,6 @@
 
 package onyx.components.config.aws;
 
-import com.amazonaws.services.s3.model.StorageClass;
-
 import java.util.concurrent.TimeUnit;
 
 public interface AwsConfig {
@@ -73,7 +71,7 @@ public interface AwsConfig {
     long getAwsS3PresignedAssetUrlValidityDuration(
             final TimeUnit timeUnit);
 
-    StorageClass getAwsS3DefaultStorageClass();
+    String getAwsS3DefaultStorageClass();
 
     long getAwsS3MaxUploadFileSize();
 

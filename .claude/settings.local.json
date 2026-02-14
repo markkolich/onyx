@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mvn clean package:*)"
+      "Bash(mvn clean package:*)",
+      "Bash(git mv:*)"
     ]
   }
 }
