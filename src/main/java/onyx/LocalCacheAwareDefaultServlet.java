@@ -27,7 +27,7 @@
 package onyx;
 
 import com.google.common.base.Splitter;
-import curacao.servlet.javax.JavaxServletContext;
+import curacao.servlet.jakarta.JakartaServletContext;
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.cache.CachedResourceSigner;
@@ -39,7 +39,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -63,7 +63,7 @@ public final class LocalCacheAwareDefaultServlet extends DefaultServlet {
 
         final ServletContext context = getServletContext();
         final curacao.core.servlet.ServletContext curacaoServletContext =
-                new JavaxServletContext(context);
+                new JakartaServletContext(context);
 
         // If the local cache is not enabled, immediately bail.
         final LocalCacheConfig localCacheConfig =

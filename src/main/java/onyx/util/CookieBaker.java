@@ -31,7 +31,7 @@ import com.google.common.collect.Iterables;
 import curacao.core.servlet.HttpCookie;
 import curacao.core.servlet.HttpRequest;
 import curacao.core.servlet.HttpResponse;
-import curacao.servlet.javax.JavaxHttpCookie;
+import curacao.servlet.jakarta.JakartaHttpCookie;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -72,7 +72,7 @@ public final class CookieBaker {
             final HttpResponse response) {
         checkNotNull(response, "HTTP response cannot be null.");
 
-        final HttpCookie cookie = new JavaxHttpCookie(name_, value_);
+        final HttpCookie cookie = new JakartaHttpCookie(name_, value_);
         cookie.setHttpOnly(true);
 
         if (maxAge_ != null) {

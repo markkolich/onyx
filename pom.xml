@@ -31,11 +31,11 @@
         <maven-versions-plugin.version>2.20.1</maven-versions-plugin.version>
 
         <slf4j.version>2.0.17</slf4j.version>
-        <logback.version>1.5.30</logback.version>
+        <logback.version>1.5.31</logback.version>
 
         <curacao.version>7.1.0</curacao.version>
 
-        <jetty.version>9.4.58.v20250814</jetty.version>
+        <jetty.version>11.0.26</jetty.version>
 
         <typesafe-config.version>1.4.5</typesafe-config.version>
 
@@ -63,7 +63,7 @@
 
         <picocli.version>4.7.7</picocli.version>
 
-        <solr.version>8.11.1</solr.version>
+        <solr.version>9.10.1</solr.version>
 
         <quartz.version>2.5.2</quartz.version>
 
@@ -71,7 +71,7 @@
 
         <!-- Test dependency versions -->
 
-        <junit.jupiter.version>6.0.2</junit.jupiter.version>
+        <junit.jupiter.version>6.0.3</junit.jupiter.version>
         <mockito-core.version>5.21.0</mockito-core.version>
     </properties>
 
@@ -128,7 +128,7 @@
         </dependency>
         <dependency>
             <groupId>curacao</groupId>
-            <artifactId>curacao-servlet-javax</artifactId>
+            <artifactId>curacao-servlet-jakarta</artifactId>
             <version>${curacao.version}</version>
         </dependency>
         <dependency>
@@ -312,10 +312,6 @@
                 </exclusion>
                 <exclusion>
                     <groupId>org.apache.curator</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.opentracing</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
                 <exclusion>
@@ -593,6 +589,8 @@
                     <ignoredResourcePatterns>
                         <!-- Jetty loves their about.html pages -->
                         <ignoredResourcePattern>.*about\.html$</ignoredResourcePattern>
+                        <ignoredResourcePattern>javax/servlet/resources/.*</ignoredResourcePattern>
+                        <ignoredResourcePattern>javax/servlet/catalog\.xml</ignoredResourcePattern>
                     </ignoredResourcePatterns>
                     <ignoredClassPatterns>
                         <!--

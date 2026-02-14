@@ -36,12 +36,12 @@
     <fieldType name="random" class="solr.RandomSortField" indexed="true" />
     <fieldType name="text_lower" class="solr.TextField" positionIncrementGap="100">
         <analyzer type="index">
-            <tokenizer class="solr.StandardTokenizerFactory"/>
-            <filter class="solr.LowerCaseFilterFactory"/>
+            <tokenizer class="org.apache.lucene.analysis.standard.StandardTokenizerFactory"/>
+            <filter class="org.apache.lucene.analysis.core.LowerCaseFilterFactory"/>
         </analyzer>
         <analyzer type="query">
-            <tokenizer class="solr.StandardTokenizerFactory"/>
-            <filter class="solr.LowerCaseFilterFactory"/>
+            <tokenizer class="org.apache.lucene.analysis.standard.StandardTokenizerFactory"/>
+            <filter class="org.apache.lucene.analysis.core.LowerCaseFilterFactory"/>
         </analyzer>
     </fieldType>
 
@@ -49,12 +49,12 @@
     <!-- Only splits on whitespace, preserving hyphenated terms like "xmas-2026" -->
     <fieldType name="text_lower_preserve_punct" class="solr.TextField" positionIncrementGap="100">
         <analyzer type="index">
-            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-            <filter class="solr.LowerCaseFilterFactory"/>
+            <tokenizer class="org.apache.lucene.analysis.core.WhitespaceTokenizerFactory"/>
+            <filter class="org.apache.lucene.analysis.core.LowerCaseFilterFactory"/>
         </analyzer>
         <analyzer type="query">
-            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-            <filter class="solr.LowerCaseFilterFactory"/>
+            <tokenizer class="org.apache.lucene.analysis.core.WhitespaceTokenizerFactory"/>
+            <filter class="org.apache.lucene.analysis.core.LowerCaseFilterFactory"/>
         </analyzer>
     </fieldType>
 

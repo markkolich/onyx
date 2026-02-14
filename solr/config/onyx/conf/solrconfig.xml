@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <config>
-  <luceneMatchVersion>8.7.0</luceneMatchVersion>
+  <luceneMatchVersion>9.12.13</luceneMatchVersion>
 
   <schemaFactory class="ClassicIndexSchemaFactory"/>
 
@@ -18,7 +18,7 @@
     </autoSoftCommit>
   </updateHandler>
 
-  <requestDispatcher handleSelect="false">
+  <requestDispatcher>
     <httpCaching never304="true" />
   </requestDispatcher>
 

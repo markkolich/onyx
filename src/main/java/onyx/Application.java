@@ -27,8 +27,8 @@
 package onyx;
 
 import com.google.common.io.Resources;
-import curacao.servlet.javax.CuracaoJavaxContextListener;
-import curacao.servlet.javax.CuracaoJavaxDispatcherServlet;
+import curacao.servlet.jakarta.CuracaoJakartaContextListener;
+import curacao.servlet.jakarta.CuracaoJakartaDispatcherServlet;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
@@ -39,7 +39,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.webapp.WebInfConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -113,9 +112,6 @@ public final class Application {
         // which disables loading the JSP engine and slightly improves startup time.
         // http://jetty.4.x6.nabble.com/disable-jsp-engine-when-starting-jetty-td17393.html
         context.setDefaultsDescriptor(null);
-        // Intentionally skip scanning JARs for Servlet 3 annotations.
-        context.setAttribute(WebInfConfiguration.WEBINF_JAR_PATTERN, "^$");
-        context.setAttribute(WebInfConfiguration.CONTAINER_JAR_PATTERN, "^$");
 
         final Resource baseResource = getBaseResourceForRuntime();
         context.setBaseResource(baseResource);
@@ -130,9 +126,9 @@ public final class Application {
         context.setInitParameter(DefaultServlet.CONTEXT_INIT + "cacheControl", "public,max-age=3600");
         context.addServlet(defaultHolder, STATIC_SERVLET_MAPPING_UNDER_CONTEXT);
 
-        final ServletHolder curacaoHolder = new ServletHolder("curacao", CuracaoJavaxDispatcherServlet.class);
+        final ServletHolder curacaoHolder = new ServletHolder("curacao", CuracaoJakartaDispatcherServlet.class);
         curacaoHolder.setAsyncSupported(true); // Async supported = true
-        context.addEventListener(new CuracaoJavaxContextListener()); // Required
+        context.addEventListener(new CuracaoJakartaContextListener()); // Required
         context.addServlet(curacaoHolder, CURACAO_SERVLET_MAPPING_UNDER_CONTEXT);
 
         final ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
