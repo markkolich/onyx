@@ -33,8 +33,6 @@ import javax.annotation.Nullable;
 
 public interface TwoFactorAuthTokenManager {
 
-    String TRUSTED_DEVICE_COOKIE_NAME = "_onyx_td";
-
     @Nullable
     String signToken(
             final TwoFactorAuthToken token);

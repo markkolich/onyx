@@ -100,7 +100,7 @@ public final class Details extends AbstractOnyxResourceFilterAwareController {
             // user is the owner.
             if (session == null) {
                 throw new ResourceNotFoundException("Found no resource at path: "
-                        + normalizedPath);
+                        + normalizedPath, "/details" + normalizedPath);
             } else if (userIsNotOwner(resource, session)) {
                 throw new ResourceForbiddenException("Private resource not visible to authenticated user: "
                         + normalizedPath);

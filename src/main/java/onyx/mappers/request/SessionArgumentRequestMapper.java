@@ -45,6 +45,7 @@ import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
+import static onyx.components.authentication.CookieManager.SESSION_COOKIE_NAME;
 import static onyx.components.authentication.api.ApiKeyAuthenticator.API_KEY_AUTH_HEADER_PREFIX;
 import static onyx.util.CookieBaker.getFirstCookieByName;
 
@@ -75,7 +76,7 @@ public final class SessionArgumentRequestMapper
         if (StringUtils.isNotBlank(apiKey)) {
             final Session session = apiKeySessionManager_.getSessionForApiKey(apiKey);
             if (session != null) {
-                context.setProperty(SessionManager.SESSION_COOKIE_NAME, session);
+                context.setProperty(SESSION_COOKIE_NAME, session);
                 return session;
             }
         }
@@ -84,11 +85,11 @@ public final class SessionArgumentRequestMapper
         // signed session cookie.
         final List<HttpCookie> cookies = request.getCookies();
         if (CollectionUtils.isNotEmpty(cookies)) {
-            final HttpCookie sessionCookie = getFirstCookieByName(cookies, SessionManager.SESSION_COOKIE_NAME);
+            final HttpCookie sessionCookie = getFirstCookieByName(cookies, SESSION_COOKIE_NAME);
             if (sessionCookie != null) {
                 final Session session = sessionManager_.extractSignedSession(sessionCookie.getValue());
                 if (session != null) {
-                    context.setProperty(SessionManager.SESSION_COOKIE_NAME, session);
+                    context.setProperty(SESSION_COOKIE_NAME, session);
                     return session;
                 }
             }

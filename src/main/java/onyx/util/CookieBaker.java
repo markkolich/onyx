@@ -50,6 +50,7 @@ public final class CookieBaker {
     private final Integer maxAge_;
 
     private final Boolean isSecure_;
+    private final Boolean isHttpOnly_;
 
     private CookieBaker(
             final String name,
@@ -57,7 +58,8 @@ public final class CookieBaker {
             @Nullable final String domain,
             @Nullable final String contextPath,
             @Nullable final Integer maxAge,
-            @Nullable final Boolean isSecure) {
+            @Nullable final Boolean isSecure,
+            @Nullable final Boolean isHttpOnly) {
         name_ = checkNotNull(name, "Cookie name cannot be null.");
         value_ = value;
 
@@ -66,6 +68,7 @@ public final class CookieBaker {
 
         maxAge_ = maxAge;
         isSecure_ = isSecure;
+        isHttpOnly_ = isHttpOnly;
     }
 
     public void bake(
@@ -73,7 +76,6 @@ public final class CookieBaker {
         checkNotNull(response, "HTTP response cannot be null.");
 
         final HttpCookie cookie = new JakartaHttpCookie(name_, value_);
-        cookie.setHttpOnly(true);
 
         if (maxAge_ != null) {
             if (maxAge_ <= 0) {
@@ -92,6 +94,9 @@ public final class CookieBaker {
         if (isSecure_ != null) {
             cookie.setSecure(isSecure_);
         }
+        if (isHttpOnly_ != null) {
+            cookie.setHttpOnly(isHttpOnly_);
+        }
 
         // Attach the cookie to the Servlet response.
         response.addCookie(cookie);
@@ -108,6 +113,7 @@ public final class CookieBaker {
         private Integer maxAge_;
 
         private Boolean isSecure_;
+        private Boolean isHttpOnly_ = true; // default
 
         public Builder setName(
                 final String name) {
@@ -145,11 +151,17 @@ public final class CookieBaker {
             return this;
         }
 
+        public Builder setHttpOnly(
+                final Boolean isHttpOnly) {
+            isHttpOnly_ = isHttpOnly;
+            return this;
+        }
+
         public CookieBaker build() {
             checkNotNull(name_, "Cookie name cannot be null.");
 
             return new CookieBaker(name_, value_, domain_, contextPath_,
-                    maxAge_, isSecure_);
+                    maxAge_, isSecure_, isHttpOnly_);
         }
 
     }

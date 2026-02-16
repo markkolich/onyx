@@ -52,7 +52,7 @@ public final class FreeMarkerContentResponseMapper
             @Nonnull final FreeMarkerLinkHeaderDnsPrefetchHelper linkHeaderDnsPrefetchHelper) {
         super(fmcRenderer);
         sessionRefresherHelper_ = sessionRefresherHelper;
-        this.linkHeaderDnsPrefetchHelper_ = linkHeaderDnsPrefetchHelper;
+        linkHeaderDnsPrefetchHelper_ = linkHeaderDnsPrefetchHelper;
     }
 
     @Override

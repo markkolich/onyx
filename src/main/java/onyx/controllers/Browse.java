@@ -88,7 +88,7 @@ public final class Browse extends AbstractOnyxResourceFilterAwareController {
             // authenticated user is the owner.
             if (session == null) {
                 throw new ResourceNotFoundException("Found no directory resource at path: "
-                        + normalizedPath);
+                        + normalizedPath, "/browse" + normalizedPath);
             } else if (userIsNotOwner(resource, session)) {
                 throw new ResourceForbiddenException("Private directory not visible to authenticated user: "
                         + normalizedPath);

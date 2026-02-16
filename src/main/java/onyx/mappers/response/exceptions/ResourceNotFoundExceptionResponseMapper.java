@@ -31,22 +31,33 @@ import curacao.annotations.Mapper;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
 import onyx.components.FreeMarkerContentRenderer;
+import onyx.components.authentication.CookieManager;
+import onyx.components.security.StringSigner;
 import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.exceptions.resource.ResourceNotFoundException;
 import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 
 import static curacao.core.servlet.HttpStatus.SC_NOT_FOUND;
+import static onyx.components.authentication.CookieManager.RETURN_TO_COOKIE_NAME;
 
 @Mapper
 public final class ResourceNotFoundExceptionResponseMapper
         extends AbstractFreeMarkerContentAwareResponseMapper<ResourceNotFoundException> {
 
+    private final CookieManager cookieManager_;
+    private final StringSigner stringSigner_;
+
     @Injectable
     public ResourceNotFoundExceptionResponseMapper(
-            @Nonnull final FreeMarkerContentRenderer fmcRenderer) {
+            @Nonnull final FreeMarkerContentRenderer fmcRenderer,
+            @Nonnull final CookieManager cookieManager,
+            @Nonnull final StringSigner stringSigner) {
         super(fmcRenderer);
+        cookieManager_ = cookieManager;
+        stringSigner_ = stringSigner;
     }
 
     @Override
@@ -56,6 +67,12 @@ public final class ResourceNotFoundExceptionResponseMapper
             @Nonnull final ResourceNotFoundException entity) throws Exception {
         final FreeMarkerContent content = new FreeMarkerContent.Builder("templates/errors/404.ftl", SC_NOT_FOUND)
                 .build();
+
+        final String returnTo = entity.getReturnTo();
+        if (StringUtils.isNotBlank(returnTo)) {
+            final String signedReturnTo = stringSigner_.sign(returnTo);
+            cookieManager_.setCookie(RETURN_TO_COOKIE_NAME, signedReturnTo, response);
+        }
 
         renderFreeMarkerContent(response, content);
     }

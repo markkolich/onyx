@@ -32,8 +32,6 @@ import javax.annotation.Nullable;
 
 public interface SessionManager {
 
-    String SESSION_COOKIE_NAME = "_onyx";
-
     @Nullable
     String signSession(
             final Session session);

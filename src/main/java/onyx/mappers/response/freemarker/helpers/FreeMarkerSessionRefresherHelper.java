@@ -29,23 +29,23 @@ package onyx.mappers.response.freemarker.helpers;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.core.servlet.HttpResponse;
+import onyx.components.authentication.CookieManager;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
-import onyx.components.config.OnyxConfig;
 import onyx.components.config.authentication.SessionConfig;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.FreeMarkerContent;
-import onyx.util.CookieBaker;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static onyx.components.authentication.CookieManager.SESSION_COOKIE_NAME;
 
 @Component
 public final class FreeMarkerSessionRefresherHelper {
 
-    private final OnyxConfig onyxConfig_;
+    private final CookieManager cookieManager_;
 
     private final UserAuthenticator userAuthenticator_;
 
@@ -56,11 +56,11 @@ public final class FreeMarkerSessionRefresherHelper {
 
     @Injectable
     public FreeMarkerSessionRefresherHelper(
-            @Nonnull final OnyxConfig onyxConfig,
+            @Nonnull final CookieManager cookieManager,
             @Nonnull final UserAuthenticator userAuthenticator,
             @Nonnull final SessionConfig sessionConfig,
             @Nonnull final SessionManager sessionManager) {
-        onyxConfig_ = onyxConfig;
+        cookieManager_ = cookieManager;
         userAuthenticator_ = userAuthenticator;
         sessionConfig_ = sessionConfig;
         sessionManager_ = sessionManager;
@@ -87,14 +87,8 @@ public final class FreeMarkerSessionRefresherHelper {
             final Session refreshed = userAuthenticator_.refreshSession(session);
             final String signedRefreshedSession = sessionManager_.signSession(refreshed);
 
-            final CookieBaker refreshedSessionCookieBaker = new CookieBaker.Builder()
-                    .setName(SessionManager.SESSION_COOKIE_NAME)
-                    .setValue(signedRefreshedSession)
-                    .setDomain(sessionConfig_.getSessionDomain())
-                    .setContextPath(onyxConfig_.getContextPath())
-                    .setSecure(sessionConfig_.isSessionUsingHttps())
-                    .build();
-            refreshedSessionCookieBaker.bake(response);
+            cookieManager_.setCookie(SESSION_COOKIE_NAME,
+                    signedRefreshedSession, response);
         }
     }
 

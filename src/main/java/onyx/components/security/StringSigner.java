@@ -29,6 +29,7 @@ package onyx.components.security;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.exceptions.OnyxException;
+import onyx.util.security.ByteSigner;
 import org.apache.commons.codec.binary.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Util component for digitally signing vanilla strings using the default
- * {@link SHA256withRSASigner} signing implementation.
+ * {@link ByteSigner} signing implementation.
  */
 @Component
 public final class StringSigner {
@@ -67,9 +68,10 @@ public final class StringSigner {
 
         try {
             final byte[] message = StringUtils.getBytesUtf8(toSign);
-            final byte[] signed = new SHA256withRSASigner()
+            final byte[] signed = new ByteSigner.Builder()
                     .setPrivateKey(privateKey_)
                     .setMessage(message)
+                    .build()
                     .sign();
 
             return Base64.getUrlEncoder().encodeToString(signed);
@@ -86,9 +88,10 @@ public final class StringSigner {
 
         try {
             final byte[] decoded = Base64.getUrlDecoder().decode(signed);
-            final byte[] verified = new SHA256withRSASigner()
+            final byte[] verified = new ByteSigner.Builder()
                     .setPublicKey(publicKey_)
                     .setMessage(decoded)
+                    .build()
                     .extract();
 
             if (verified == null) {

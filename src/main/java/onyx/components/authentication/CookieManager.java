@@ -24,31 +24,31 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.exceptions.resource;
+package onyx.components.authentication;
 
-import onyx.exceptions.OnyxException;
+import curacao.core.servlet.HttpResponse;
 
 import javax.annotation.Nullable;
 
-public final class ResourceNotFoundException extends OnyxException {
+public interface CookieManager {
 
-    private final String returnTo_;
+    String SESSION_COOKIE_NAME = "_onyx";
+    String RETURN_TO_COOKIE_NAME = "_onyx_rt";
+    String TRUSTED_DEVICE_COOKIE_NAME = "_onyx_td";
 
-    public ResourceNotFoundException(
-            final String message) {
-        this(message, null);
-    }
+    void setCookie(
+            final String name,
+            final String value,
+            final HttpResponse response);
 
-    public ResourceNotFoundException(
-            final String message,
-            @Nullable final String returnTo) {
-        super(message);
-        returnTo_ = returnTo;
-    }
+    void setCookie(
+            final String name,
+            final String value,
+            @Nullable final Integer maxAge,
+            final HttpResponse response);
 
-    @Nullable
-    public String getReturnTo() {
-        return returnTo_;
-    }
+    void clearCookie(
+            final String name,
+            final HttpResponse response);
 
 }

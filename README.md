@@ -125,6 +125,35 @@ onyx {
 }
 ```
 
+### Generating Signer Keys
+
+Onyx uses a public-private RSA key pair to digitally sign and verify cookies. The keys must be in DER format, encoded as URL-safe Base64 strings. The public key uses X.509 encoding and the private key uses PKCS#8 encoding.
+
+To generate a 4096-bit RSA key pair:
+
+```bash
+# Generate a 4096-bit RSA private key in PEM format
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out private.pem
+
+# Export the public key as URL-safe Base64 (X.509 DER)
+openssl rsa -in private.pem -pubout -outform DER | base64 | tr -d '\n' | tr '+/' '-_'
+
+# Export the private key as URL-safe Base64 (PKCS#8 DER)
+openssl pkcs8 -topk8 -nocrypt -in private.pem -outform DER | base64 | tr -d '\n' | tr '+/' '-_'
+```
+
+Place the resulting values in your configuration file within the `security` block:
+
+```hocon
+onyx {
+  security {
+    signer-key-algorithm = "RSA"
+    signer-public-key = "<URL-safe Base64 encoded public key>"
+    signer-private-key = "<URL-safe Base64 encoded private key>"
+  }
+}
+```
+
 When running Onyx locally, specify your configuration file by passing a `-Dconfig.file` system property on the command line:
 
 ```

@@ -31,7 +31,7 @@
         <maven-versions-plugin.version>2.20.1</maven-versions-plugin.version>
 
         <slf4j.version>2.0.17</slf4j.version>
-        <logback.version>1.5.31</logback.version>
+        <logback.version>1.5.32</logback.version>
 
         <curacao.version>7.1.0</curacao.version>
 
@@ -47,7 +47,7 @@
         <commons-io.version>2.21.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
 
-        <aws-sdk-v2.version>2.41.29</aws-sdk-v2.version>
+        <aws-sdk-v2.version>2.41.30</aws-sdk-v2.version>
 
         <guava.version>33.5.0-jre</guava.version>
 
@@ -428,7 +428,7 @@
                         <!-- Forces unit tests to run in the context of a known timezone: PST/PDT. -->
                         <user.timezone>America/Los_Angeles</user.timezone>
                     </systemPropertyVariables>
-                    <argLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito-core.version}/mockito-core-${mockito-core.version}.jar --add-exports java.xml/jdk.xml.internal=ALL-UNNAMED</argLine>
+                    <argLine>-Xshare:off -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito-core.version}/mockito-core-${mockito-core.version}.jar --add-exports java.xml/jdk.xml.internal=ALL-UNNAMED</argLine>
                 </configuration>
             </plugin>
             <plugin>

@@ -34,19 +34,19 @@ import curacao.annotations.parameters.RequestBody;
 import curacao.annotations.parameters.convenience.Cookie;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
+import onyx.components.authentication.CookieManager;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.authentication.twofactor.TwoFactorAuthCodeManager;
 import onyx.components.authentication.twofactor.TwoFactorAuthTokenManager;
 import onyx.components.config.OnyxConfig;
-import onyx.components.config.authentication.SessionConfig;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
+import onyx.components.security.StringSigner;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.User;
 import onyx.entities.authentication.twofactor.TrustedDeviceToken;
 import onyx.entities.authentication.twofactor.TwoFactorAuthToken;
 import onyx.entities.freemarker.FreeMarkerContent;
-import onyx.util.CookieBaker;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -58,9 +58,12 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 import static curacao.annotations.RequestMapping.Method.POST;
-import static onyx.components.authentication.SessionManager.SESSION_COOKIE_NAME;
-import static onyx.components.authentication.twofactor.TwoFactorAuthTokenManager.TRUSTED_DEVICE_COOKIE_NAME;
+import static onyx.components.authentication.CookieManager.RETURN_TO_COOKIE_NAME;
+import static onyx.components.authentication.CookieManager.SESSION_COOKIE_NAME;
+import static onyx.components.authentication.CookieManager.TRUSTED_DEVICE_COOKIE_NAME;
 import static org.apache.commons.codec.binary.StringUtils.getBytesUtf8;
 
 @Controller
@@ -74,7 +77,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
     private static final String CODE_FIELD = "code";
     private static final String TRUST_DEVICE_FIELD = "trustDevice";
 
-    private final SessionConfig sessionConfig_;
+    private final CookieManager cookieManager_;
     private final SessionManager sessionManager_;
 
     private final UserAuthenticator userAuthenticator_;
@@ -83,23 +86,27 @@ public final class Session extends AbstractOnyxFreeMarkerController {
     private final TwoFactorAuthTokenManager twoFactorAuthTokenManager_;
     private final TwoFactorAuthCodeManager twoFactorAuthCodeManager_;
 
+    private final StringSigner stringSigner_;
+
     @Injectable
     public Session(
             final OnyxConfig onyxConfig,
             final ResourceManager resourceManager,
-            final SessionConfig sessionConfig,
+            final CookieManager cookieManager,
             final SessionManager sessionManager,
             final UserAuthenticator userAuthenticator,
             final TwoFactorAuthConfig twoFactorAuthConfig,
             final TwoFactorAuthTokenManager twoFactorAuthTokenManager,
-            final TwoFactorAuthCodeManager twoFactorAuthCodeManager) {
+            final TwoFactorAuthCodeManager twoFactorAuthCodeManager,
+            final StringSigner stringSigner) {
         super(onyxConfig, resourceManager);
-        sessionConfig_ = sessionConfig;
+        cookieManager_ = cookieManager;
         sessionManager_ = sessionManager;
         userAuthenticator_ = userAuthenticator;
         twoFactorAuthConfig_ = twoFactorAuthConfig;
         twoFactorAuthTokenManager_ = twoFactorAuthTokenManager;
         twoFactorAuthCodeManager_ = twoFactorAuthCodeManager;
+        stringSigner_ = stringSigner;
     }
 
     @RequestMapping("^/login$")
@@ -111,6 +118,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
     @RequestMapping(value = "^/login$", methods = POST)
     public FreeMarkerContent doLogin(
             @Cookie(TRUSTED_DEVICE_COOKIE_NAME) final String trustedDeviceCookie,
+            @Cookie(RETURN_TO_COOKIE_NAME) final String returnToCookie,
             @RequestBody(USERNAME_FIELD) final String username,
             @RequestBody(PASSWORD_FIELD) final String password,
             final HttpResponse response,
@@ -131,7 +139,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
         final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
         if (!twoFactorAuthEnabled) {
             // If 2FA is not enabled, process the login and let the user in.
-            processLogin(session, response, context);
+            processLogin(session, returnToCookie, response, context);
             return null;
         }
 
@@ -147,7 +155,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
             } else if (user.getUsername().equals(trustedDeviceToken.getUsername())) {
                 // Validate that the username on the 2FA trusted device token matches
                 // that of the user attempting to authenticate.
-                processLogin(session, response, context);
+                processLogin(session, returnToCookie, response, context);
                 return null;
             }
         }
@@ -157,6 +165,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
 
     @RequestMapping(value = "^/login/verify$", methods = POST)
     public void doLoginVerify(
+            @Cookie(RETURN_TO_COOKIE_NAME) final String returnToCookie,
             @RequestBody(TOKEN_FIELD) final String signedToken,
             @RequestBody(CODE_FIELD) final String code,
             @RequestBody(TRUST_DEVICE_FIELD) final String trustDevice,
@@ -211,20 +220,13 @@ public final class Session extends AbstractOnyxFreeMarkerController {
             final long trustedDeviceTokenCookieMaxAgeInSeconds =
                     twoFactorAuthConfig_.getTrustedDeviceTokenCookieMaxAge(TimeUnit.SECONDS);
 
-            final CookieBaker trustedDeviceCookieBaker = new CookieBaker.Builder()
-                    .setName(TRUSTED_DEVICE_COOKIE_NAME)
-                    .setValue(signedTrustedDeviceToken)
-                    .setDomain(sessionConfig_.getSessionDomain())
-                    .setContextPath(onyxConfig_.getContextPath())
-                    .setMaxAge(Ints.checkedCast(trustedDeviceTokenCookieMaxAgeInSeconds))
-                    .setSecure(sessionConfig_.isSessionUsingHttps())
-                    .build();
-            trustedDeviceCookieBaker.bake(response);
+            cookieManager_.setCookie(TRUSTED_DEVICE_COOKIE_NAME, signedTrustedDeviceToken,
+                    Ints.checkedCast(trustedDeviceTokenCookieMaxAgeInSeconds), response);
         }
 
         // If we get here, then the provided 2FA verification code was valid and the
         // session extracted from the 2FA token is good to go - let the user in!
-        processLogin(session, response, context);
+        processLogin(session, returnToCookie, response, context);
     }
 
     @RequestMapping("^/logout$")
@@ -236,20 +238,23 @@ public final class Session extends AbstractOnyxFreeMarkerController {
 
     private void processLogin(
             final onyx.entities.authentication.Session session,
+            @Nullable final String returnToCookie,
             final HttpResponse response,
             final AsyncContext context) throws Exception {
         final String signedSession = sessionManager_.signSession(session);
+        cookieManager_.setCookie(SESSION_COOKIE_NAME, signedSession, response);
 
-        final CookieBaker sessionCookieBaker = new CookieBaker.Builder()
-                .setName(SESSION_COOKIE_NAME)
-                .setValue(signedSession)
-                .setDomain(sessionConfig_.getSessionDomain())
-                .setContextPath(onyxConfig_.getContextPath())
-                .setSecure(sessionConfig_.isSessionUsingHttps())
-                .build();
-        sessionCookieBaker.bake(response);
+        cookieManager_.clearCookie(RETURN_TO_COOKIE_NAME, response);
 
-        response.sendRedirect(onyxConfig_.getViewSafeFullUri() + "/browse/" + session.getUsername());
+        String redirectTo = onyxConfig_.getViewSafeFullUri() + "/browse/" + session.getUsername();
+        if (StringUtils.isNotBlank(returnToCookie)) {
+            final String verifiedReturnTo = stringSigner_.verifyAndGet(returnToCookie);
+            if (verifiedReturnTo != null && verifiedReturnTo.startsWith("/")) {
+                redirectTo = onyxConfig_.getViewSafeFullUri() + verifiedReturnTo;
+            }
+        }
+
+        response.sendRedirect(redirectTo);
         context.complete();
     }
 
@@ -284,25 +289,12 @@ public final class Session extends AbstractOnyxFreeMarkerController {
     private void processLogout(
             final HttpResponse response,
             final AsyncContext context) throws Exception {
-        final CookieBaker sessionCookieBaker = new CookieBaker.Builder()
-                .setName(SESSION_COOKIE_NAME)
-                .setDomain(sessionConfig_.getSessionDomain())
-                .setContextPath(onyxConfig_.getContextPath())
-                .setMaxAge(0) // unset!
-                .setSecure(sessionConfig_.isSessionUsingHttps())
-                .build();
-        sessionCookieBaker.bake(response);
+        cookieManager_.clearCookie(SESSION_COOKIE_NAME, response);
+        cookieManager_.clearCookie(RETURN_TO_COOKIE_NAME, response);
 
         final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
         if (twoFactorAuthEnabled) {
-            final CookieBaker trustedDeviceCookieBaker = new CookieBaker.Builder()
-                    .setName(TRUSTED_DEVICE_COOKIE_NAME)
-                    .setDomain(sessionConfig_.getSessionDomain())
-                    .setContextPath(onyxConfig_.getContextPath())
-                    .setMaxAge(0) // unset!
-                    .setSecure(sessionConfig_.isSessionUsingHttps())
-                    .build();
-            trustedDeviceCookieBaker.bake(response);
+            cookieManager_.clearCookie(TRUSTED_DEVICE_COOKIE_NAME, response);
         }
 
         response.sendRedirect(onyxConfig_.getViewSafeFullUri());
