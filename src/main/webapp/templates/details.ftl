@@ -87,6 +87,10 @@
 
               <#include "details/resource-created-at-card.ftl">
 
+              <#if userIsOwner>
+                <#include "details/resource-last-accessed-at-card.ftl">
+              </#if>
+
               <#include "details/resource-type-card.ftl">
 
               <#if resource.getType() == "FILE">

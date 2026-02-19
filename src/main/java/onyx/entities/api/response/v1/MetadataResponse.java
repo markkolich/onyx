@@ -53,6 +53,9 @@ public interface MetadataResponse extends OnyxApiResponseEntity {
     @JsonProperty("createdAt")
     Instant getCreatedAt();
 
+    @JsonProperty("lastAccessedAt")
+    JsonNullable<Instant> getLastAccessedAt();
+
     @JsonProperty("description")
     String getDescription();
 
@@ -71,6 +74,7 @@ public interface MetadataResponse extends OnyxApiResponseEntity {
         private Resource.Visibility visibility_;
         private String owner_;
         private Instant createdAt_;
+        private JsonNullable<Instant> lastAccessedAt_;
         private String description_;
         private JsonNullable<Long> size_;
         private JsonNullable<String> sizeReadable_;
@@ -102,6 +106,12 @@ public interface MetadataResponse extends OnyxApiResponseEntity {
         public Builder setCreatedAt(
                 final Instant createdAt) {
             createdAt_ = createdAt;
+            return this;
+        }
+
+        public Builder setLastAccessedAt(
+                final JsonNullable<Instant> lastAccessedAt) {
+            lastAccessedAt_ = lastAccessedAt;
             return this;
         }
 
@@ -152,6 +162,11 @@ public interface MetadataResponse extends OnyxApiResponseEntity {
                 }
 
                 @Override
+                public JsonNullable<Instant> getLastAccessedAt() {
+                    return lastAccessedAt_;
+                }
+
+                @Override
                 public String getDescription() {
                     return description_;
                 }
@@ -193,6 +208,8 @@ public interface MetadataResponse extends OnyxApiResponseEntity {
                     .setVisibility(resource.getVisibility())
                     .setOwner(resource.getOwner())
                     .setCreatedAt(resource.getCreatedAt())
+                    .setLastAccessedAt((userIsOwner && resourceIsFile) && resource.getLastAccessedAt() != null
+                            ? JsonNullable.of(resource.getLastAccessedAt()) : JsonNullable.undefined())
                     .setDescription(resource.getHtmlDescription())
                     .setSize(userIsOwner || resourceIsFile
                             ? JsonNullable.of(resource.getSize()) : JsonNullable.undefined())

@@ -225,6 +225,7 @@ public final class File extends AbstractOnyxApiController {
                 .setVisibility(request.getVisibility())
                 .setOwner(session.getUsername())
                 .setCreatedAt(Instant.now()) // now
+                .setLastAccessedAt(Instant.now()) // now
                 .build();
 
         resourceManager_.createResource(newFile);

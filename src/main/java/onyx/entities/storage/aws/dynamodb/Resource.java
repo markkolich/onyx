@@ -62,6 +62,7 @@ public final class Resource {
     private Visibility visibility_;
     private String owner_;
     private Instant createdAt_;
+    private Instant lastAccessedAt_;
     private Boolean favorite_;
 
     @DynamoDbPartitionKey
@@ -156,6 +157,18 @@ public final class Resource {
         return this;
     }
 
+    @DynamoDbConvertedBy(InstantToStringTypeConverter.class)
+    @DynamoDbAttribute("lastAccessedAt")
+    public Instant getLastAccessedAt() {
+        return lastAccessedAt_;
+    }
+
+    public Resource setLastAccessedAt(
+            final Instant lastAccessedAt) {
+        lastAccessedAt_ = lastAccessedAt;
+        return this;
+    }
+
     @DynamoDbAttribute("favorite")
     public Boolean getFavorite() {
         return BooleanUtils.isTrue(favorite_);
@@ -238,6 +251,18 @@ public final class Resource {
         return new Date(getCreatedAt().toEpochMilli());
     }
 
+    /**
+     * Returns a {@link Date} representing the instant at which this resource
+     * was last accessed. This is really only useful for legacy APIs and libraries that
+     * don't understand or handle {@link Instant}. Modern callers should use
+     * {@link #getLastAccessedAt()} instead.
+     */
+    @Deprecated
+    @DynamoDbIgnore
+    public Date getLastAccessedDate() {
+        return (lastAccessedAt_ != null) ? new Date(getLastAccessedAt().toEpochMilli()) : null;
+    }
+
     @Override
     @DynamoDbIgnore
     public String toString() {
@@ -254,6 +279,7 @@ public final class Resource {
         private Visibility visibility_;
         private String owner_;
         private Instant createdAt_;
+        private Instant lastAccessedAt_;
         private Boolean favorite_;
 
         public Builder setPath(
@@ -305,6 +331,12 @@ public final class Resource {
             return this;
         }
 
+        public Builder setLastAccessedAt(
+                final Instant lastAccessedAt) {
+            lastAccessedAt_ = lastAccessedAt;
+            return this;
+        }
+
         public Builder setFavorite(
                 final Boolean favorite) {
             favorite_ = checkNotNull(favorite, "Resource favorite cannot be null.");
@@ -331,6 +363,7 @@ public final class Resource {
                     .setVisibility(visibility_)
                     .setOwner(owner_)
                     .setCreatedAt(createdAt_)
+                    .setLastAccessedAt(lastAccessedAt_)
                     .setFavorite(favorite_);
         }
 

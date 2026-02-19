@@ -46,6 +46,7 @@ import onyx.exceptions.api.ApiNotFoundException;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.net.URL;
+import java.time.Instant;
 
 import static curacao.annotations.RequestMapping.Method.GET;
 import static onyx.util.UserUtils.userIsNotOwner;
@@ -134,6 +135,9 @@ public final class Download extends AbstractOnyxApiController {
                 downloadUrl = assetManager_.getPresignedDownloadUrlForResource(file);
             }
         }
+
+        file.setLastAccessedAt(Instant.now()); // now
+        resourceManager_.updateResourceAsync(file);
 
         response.sendRedirect(downloadUrl.toString());
         context.complete();
