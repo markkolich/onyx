@@ -28,15 +28,11 @@ package onyx.components.config.authentication;
 
 import com.google.common.collect.ImmutableMap;
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigList;
-import com.typesafe.config.ConfigValue;
-import com.typesafe.config.ConfigValueType;
+import com.typesafe.config.ConfigObject;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.config.OnyxConfig;
 import onyx.entities.authentication.User;
-import onyx.exceptions.OnyxException;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -54,73 +50,23 @@ public final class OnyxTypesafeSessionConfig implements SessionConfig {
 
     @Override
     public Map<String, User> getUsers() {
-        final ConfigList userCredentialsInConfig = config_.getList(SESSION_USERS_PROP);
-
-        final ImmutableMap.Builder<String, User> userCredentialsBuilder =
-                ImmutableMap.builder();
-        for (final ConfigValue configValue : userCredentialsInConfig) {
-            if (!ConfigValueType.OBJECT.equals(configValue.valueType())) {
-                continue;
-            }
-
-            @SuppressWarnings("unchecked") // intentional, and safe
-            final Map<String, String> configUser = (Map<String, String>) configValue.unwrapped();
-
-            final String username = configUser.get(USERS_USERNAME_PROP);
-            if (StringUtils.isBlank(username)) {
-                throw missingUserConfigKey(USERS_USERNAME_PROP);
-            }
-
-            final String password = configUser.get(USERS_PASSWORD_PROP);
-            if (StringUtils.isBlank(password)) {
-                throw missingUserConfigKey(USERS_PASSWORD_PROP);
-            }
-
-            final String mobileNumber = configUser.get(USERS_MOBILE_NUMBER_PROP);
-            if (StringUtils.isBlank(mobileNumber)) {
-                throw missingUserConfigKey(USERS_MOBILE_NUMBER_PROP);
-            }
-
-            final User user = new User.Builder()
-                    .setUsername(username)
-                    .setPassword(password)
-                    .setMobileNumber(mobileNumber)
-                    .build();
-
-            userCredentialsBuilder.put(username, user);
-        }
-
-        return userCredentialsBuilder.build();
+        return config_.getObjectList(SESSION_USERS_PROP).stream()
+                .map(ConfigObject::toConfig)
+                .map(userConfig -> new User.Builder()
+                        .setUsername(userConfig.getString(USERS_USERNAME_PROP))
+                        .setPassword(userConfig.getString(USERS_PASSWORD_PROP))
+                        .setMobileNumber(userConfig.getString(USERS_MOBILE_NUMBER_PROP))
+                        .build())
+                .collect(ImmutableMap.toImmutableMap(User::getUsername, user -> user));
     }
 
     @Override
     public Map<String, String> getApiKeys() {
-        final ConfigList apiKeysInConfig = config_.getList(SESSION_API_KEYS_PROP);
-
-        final ImmutableMap.Builder<String, String> apiKeysBuilder =
-                ImmutableMap.builder();
-        for (final ConfigValue configValue : apiKeysInConfig) {
-            if (!ConfigValueType.OBJECT.equals(configValue.valueType())) {
-                continue;
-            }
-
-            @SuppressWarnings("unchecked") // intentional, and safe
-            final Map<String, String> configUser = (Map<String, String>) configValue.unwrapped();
-
-            final String username = configUser.get(API_KEY_USERNAME_PROP);
-            if (StringUtils.isBlank(username)) {
-                throw missingApiKeyConfigKey(API_KEY_USERNAME_PROP);
-            }
-
-            final String apiKey = configUser.get(API_KEY_KEY_PROP);
-            if (StringUtils.isBlank(apiKey)) {
-                throw missingApiKeyConfigKey(API_KEY_KEY_PROP);
-            }
-
-            apiKeysBuilder.put(apiKey, username);
-        }
-
-        return apiKeysBuilder.build();
+        return config_.getObjectList(SESSION_API_KEYS_PROP).stream()
+                .map(ConfigObject::toConfig)
+                .collect(ImmutableMap.toImmutableMap(
+                        apiKeyConfig -> apiKeyConfig.getString(API_KEY_KEY_PROP),
+                        apiKeyConfig -> apiKeyConfig.getString(API_KEY_USERNAME_PROP)));
     }
 
     @Override
@@ -148,16 +94,6 @@ public final class OnyxTypesafeSessionConfig implements SessionConfig {
     public long getRefreshSessionAfter(
             final TimeUnit timeUnit) {
         return config_.getDuration(SESSION_REFRESH_AFTER_PROP, timeUnit);
-    }
-
-    private static OnyxException missingUserConfigKey(
-            final String key) {
-        return new OnyxException("Blank or null user-authenticator config key: " + key);
-    }
-
-    private static OnyxException missingApiKeyConfigKey(
-            final String key) {
-        return new OnyxException("Blank or null API key config key: " + key);
     }
 
 }

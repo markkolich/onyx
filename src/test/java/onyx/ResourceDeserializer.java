@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.Instant;
 
 /**
@@ -50,6 +51,9 @@ public final class ResourceDeserializer extends StdDeserializer<Resource> {
     private static final String VISIBILITY = "visibility";
     private static final String OWNER = "owner";
     private static final String FAVORITE = "favorite";
+    private static final String CREATED_AT = "createdAt";
+    private static final String LAST_ACCESSED_AT = "lastAccessedAt";
+    private static final String COST = "cost";
 
     public ResourceDeserializer() {
         this(null);
@@ -75,6 +79,18 @@ public final class ResourceDeserializer extends StdDeserializer<Resource> {
         final String owner = nodeText(node, OWNER);
         final boolean favorite = nodeBoolean(node, FAVORITE);
 
+        final Instant createdAt = node.has(CREATED_AT)
+                ? Instant.parse(nodeText(node, CREATED_AT))
+                : Instant.now();
+
+        final Instant lastAccessedAt = node.has(LAST_ACCESSED_AT)
+                ? Instant.parse(nodeText(node, LAST_ACCESSED_AT))
+                : null;
+
+        final BigDecimal cost = node.has(COST)
+                ? new BigDecimal(nodeText(node, COST))
+                : BigDecimal.ZERO;
+
         return new Resource.Builder()
                 .setPath(path)
                 .setParent(parent)
@@ -83,8 +99,10 @@ public final class ResourceDeserializer extends StdDeserializer<Resource> {
                 .setType(type)
                 .setVisibility(visibility)
                 .setOwner(owner)
-                .setCreatedAt(Instant.now()) // now
+                .setCreatedAt(createdAt)
+                .setLastAccessedAt(lastAccessedAt)
                 .setFavorite(favorite)
+                .setCost(cost)
                 .build();
     }
 

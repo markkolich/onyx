@@ -70,6 +70,7 @@
     <field name="owner" type="string" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
     <field name="created" type="date" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />
     <field name="favorite" type="boolean" indexed="true" stored="true" required="false" multiValued="false" docValues="true" />
+    <field name="cost" type="double" indexed="true" stored="true" required="false" multiValued="false" docValues="true" />
     <field name="_version_" type="long" indexed="true" stored="false" required="false" />
 
     <field name="name" type="string" indexed="true" stored="true" required="true" multiValued="false" docValues="true" />

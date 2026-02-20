@@ -4,6 +4,7 @@
 ONYX_USERNAME="[username here]"
 ONYX_API_KEY="[api key here]"
 
+BASE_APP_URL="https://onyx.koli.ch"
 BASE_API_URL="https://onyx.koli.ch/api/v1"
 
 find "$@" -type f -print0 | while IFS= read -r -d '' FILEPATH; do

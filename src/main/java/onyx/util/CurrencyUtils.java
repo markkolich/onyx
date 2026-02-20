@@ -26,63 +26,40 @@
 
 package onyx.util;
 
+import com.ibm.icu.number.LocalizedNumberFormatter;
+import com.ibm.icu.number.NumberFormatter;
+import com.ibm.icu.number.Precision;
+import com.ibm.icu.util.Currency;
+
 import java.math.BigDecimal;
+import java.util.Locale;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class TreeNode {
+public final class CurrencyUtils {
 
-    private long resources_;
-    private long size_;
-    private BigDecimal cost_;
+    private static final String CURRENCY_ISO_CODE_USD = "USD";
 
-    private TreeNode(
-            final long resources,
-            final long size,
-            final BigDecimal cost) {
-        resources_ = resources;
-        size_ = size;
-        cost_ = cost;
+    private static final LocalizedNumberFormatter USD_FORMATTER =
+            NumberFormatter.withLocale(Locale.US)
+            .unit(Currency.getInstance(CURRENCY_ISO_CODE_USD))
+            .precision(Precision.fixedFraction(2));
+
+    // Cannot instantiate
+    private CurrencyUtils() {
     }
 
-    public long getResources() {
-        return resources_;
-    }
+    /**
+     * Formats a {@link BigDecimal} amount as a human-readable USD currency string.
+     * Always formats with exactly 2 decimal places for cents.
+     *
+     * <p>Examples: {@code "$0.00"}, {@code "$12.34"}, {@code "$1,234.56"}
+     */
+    public static String humanReadableCost(
+            final BigDecimal amount) {
+        checkNotNull(amount, "Amount cannot be null.");
 
-    public long getSize() {
-        return size_;
-    }
-
-    public BigDecimal getCost() {
-        return cost_;
-    }
-
-    public TreeNode plus(
-            final TreeNode treeNode) {
-        checkNotNull(treeNode, "Tree node cannot be null.");
-
-        resources_ += treeNode.getResources();
-        size_ += treeNode.getSize();
-        cost_ = cost_.add(treeNode.getCost());
-
-        return this;
-    }
-
-    public static TreeNode of() {
-        return of(0L, 0L, BigDecimal.ZERO);
-    }
-
-    public static TreeNode of(
-            final long resources,
-            final long size) {
-        return of(resources, size, BigDecimal.ZERO);
-    }
-
-    public static TreeNode of(
-            final long resources,
-            final long size,
-            final BigDecimal cost) {
-        return new TreeNode(resources, size, cost);
+        return USD_FORMATTER.format(amount).toString();
     }
 
 }

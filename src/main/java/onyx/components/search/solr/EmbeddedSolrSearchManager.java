@@ -46,6 +46,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -307,6 +308,7 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
         doc.addField(INDEX_FIELD_OWNER, resource.getOwner());
         doc.addField(INDEX_FIELD_CREATED, resource.getCreatedAt().toString());
         doc.addField(INDEX_FIELD_FAVORITE, resource.getFavorite());
+        doc.addField(INDEX_FIELD_COST, resource.getCost().doubleValue());
 
         // Derived fields
         doc.addField(INDEX_FIELD_NAME, resource.getName());
@@ -337,6 +339,7 @@ public final class EmbeddedSolrSearchManager implements SearchManager {
                 .setOwner((String) document.get(INDEX_FIELD_OWNER))
                 .setCreatedAt(((Date) document.get(INDEX_FIELD_CREATED)).toInstant())
                 .setFavorite((Boolean) document.get(INDEX_FIELD_FAVORITE))
+                .setCost(BigDecimal.valueOf((Double) document.get(INDEX_FIELD_COST)))
                 .build();
     }
 

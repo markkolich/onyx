@@ -32,6 +32,7 @@ import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.sizer.cost.CostAnalyzer;
 import onyx.controllers.AbstractOnyxControllerTest;
 import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
@@ -57,6 +58,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         final AssetManager assetManager = Mockito.mock(AssetManager.class);
         final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
         final CacheManager cacheManager = Mockito.mock(CacheManager.class);
+        final CostAnalyzer costAnalyzer = Mockito.mock(CostAnalyzer.class);
 
         final String privateFileName = "/foobar/secret-stuff/cool.txt";
         final Resource privateFile =
@@ -75,7 +77,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         Mockito.doNothing().when(httpResponse).sendRedirect(redirectLocation.capture());
 
         final Download controller = new Download(onyxConfig_, localCacheConfig,
-                resourceManager, assetManager, cacheManager);
+                resourceManager, assetManager, cacheManager, costAnalyzer);
 
         final Session session = generateNewSession("foobar");
         controller.downloadFile("foobar", "secret-stuff/cool.txt", null,
@@ -93,6 +95,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         final AssetManager assetManager = Mockito.mock(AssetManager.class);
         final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
         final CacheManager cacheManager = Mockito.mock(CacheManager.class);
+        final CostAnalyzer costAnalyzer = Mockito.mock(CostAnalyzer.class);
 
         final String privateFileName = "/foobar/secret-stuff/cool.txt";
         final Resource privateFile =
@@ -117,7 +120,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         Mockito.doNothing().when(httpResponse).sendRedirect(redirectLocation.capture());
 
         final Download controller = new Download(onyxConfig_, localCacheConfig,
-                resourceManager, assetManager, cacheManager);
+                resourceManager, assetManager, cacheManager, costAnalyzer);
 
         final Session session = generateNewSession("foobar");
         controller.downloadFile("foobar", "secret-stuff/cool.txt", null,
@@ -136,6 +139,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         final AssetManager assetManager = Mockito.mock(AssetManager.class);
         final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
         final CacheManager cacheManager = Mockito.mock(CacheManager.class);
+        final CostAnalyzer costAnalyzer = Mockito.mock(CostAnalyzer.class);
 
         final String privateFileName = "/foobar/secret-stuff/cool.txt";
         final Resource privateFile =
@@ -154,7 +158,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         Mockito.doNothing().when(httpResponse).sendRedirect(redirectLocation.capture());
 
         final Download controller = new Download(onyxConfig_, localCacheConfig,
-                resourceManager, assetManager, cacheManager);
+                resourceManager, assetManager, cacheManager, costAnalyzer);
 
         final Session session = generateNewSession("foobar");
         controller.downloadFile("foobar", "secret-stuff/cool.txt", true,
@@ -173,6 +177,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         final AssetManager assetManager = Mockito.mock(AssetManager.class);
         final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
         final CacheManager cacheManager = Mockito.mock(CacheManager.class);
+        final CostAnalyzer costAnalyzer = Mockito.mock(CostAnalyzer.class);
 
         final String privateFileName = "/foobar/secret-stuff/cool.txt";
         final Resource privateFile =
@@ -191,7 +196,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         Mockito.doNothing().when(httpResponse).sendRedirect(redirectLocation.capture());
 
         final Download controller = new Download(onyxConfig_, localCacheConfig,
-                resourceManager, assetManager, cacheManager);
+                resourceManager, assetManager, cacheManager, costAnalyzer);
 
         final Session session = generateNewSession("foobar");
         controller.downloadFile("foobar", "secret-stuff/cool.txt", false,
@@ -210,6 +215,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         final AssetManager assetManager = Mockito.mock(AssetManager.class);
         final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
         final CacheManager cacheManager = Mockito.mock(CacheManager.class);
+        final CostAnalyzer costAnalyzer = Mockito.mock(CostAnalyzer.class);
 
         final String privateFileName = "/foobar/secret-stuff/awesome.txt";
         final Resource privateFileNotFavorite =
@@ -228,7 +234,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         Mockito.doNothing().when(httpResponse).sendRedirect(redirectLocation.capture());
 
         final Download controller = new Download(onyxConfig_, localCacheConfig,
-                resourceManager, assetManager, cacheManager);
+                resourceManager, assetManager, cacheManager, costAnalyzer);
 
         final Session session = generateNewSession("foobar");
         controller.downloadFile("foobar", "secret-stuff/awesome.txt", null,
@@ -248,6 +254,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         final AssetManager assetManager = Mockito.mock(AssetManager.class);
         final ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
         final CacheManager cacheManager = Mockito.mock(CacheManager.class);
+        final CostAnalyzer costAnalyzer = Mockito.mock(CostAnalyzer.class);
 
         final String publicFileName = "/foobar/secret-stuff/kewl.txt";
         final Resource publicFile =
@@ -266,7 +273,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         Mockito.doNothing().when(httpResponse).sendRedirect(redirectLocation.capture());
 
         final Download controller = new Download(onyxConfig_, localCacheConfig,
-                resourceManager, assetManager, cacheManager);
+                resourceManager, assetManager, cacheManager, costAnalyzer);
 
         final Session session = generateNewSession("foobar");
         controller.downloadFile("foobar", "secret-stuff/kewl.txt", null,

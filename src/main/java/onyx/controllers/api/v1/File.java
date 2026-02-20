@@ -42,6 +42,7 @@ import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.sizer.cost.CostAnalyzer;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.request.v1.UpdateFileRequest;
 import onyx.entities.api.request.v1.UploadFileRequest;
@@ -57,6 +58,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.time.Instant;
 import java.util.List;
@@ -82,6 +84,8 @@ public final class File extends AbstractOnyxApiController {
     private final ResourceManager resourceManager_;
     private final CacheManager cacheManager_;
 
+    private final CostAnalyzer costAnalyzer_;
+
     private final ObjectMapper objectMapper_;
 
     @Injectable
@@ -92,6 +96,7 @@ public final class File extends AbstractOnyxApiController {
             final AssetManager assetManager,
             final ResourceManager resourceManager,
             final CacheManager cacheManager,
+            final CostAnalyzer costAnalyzer,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         super(onyxConfig);
         awsConfig_ = awsConfig;
@@ -99,6 +104,7 @@ public final class File extends AbstractOnyxApiController {
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
         cacheManager_ = cacheManager;
+        costAnalyzer_ = costAnalyzer;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
@@ -216,6 +222,10 @@ public final class File extends AbstractOnyxApiController {
                     + parentPath);
         }
 
+        // Compute the initial cost based on the file's size and the applicable tier.
+        final Instant now = Instant.now();
+        final BigDecimal cost = costAnalyzer_.computeResourceCost(request.getSize(), now);
+
         final Resource newFile = new Resource.Builder()
                 .setPath(normalizedPath)
                 .setParent(parent.getPath())
@@ -224,8 +234,9 @@ public final class File extends AbstractOnyxApiController {
                 .setType(Resource.Type.FILE)
                 .setVisibility(request.getVisibility())
                 .setOwner(session.getUsername())
-                .setCreatedAt(Instant.now()) // now
-                .setLastAccessedAt(Instant.now()) // now
+                .setCreatedAt(now)
+                .setLastAccessedAt(now)
+                .setCost(cost)
                 .build();
 
         resourceManager_.createResource(newFile);

@@ -38,6 +38,7 @@ import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.sizer.cost.CostAnalyzer;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.authentication.Session;
 import onyx.entities.storage.aws.dynamodb.Resource;
@@ -45,6 +46,7 @@ import onyx.exceptions.api.ApiForbiddenException;
 import onyx.exceptions.api.ApiNotFoundException;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.time.Instant;
 
@@ -61,18 +63,22 @@ public final class Download extends AbstractOnyxApiController {
     private final AssetManager assetManager_;
     private final CacheManager cacheManager_;
 
+    private final CostAnalyzer costAnalyzer_;
+
     @Injectable
     public Download(
             final OnyxConfig onyxConfig,
             final LocalCacheConfig localCacheConfig,
             final ResourceManager resourceManager,
             final AssetManager assetManager,
-            final CacheManager cacheManager) {
+            final CacheManager cacheManager,
+            final CostAnalyzer costAnalyzer) {
         super(onyxConfig);
         localCacheConfig_ = localCacheConfig;
         resourceManager_ = resourceManager;
         assetManager_ = assetManager;
         cacheManager_ = cacheManager;
+        costAnalyzer_ = costAnalyzer;
     }
 
     @RequestMapping(value = "^/api/v1/download/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
@@ -107,6 +113,7 @@ public final class Download extends AbstractOnyxApiController {
         }
 
         final URL downloadUrl;
+        final boolean resourceAccessed;
         {
             final boolean localCacheEnabled = localCacheConfig_.localCacheEnabled();
 
@@ -120,6 +127,7 @@ public final class Download extends AbstractOnyxApiController {
                 if (cacheUrl != null) {
                     // File was found in cache; send back cached resource URL.
                     downloadUrl = cacheUrl;
+                    resourceAccessed = false;
                 } else {
                     // File was not found in cache; trigger a download of the file to the cache
                     // only if the resource has private visibility.
@@ -128,16 +136,28 @@ public final class Download extends AbstractOnyxApiController {
                     }
 
                     downloadUrl = assetManager_.getPresignedDownloadUrlForResource(file);
+                    resourceAccessed = true;
                 }
             } else {
                 // Not a favorite file; would not be in the cache as only favorite files can
                 // be stored locally. Generate the S3 download URL.
                 downloadUrl = assetManager_.getPresignedDownloadUrlForResource(file);
+                resourceAccessed = true;
             }
         }
 
-        file.setLastAccessedAt(Instant.now()); // now
-        resourceManager_.updateResourceAsync(file);
+        // Only update if the resource was "accessed", meaning if we in fact had to send
+        // the requester to download the file from the underlying asset repository.
+        if (resourceAccessed) {
+            // Last accessed time is "now".
+            file.setLastAccessedAt(Instant.now());
+
+            // Compute the new storage cost per month based on the new last accessed time.
+            final BigDecimal computedCost = costAnalyzer_.computeResourceCost(file);
+            file.setCost(computedCost);
+
+            resourceManager_.updateResourceAsync(file);
+        }
 
         response.sendRedirect(downloadUrl.toString());
         context.complete();

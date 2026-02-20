@@ -29,6 +29,7 @@ package onyx.components.storage.sizer;
 import com.google.common.collect.ImmutableSet;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.sizer.cost.CostAnalyzer;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.util.TreeNode;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -39,10 +40,12 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
+import static onyx.util.CurrencyUtils.humanReadableCost;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.RetryableUtil.callWithRetry;
@@ -51,7 +54,7 @@ import static onyx.util.RetryableUtil.runWithRetry;
 /**
  * Recursively, depth-first-search, scans all resources/content found under
  * each home directory and updates each parent resource directory with the
- * aggregate size of all of its children.
+ * aggregate size and cost of all of its children.
  */
 public final class SizerJob implements Job {
 
@@ -68,6 +71,8 @@ public final class SizerJob implements Job {
                 (ResourceManager) jobDataMap.get(ResourceManager.class.getSimpleName());
         final AssetManager assetManager =
                 (AssetManager) jobDataMap.get(AssetManager.class.getSimpleName());
+        final CostAnalyzer costAnalyzer =
+                (CostAnalyzer) jobDataMap.get(CostAnalyzer.class.getSimpleName());
 
         final int backoffMaxRetries = sizerConfig.getBackoffMaxRetries();
         final Duration backoffThrottle = sizerConfig.getBackoffThrottleDuration();
@@ -84,14 +89,15 @@ public final class SizerJob implements Job {
                     () -> resourceManager.getResourceAtPath(normalizedPath));
             if (resource != null) {
                 rootNode.plus(sizeResource(backoffMaxRetries, backoffThrottle,
-                        resourceManager, assetManager, resource));
+                        resourceManager, assetManager, costAnalyzer, resource));
             }
 
             final long end = System.currentTimeMillis();
             final String duration = DurationFormatUtils.formatDurationHMS(end - start);
-            LOG.info("Successfully sized {} ({}) resources under home directory {} in {}",
-                    rootNode.getResources(),
+            LOG.info("Successfully sized ({}) & cost-analyzed ({}) {} resources under home directory {} in {}",
                     humanReadableByteCountBin(rootNode.getSize()),
+                    humanReadableCost(rootNode.getCost()),
+                    rootNode.getResources(),
                     homeDirectory.getPath(),
                     duration);
         }
@@ -102,6 +108,7 @@ public final class SizerJob implements Job {
             final Duration backoffThrottle,
             final ResourceManager resourceManager,
             final AssetManager assetManager,
+            final CostAnalyzer costAnalyzer,
             final Resource resource) {
         final TreeNode treeNode = TreeNode.of();
 
@@ -112,18 +119,32 @@ public final class SizerJob implements Job {
                 // then log a warning and skip indexing of the file.
                 LOG.warn("Sizer skipping non-existent resource in S3: {}", resource.getPath());
                 return TreeNode.of();
-            } else if (resourceObjectSizeFromS3 != resource.getSize()) {
-                // If the resource exits but the size metadata does not match the size in S3,
+            }
+
+            boolean resourceUpdated = false;
+
+            if (resourceObjectSizeFromS3 != resource.getSize()) {
+                // If the resource exists but the size metadata does not match the size in S3,
                 // then update accordingly to keep the worlds in sync.
                 LOG.warn("Resource metadata does not match object size in S3 ({} != {}): {}",
                         resource.getSize(), resourceObjectSizeFromS3, resource.getPath());
-
                 resource.setSize(resourceObjectSizeFromS3);
+                resourceUpdated = true;
+            }
+
+            // Compute the cost based on the resource's size and access tier.
+            final BigDecimal computedCost = costAnalyzer.computeResourceCost(resource);
+            if (computedCost.compareTo(resource.getCost()) != 0) {
+                resource.setCost(computedCost);
+                resourceUpdated = true;
+            }
+
+            if (resourceUpdated) {
                 runWithRetry(backoffMaxRetries, backoffThrottle,
                         () -> resourceManager.updateResource(resource));
             }
 
-            treeNode.plus(TreeNode.of(1L, resource.getSize()));
+            treeNode.plus(TreeNode.of(1L, resource.getSize(), resource.getCost()));
         } else if (Resource.Type.DIRECTORY.equals(resource.getType())) {
             // Recursively index the contents of the directory.
             final Set<Resource.Visibility> visibility =
@@ -134,23 +155,28 @@ public final class SizerJob implements Job {
                 try {
                     // Recursive!
                     treeNode.plus(sizeResource(backoffMaxRetries, backoffThrottle,
-                            resourceManager, assetManager, child));
+                            resourceManager, assetManager, costAnalyzer, child));
                 } catch (final Exception e) {
-                    LOG.warn("Skipping resource - failed to size: {}", child.getPath(), e);
+                    LOG.warn("Skipping resource - failed to size or cost: {}", child.getPath(), e);
                 }
             }
 
-            // Set the total size of the directory (including all of its children) only
-            // if what we have in hand from the underlying data store does not match
-            // the new computed size.
-            if (treeNode.getSize() != resource.getSize()) {
+            // Set the total size and cost of the directory (including all of its children)
+            // only if what we have in hand from the underlying data store does not match
+            // the new computed values.
+            final boolean sizeChanged = treeNode.getSize() != resource.getSize();
+            final boolean costChanged = treeNode.getCost().compareTo(resource.getCost()) != 0;
+            if (sizeChanged || costChanged) {
                 resource.setSize(treeNode.getSize());
+                resource.setCost(treeNode.getCost());
                 runWithRetry(backoffMaxRetries, backoffThrottle, () -> resourceManager.updateResource(resource));
             }
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Successfully sized resource: {} ({})", resource.getPath(),
-                        humanReadableByteCountBin(resource.getSize()));
+                LOG.debug("Successfully sized resource: {} ({}, {})",
+                        resource.getPath(),
+                        humanReadableByteCountBin(resource.getSize()),
+                        humanReadableCost(resource.getCost()));
             }
         }
 
