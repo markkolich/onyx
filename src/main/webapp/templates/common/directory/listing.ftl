@@ -10,7 +10,7 @@
                       <a href="${contextPath}/<#if view == "browse">details<#else>browse</#if>${resource.getPath()}"><i class="pl-2 far fa-folder-open text-body"></i></a>
                   </#if>
               </td>
-              <td class="align-middle" colspan="4">
+              <td class="align-middle" <#if view == "browse">colspan="4"<#else>colspan="5"</#if>>
                   <span>${resource.getHtmlName()}</span>
                   <#if (directoryCount+fileCount > 0)>
                       <p class="text-muted small mb-0">

@@ -103,6 +103,10 @@
                   <#include "details/resource-size-card.ftl">
               </#if>
 
+              <#if userIsOwner>
+                <#include "details/resource-cost-card.ftl">
+              </#if>
+
               <#include "details/resource-attributes-card.ftl">
 
             </div> <!-- /.col-md-12 col-lg-4 col-xl-3 -->

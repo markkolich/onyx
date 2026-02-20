@@ -32,6 +32,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -40,6 +41,7 @@ import java.util.Date;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static onyx.components.aws.dynamodb.DynamoDbManager.PARENT_INDEX_NAME;
+import static onyx.util.CurrencyUtils.humanReadableCost;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
@@ -64,6 +66,7 @@ public final class Resource {
     private Instant createdAt_;
     private Instant lastAccessedAt_;
     private Boolean favorite_;
+    private BigDecimal cost_;
 
     @DynamoDbPartitionKey
     @DynamoDbAttribute("path")
@@ -180,6 +183,17 @@ public final class Resource {
         return this;
     }
 
+    @DynamoDbAttribute("cost")
+    public BigDecimal getCost() {
+        return cost_ != null ? cost_ : BigDecimal.ZERO;
+    }
+
+    public Resource setCost(
+            final BigDecimal cost) {
+        cost_ = cost;
+        return this;
+    }
+
     // Derived fields
 
     /**
@@ -223,11 +237,19 @@ public final class Resource {
     }
 
     /**
-     * Returns a human readable/friendly size of the resource.
+     * Returns a human-readable/friendly size of the resource.
      */
     @DynamoDbIgnore
     public String getHtmlSize() {
         return humanReadableByteCountBin(size_);
+    }
+
+    /**
+     * Returns a human-readable/friendly cost of the resource formatted as USD.
+     */
+    @DynamoDbIgnore
+    public String getHtmlCost() {
+        return humanReadableCost(getCost());
     }
 
     /**
@@ -281,6 +303,7 @@ public final class Resource {
         private Instant createdAt_;
         private Instant lastAccessedAt_;
         private Boolean favorite_;
+        private BigDecimal cost_;
 
         public Builder setPath(
                 final String path) {
@@ -343,6 +366,12 @@ public final class Resource {
             return this;
         }
 
+        public Builder setCost(
+                final BigDecimal cost) {
+            cost_ = checkNotNull(cost, "Resource cost cannot be null.");
+            return this;
+        }
+
         public Resource build() {
             checkNotNull(path_, "Resource path cannot be null.");
             checkState(path_.startsWith("/"), "Resource path must start with a '/'.");
@@ -353,6 +382,7 @@ public final class Resource {
             checkNotNull(visibility_, "Resource visibility cannot be null.");
             checkNotNull(owner_, "Resource owner cannot be null.");
             checkNotNull(createdAt_, "Resource created at cannot be null.");
+            checkNotNull(cost_, "Resource cost cannot be null.");
 
             return new Resource()
                     .setPath(path_)
@@ -364,7 +394,8 @@ public final class Resource {
                     .setOwner(owner_)
                     .setCreatedAt(createdAt_)
                     .setLastAccessedAt(lastAccessedAt_)
-                    .setFavorite(favorite_);
+                    .setFavorite(favorite_)
+                    .setCost(cost_);
         }
 
     }

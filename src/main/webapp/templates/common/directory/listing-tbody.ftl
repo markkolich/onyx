@@ -32,19 +32,33 @@
   </td>
   <td class="align-middle d-none d-lg-table-cell text-nowrap text-muted">
       <#if child.getType() == "FILE">
-          ${child.getHtmlSize()}
+          <span<#if userIsOwner> title="${child.getHtmlCost()}"</#if>>${child.getHtmlSize()}</span>
       <#else>
           <#--
             Only show the user the total size of the directory and all
             of its children if the authenticated user is the owner.
           -->
           <#if userIsOwner>
-              ${child.getHtmlSize()}
+              <span<#if userIsOwner> title="${child.getHtmlCost()}"</#if>>${child.getHtmlSize()}</span>
           <#else>
             <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
           </#if>
       </#if>
   </td>
+
+  <#if view == "details">
+    <td class="align-middle d-none d-xl-table-cell text-nowrap">
+      <#--
+        Only show the user the total cost of the resource and all
+        of its children if the authenticated user is the owner.
+      -->
+      <#if userIsOwner>
+          <code class="text-success">${child.getHtmlCost()}</code>
+      <#else>
+        <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
+      </#if>
+    </td>
+  </#if>
 
   <td class="align-middle text-right">
       <#if session?has_content>

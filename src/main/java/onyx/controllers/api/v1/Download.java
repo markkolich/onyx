@@ -107,6 +107,7 @@ public final class Download extends AbstractOnyxApiController {
         }
 
         final URL downloadUrl;
+        final boolean resourceAccessed;
         {
             final boolean localCacheEnabled = localCacheConfig_.localCacheEnabled();
 
@@ -120,6 +121,7 @@ public final class Download extends AbstractOnyxApiController {
                 if (cacheUrl != null) {
                     // File was found in cache; send back cached resource URL.
                     downloadUrl = cacheUrl;
+                    resourceAccessed = false;
                 } else {
                     // File was not found in cache; trigger a download of the file to the cache
                     // only if the resource has private visibility.
@@ -128,16 +130,22 @@ public final class Download extends AbstractOnyxApiController {
                     }
 
                     downloadUrl = assetManager_.getPresignedDownloadUrlForResource(file);
+                    resourceAccessed = true;
                 }
             } else {
                 // Not a favorite file; would not be in the cache as only favorite files can
                 // be stored locally. Generate the S3 download URL.
                 downloadUrl = assetManager_.getPresignedDownloadUrlForResource(file);
+                resourceAccessed = true;
             }
         }
 
-        file.setLastAccessedAt(Instant.now()); // now
-        resourceManager_.updateResourceAsync(file);
+        // Only update if the resource was "touched", meaning if we in fact had to send
+        // the requester to download the file from the underlying asset repository.
+        if (resourceAccessed) {
+            file.setLastAccessedAt(Instant.now()); // now
+            resourceManager_.updateResourceAsync(file);
+        }
 
         response.sendRedirect(downloadUrl.toString());
         context.complete();

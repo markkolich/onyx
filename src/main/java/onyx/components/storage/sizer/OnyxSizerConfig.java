@@ -26,12 +26,17 @@
 
 package onyx.components.storage.sizer;
 
+import com.google.common.collect.ImmutableList;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigObject;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.config.OnyxConfig;
+import onyx.components.storage.sizer.cost.StorageTier;
 
 import java.time.Duration;
+import java.util.Comparator;
+import java.util.List;
 
 @Component
 public final class OnyxSizerConfig implements SizerConfig {
@@ -67,6 +72,19 @@ public final class OnyxSizerConfig implements SizerConfig {
     @Override
     public Duration getBackoffThrottleDuration() {
         return config_.getDuration(SIZER_BACKOFF_THROTTLE_DURATION_PROP);
+    }
+
+    @Override
+    public List<StorageTier> getCostAnalysisStorageTiers() {
+        return config_.getObjectList(SIZER_COST_ANALYSIS_TIERS_PROP).stream()
+                .map(ConfigObject::toConfig)
+                .map(tierConfig -> new StorageTier.Builder()
+                        .setName(tierConfig.getString(SIZER_COST_ANALYSIS_TIER_NAME_PROP))
+                        .setDaysSinceLastAccess(tierConfig.getInt(SIZER_COST_ANALYSIS_TIER_DAYS_SINCE_LAST_ACCESS_PROP))
+                        .setCostPerGbPerMonth(tierConfig.getDouble(SIZER_COST_ANALYSIS_TIER_COST_PER_GB_PER_MONTH_PROP))
+                        .build())
+                .sorted(Comparator.comparingInt(StorageTier::getDaysSinceLastAccess))
+                .collect(ImmutableList.toImmutableList());
     }
 
 }

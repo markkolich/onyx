@@ -45,6 +45,7 @@ public interface SearchManager {
     String INDEX_FIELD_OWNER = "owner";
     String INDEX_FIELD_CREATED = "created";
     String INDEX_FIELD_FAVORITE = "favorite";
+    String INDEX_FIELD_COST = "cost";
 
     // Derived fields
 

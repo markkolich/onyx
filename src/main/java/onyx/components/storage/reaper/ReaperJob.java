@@ -114,7 +114,7 @@ public final class ReaperJob implements Job {
                     // In the case that the object was accidentally deleted on the reaper cleanup, it will
                     // be deleted and replaced with a delete marker so the object can be recovered later if
                     // needed. S3 lifecycle rules within the bucket itself can be configured to permanently
-                    // delete the object and corresponding delete marker if desired.
+                    // delete the object and its delete marker if desired.
                     s3.deleteObject(DeleteObjectRequest.builder()
                             .bucket(bucketName)
                             .key(objSummary.key())

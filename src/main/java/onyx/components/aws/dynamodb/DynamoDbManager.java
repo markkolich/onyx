@@ -41,6 +41,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -94,8 +95,8 @@ public final class DynamoDbManager implements ResourceManager {
             // Index the addition of the resource asynchronously.
             searchManager_.addResourceToIndexAsync(r, asyncResourceExecutorService_);
 
-            // Update the parent resource size and all of its ancestors.
-            updateParentResourceSizesAsync(r, Extensions.Op.ADD);
+            // Update the parent resource size, cost, and all of its ancestors.
+            updateParentResourcesAsync(r, Extensions.Op.ADD);
         });
     }
 
@@ -127,8 +128,8 @@ public final class DynamoDbManager implements ResourceManager {
             // Index the deletion of the resource asynchronously.
             searchManager_.deleteResourceFromIndexAsync(r, asyncResourceExecutorService_);
 
-            // Update the parent resource size and all of its ancestors.
-            updateParentResourceSizesAsync(r, Extensions.Op.SUBTRACT);
+            // Update the parent resource size, cost, and all of its ancestors.
+            updateParentResourcesAsync(r, Extensions.Op.SUBTRACT);
         });
     }
 
@@ -181,7 +182,7 @@ public final class DynamoDbManager implements ResourceManager {
 
     // Helpers
 
-    private void updateParentResourceSizesAsync(
+    private void updateParentResourcesAsync(
             final Resource child,
             final Extensions.Op op) {
         checkNotNull(child, "Resource child cannot be null.");
@@ -198,9 +199,13 @@ public final class DynamoDbManager implements ResourceManager {
                 if (Extensions.Op.ADD.equals(op)) {
                     final long newParentSize = parent.getSize() + child.getSize();
                     parent.setSize(newParentSize);
+                    final BigDecimal newParentCost = parent.getCost().add(child.getCost());
+                    parent.setCost(newParentCost);
                 } else if (Extensions.Op.SUBTRACT.equals(op)) {
                     final long newParentSize = parent.getSize() - child.getSize();
                     parent.setSize(Math.max(0L, newParentSize));
+                    final BigDecimal newParentCost = parent.getCost().subtract(child.getCost()).max(BigDecimal.ZERO);
+                    parent.setCost(newParentCost);
                 } else {
                     throw new OnyxException("Unknown/unsupported resource operation: " + op);
                 }

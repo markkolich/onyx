@@ -24,40 +24,30 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.sizer;
+package onyx.util;
 
-import onyx.components.storage.sizer.cost.StorageTier;
+import onyx.AbstractOnyxTest;
+import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
-import java.util.List;
+import java.math.BigDecimal;
 
-public interface SizerConfig {
+import static onyx.util.CurrencyUtils.humanReadableCost;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    String SIZER_CONFIG_PATH = "sizer";
+public final class CurrencyUtilsTest extends AbstractOnyxTest {
 
-    String SIZER_RUN_ON_APP_STARTUP_PROP = "run-on-app-startup";
-    String SIZER_RUN_ON_SCHEDULE_PROP = "run-on-schedule";
-    String SIZER_RUN_CRON_EXPRESSION_PROP = "run-cron-expression";
+    public CurrencyUtilsTest() throws Exception {
+    }
 
-    String SIZER_BACKOFF_MAX_RETRIES_PROP = "backoff-max-retries";
-    String SIZER_BACKOFF_THROTTLE_DURATION_PROP = "backoff-throttle-duration";
-
-    String SIZER_COST_ANALYSIS_TIERS_PROP = "cost-analysis-storage-tiers";
-
-    String SIZER_COST_ANALYSIS_TIER_NAME_PROP = "name";
-    String SIZER_COST_ANALYSIS_TIER_DAYS_SINCE_LAST_ACCESS_PROP = "days-since-last-access";
-    String SIZER_COST_ANALYSIS_TIER_COST_PER_GB_PER_MONTH_PROP = "cost-per-gb-per-month";
-
-    boolean getSizerRunOnAppStartup();
-
-    boolean getSizerRunOnSchedule();
-
-    String getSizerRunCronExpression();
-
-    int getBackoffMaxRetries();
-
-    Duration getBackoffThrottleDuration();
-
-    List<StorageTier> getCostAnalysisStorageTiers();
+    @Test
+    public void humanReadableCostTest() {
+        assertEquals("$0.00", humanReadableCost(BigDecimal.ZERO));
+        assertEquals("$1.00", humanReadableCost(BigDecimal.ONE));
+        assertEquals("$12.34", humanReadableCost(new BigDecimal("12.34")));
+        assertEquals("$1,234.56", humanReadableCost(new BigDecimal("1234.56")));
+        assertEquals("$0.00", humanReadableCost(new BigDecimal("0.000023")));
+        assertEquals("$0.02", humanReadableCost(new BigDecimal("0.023")));
+        assertEquals("$0.00", humanReadableCost(new BigDecimal("0.00099")));
+    }
 
 }
