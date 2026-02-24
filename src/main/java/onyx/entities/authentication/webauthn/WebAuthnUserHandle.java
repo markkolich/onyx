@@ -24,34 +24,41 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage;
+package onyx.entities.authentication.webauthn;
 
-import onyx.entities.storage.aws.dynamodb.Resource;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import java.net.URL;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public interface AssetManager {
+@JsonDeserialize(builder = WebAuthnUserHandle.Builder.class)
+public interface WebAuthnUserHandle {
 
-    String ONYX_METADATA_PATH_PREFIX = ".onyx";
+    @JsonProperty("username")
+    String getUsername();
 
-    URL getPresignedInfoUrlForResource(
-            final Resource resource);
+    final class Builder {
 
-    URL getPresignedDownloadUrlForResource(
-            final Resource resource);
+        private String username_;
 
-    URL getPresignedUploadUrlForResource(
-            final Resource resource);
+        @JsonProperty("username")
+        public Builder setUsername(
+                final String username) {
+            username_ = username;
+            return this;
+        }
 
-    long getResourceObjectSize(
-            final Resource resource);
+        public WebAuthnUserHandle build() {
+            checkNotNull(username_, "Username cannot be null.");
 
-    void deleteResource(
-            final Resource resource,
-            final boolean permanent);
+            return new WebAuthnUserHandle() {
+                @Override
+                public String getUsername() {
+                    return username_;
+                }
+            };
+        }
 
-    void deleteResourceAsync(
-            final Resource resource,
-            final boolean permanent);
+    }
 
 }

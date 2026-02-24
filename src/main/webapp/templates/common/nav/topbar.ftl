@@ -59,6 +59,10 @@
                   <i class="fas fa-home fa-sm fa-fw mr-2 text-gray-400"></i>
                   My Home
                 </a>
+                <a class="dropdown-item" href="#" id="webauthn-register-passkey" class="d-none">
+                  <i class="fas fa-key fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Register Passkey
+                </a>
                 <div class="dropdown-divider"></div>
             </#if>
             <a class="dropdown-item" href="${contextPath}/logout">

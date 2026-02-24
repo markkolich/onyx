@@ -24,34 +24,23 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage;
+package onyx.components.authentication.webauthn;
 
-import onyx.entities.storage.aws.dynamodb.Resource;
+import com.yubico.webauthn.CredentialRepository;
+import com.yubico.webauthn.RegisteredCredential;
+import com.yubico.webauthn.data.ByteArray;
 
-import java.net.URL;
+public interface WebAuthnCredentialRepository extends CredentialRepository {
 
-public interface AssetManager {
+    void addCredential(
+            final String username,
+            final RegisteredCredential credential);
 
-    String ONYX_METADATA_PATH_PREFIX = ".onyx";
+    void removeCredential(
+            final ByteArray credentialId);
 
-    URL getPresignedInfoUrlForResource(
-            final Resource resource);
-
-    URL getPresignedDownloadUrlForResource(
-            final Resource resource);
-
-    URL getPresignedUploadUrlForResource(
-            final Resource resource);
-
-    long getResourceObjectSize(
-            final Resource resource);
-
-    void deleteResource(
-            final Resource resource,
-            final boolean permanent);
-
-    void deleteResourceAsync(
-            final Resource resource,
-            final boolean permanent);
+    void updateSignatureCount(
+            final ByteArray credentialId,
+            final long signatureCount);
 
 }

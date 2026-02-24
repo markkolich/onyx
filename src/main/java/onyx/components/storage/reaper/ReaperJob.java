@@ -27,8 +27,8 @@
 package onyx.components.storage.reaper;
 
 import onyx.components.aws.s3.OnyxS3Client;
-import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.AssetManager;
+import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -93,45 +93,51 @@ public final class ReaperJob implements Job {
                     .bucket(bucketName)
                     .build();
 
-            s3.listObjectsV2Paginator(listRequest).contents().forEach((S3Object objSummary) -> {
-                final String resourcePath = ResourceManager.ROOT_PATH + objSummary.key();
+            s3.listObjectsV2Paginator(listRequest).contents().stream()
+                    .filter(objSummary -> !objSummary.key().startsWith(AssetManager.ONYX_METADATA_PATH_PREFIX))
+                    .forEach((S3Object objSummary) -> {
+                        final String resourcePath = ResourceManager.ROOT_PATH + objSummary.key();
 
-                final Resource resource = callWithRetry(backoffMaxRetries, backoffThrottle,
-                        () -> resourceManager.getResourceAtPath(resourcePath));
-                if (resource == null) {
-                    // If we got here, the resource was found in S3 but not Dynamo.
-                    try {
-                        s3.headObject(HeadObjectRequest.builder()
-                                .bucket(bucketName)
-                                .key(objSummary.key())
-                                .build());
-                    } catch (final NoSuchKeyException e) {
-                        LOG.error("Failed to load object metadata from S3 for key: {}", resourcePath);
-                        return;
-                    }
+                        final Resource resource = callWithRetry(backoffMaxRetries, backoffThrottle,
+                                () -> resourceManager.getResourceAtPath(resourcePath));
+                        if (resource == null) {
+                            // If we got here, the resource was found in S3 but not Dynamo.
+                            try {
+                                s3.headObject(HeadObjectRequest.builder()
+                                        .bucket(bucketName)
+                                        .key(objSummary.key())
+                                        .build());
+                            } catch (final NoSuchKeyException e) {
+                                LOG.error("Failed to load object metadata from S3 for key: {}",
+                                        resourcePath);
+                                return;
+                            }
 
-                    // Very intentionally not deleting the versioned object, only the object itself.
-                    // In the case that the object was accidentally deleted on the reaper cleanup, it will
-                    // be deleted and replaced with a delete marker so the object can be recovered later if
-                    // needed. S3 lifecycle rules within the bucket itself can be configured to permanently
-                    // delete the object and its delete marker if desired.
-                    s3.deleteObject(DeleteObjectRequest.builder()
-                            .bucket(bucketName)
-                            .key(objSummary.key())
-                            .build());
+                            // Very intentionally not deleting the versioned object, only the object
+                            // itself. In the case that the object was accidentally deleted on the
+                            // reaper cleanup, it will be deleted and replaced with a delete marker
+                            // so the object can be recovered later if needed. S3 lifecycle rules
+                            // within the bucket itself can be configured to permanently delete the
+                            // object and its delete marker if desired.
+                            s3.deleteObject(DeleteObjectRequest.builder()
+                                    .bucket(bucketName)
+                                    .key(objSummary.key())
+                                    .build());
 
-                    LOG.info("Successfully deleted dangling resource in S3: {}", resourcePath);
-                }
+                            LOG.info("Successfully deleted dangling resource in S3: {}",
+                                    resourcePath);
+                        }
 
-                counter.incrementAndGet();
+                        counter.incrementAndGet();
 
-                try {
-                    // Micro throttle (sleep) on each iteration to avoid pummeling S3 and/or DynamoDB.
-                    Thread.sleep(iterationThrottle.toMillis());
-                } catch (final InterruptedException e) {
-                    // Ignored, intentional.
-                }
-            });
+                        try {
+                            // Micro throttle (sleep) on each iteration to avoid pummeling S3
+                            // and/or DynamoDB.
+                            Thread.sleep(iterationThrottle.toMillis());
+                        } catch (final InterruptedException e) {
+                            // Ignored, intentional.
+                        }
+                    });
 
             final long end = System.currentTimeMillis();
             final String duration = DurationFormatUtils.formatDurationHMS(end - start);

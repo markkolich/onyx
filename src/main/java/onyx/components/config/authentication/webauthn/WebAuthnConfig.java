@@ -24,34 +24,31 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage;
+package onyx.components.config.authentication.webauthn;
 
-import onyx.entities.storage.aws.dynamodb.Resource;
+import java.util.concurrent.TimeUnit;
 
-import java.net.URL;
+public interface WebAuthnConfig {
 
-public interface AssetManager {
+    String WEBAUTHN_CONFIG_PATH = "webauthn";
 
-    String ONYX_METADATA_PATH_PREFIX = ".onyx";
+    String ENABLED_PROP = "enabled";
 
-    URL getPresignedInfoUrlForResource(
-            final Resource resource);
+    String RP_ID_PROP = "rp-id";
+    String RP_NAME_PROP = "rp-name";
+    String RP_ORIGIN_PROP = "rp-origin";
 
-    URL getPresignedDownloadUrlForResource(
-            final Resource resource);
+    String CHALLENGE_TIMEOUT_PROP = "challenge-timeout";
 
-    URL getPresignedUploadUrlForResource(
-            final Resource resource);
+    boolean isWebAuthnEnabled();
 
-    long getResourceObjectSize(
-            final Resource resource);
+    String getRpId();
 
-    void deleteResource(
-            final Resource resource,
-            final boolean permanent);
+    String getRpName();
 
-    void deleteResourceAsync(
-            final Resource resource,
-            final boolean permanent);
+    String getRpOrigin();
+
+    long getChallengeTimeout(
+            final TimeUnit timeUnit);
 
 }

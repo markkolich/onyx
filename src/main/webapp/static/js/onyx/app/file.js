@@ -158,6 +158,8 @@
                         $modal.find('input[data-file="description"]').focus();
 
                         $modal.find('form').unbind().on('submit', function(e) {
+                            e.preventDefault();
+
                             var resource = $('body[data-path]').data('path');
 
                             var newDescription = $modal.find('input[data-file="description"]').val();
@@ -176,7 +178,6 @@
                                 }
                             });
 
-                            e.preventDefault();
                             return false;
                         });
                     });
@@ -283,39 +284,39 @@
         }()),
 
         init = function() {
-            data.$contentDiv.find('[data-action="upload-file"]').unbind().click(function(e) {
+            data.$contentDiv.find('[data-action="upload-file"]').on('click', function(e) {
+                e.preventDefault();
+
                 upload.showModal();
-
-                e.preventDefault();
                 return true;
             });
-            data.$contentDiv.find('[data-action="edit-file"]').unbind().click(function(e) {
+            data.$contentDiv.find('[data-action="edit-file"]').on('click', function(e) {
+                e.preventDefault();
+
                 edit.showModal();
-
-                e.preventDefault();
                 return true;
             });
-            data.$contentDiv.find('[data-action="toggle-file-visibility"]').unbind().click(function(e) {
+            data.$contentDiv.find('[data-action="toggle-file-visibility"]').on('click', function(e) {
+                e.preventDefault();
+
                 var resource = $(this).closest('tr[data-resource]').data('resource');
                 var visibility = $(this).closest('tr[data-resource-visibility]').data('resource-visibility');
                 edit.toggleVisibility(resource, visibility);
-
-                e.preventDefault();
                 return true;
             });
-            data.$contentDiv.find('[data-action="toggle-file-favorite"]').unbind().click(function(e) {
+            data.$contentDiv.find('[data-action="toggle-file-favorite"]').on('click', function(e) {
+                e.preventDefault();
+
                 var resource = $(this).closest('tr[data-resource]').data('resource');
                 var favorite = $(this).closest('tr[data-resource-favorite]').data('resource-favorite');
                 edit.toggleFavorite(resource, favorite);
-
-                e.preventDefault();
                 return true;
             });
-            data.$contentDiv.find('[data-action="delete-file"]').unbind().click(function(e) {
+            data.$contentDiv.find('[data-action="delete-file"]').on('click', function(e) {
+                e.preventDefault();
+
                 var resource = $(this).closest('tr[data-resource]').data('resource');
                 del.showModal(resource);
-
-                e.preventDefault();
                 return true;
             });
         };

@@ -29,9 +29,13 @@ package onyx.components.authentication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import curacao.core.servlet.HttpResponse;
 import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.config.OnyxConfig;
+import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
 import onyx.components.security.StringSigner;
 import onyx.entities.authentication.Session;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,20 +43,32 @@ import javax.annotation.Nullable;
 import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static onyx.components.authentication.CookieManager.RETURN_TO_COOKIE_NAME;
+import static onyx.components.authentication.CookieManager.SESSION_COOKIE_NAME;
+import static onyx.components.authentication.CookieManager.TRUSTED_DEVICE_COOKIE_NAME;
 
 @Component
 public final class OnyxSignedSessionManager implements SessionManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(OnyxSignedSessionManager.class);
 
+    private final OnyxConfig onyxConfig_;
+    private final CookieManager cookieManager_;
+    private final TwoFactorAuthConfig twoFactorAuthConfig_;
     private final StringSigner stringSigner_;
 
     private final ObjectMapper objectMapper_;
 
     @Injectable
     public OnyxSignedSessionManager(
+            final OnyxConfig onyxConfig,
+            final CookieManager cookieManager,
+            final TwoFactorAuthConfig twoFactorAuthConfig,
             final StringSigner stringSigner,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
+        onyxConfig_ = onyxConfig;
+        cookieManager_ = cookieManager;
+        twoFactorAuthConfig_ = twoFactorAuthConfig;
         stringSigner_ = stringSigner;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
@@ -98,6 +114,40 @@ public final class OnyxSignedSessionManager implements SessionManager {
             LOG.warn("Failed to get session from signed session string: {}", signedSession, e);
             return null;
         }
+    }
+
+    @Override
+    public String processLogin(
+            final Session session,
+            @Nullable final String returnToCookie,
+            final HttpResponse response) {
+        final String signedSession = signSession(session);
+        cookieManager_.setCookie(SESSION_COOKIE_NAME, signedSession, response);
+
+        cookieManager_.clearCookie(RETURN_TO_COOKIE_NAME, response);
+
+        String redirectUrl = onyxConfig_.getViewSafeFullUri() + "/browse/" + session.getUsername();
+        if (StringUtils.isNotBlank(returnToCookie)) {
+            final String verifiedReturnTo = stringSigner_.verifyAndGet(returnToCookie);
+            if (verifiedReturnTo != null && verifiedReturnTo.startsWith("/")) {
+                redirectUrl = onyxConfig_.getViewSafeFullUri() + verifiedReturnTo;
+            }
+        }
+
+        return redirectUrl;
+    }
+
+    @Override
+    public String processLogout(
+            final HttpResponse response) {
+        cookieManager_.clearCookie(SESSION_COOKIE_NAME, response);
+        cookieManager_.clearCookie(RETURN_TO_COOKIE_NAME, response);
+
+        if (twoFactorAuthConfig_.twoFactorAuthEnabled()) {
+            cookieManager_.clearCookie(TRUSTED_DEVICE_COOKIE_NAME, response);
+        }
+
+        return onyxConfig_.getViewSafeFullUri();
     }
 
 }

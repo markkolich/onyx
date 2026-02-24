@@ -87,8 +87,7 @@ public final class FreeMarkerSessionRefresherHelper {
             final Session refreshed = userAuthenticator_.refreshSession(session);
             final String signedRefreshedSession = sessionManager_.signSession(refreshed);
 
-            cookieManager_.setCookie(SESSION_COOKIE_NAME,
-                    signedRefreshedSession, response);
+            cookieManager_.setCookie(SESSION_COOKIE_NAME, signedRefreshedSession, response);
         }
     }
 

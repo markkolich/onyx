@@ -32,7 +32,6 @@ import onyx.components.authentication.twofactor.TwoFactorAuthCodeManager;
 import onyx.components.authentication.twofactor.TwoFactorAuthTokenManager;
 import onyx.components.authentication.CookieManager;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
-import onyx.components.security.StringSigner;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.freemarker.FreeMarkerContent;
 import org.apache.commons.lang3.StringUtils;
@@ -56,11 +55,10 @@ public final class SessionTest extends AbstractOnyxControllerTest {
         final TwoFactorAuthConfig twoFactorAuthConfig = Mockito.mock(TwoFactorAuthConfig.class);
         final TwoFactorAuthTokenManager twoFactorAuthTokenManager = Mockito.mock(TwoFactorAuthTokenManager.class);
         final TwoFactorAuthCodeManager twoFactorAuthCodeManager = Mockito.mock(TwoFactorAuthCodeManager.class);
-        final StringSigner stringSigner = Mockito.mock(StringSigner.class);
 
         final Session controller = new Session(onyxConfig_, resourceManager, cookieManager,
                 sessionManager, userAuthenticator, twoFactorAuthConfig,
-                twoFactorAuthTokenManager, twoFactorAuthCodeManager, stringSigner);
+                twoFactorAuthTokenManager, twoFactorAuthCodeManager);
 
         final FreeMarkerContent responseEntity = controller.login();
         assertNotNull(responseEntity);

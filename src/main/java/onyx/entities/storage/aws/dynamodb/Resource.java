@@ -382,7 +382,6 @@ public final class Resource {
             checkNotNull(visibility_, "Resource visibility cannot be null.");
             checkNotNull(owner_, "Resource owner cannot be null.");
             checkNotNull(createdAt_, "Resource created at cannot be null.");
-            checkNotNull(cost_, "Resource cost cannot be null.");
 
             return new Resource()
                     .setPath(path_)

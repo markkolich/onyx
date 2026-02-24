@@ -24,34 +24,29 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage;
+package onyx.components.authentication.webauthn;
 
-import onyx.entities.storage.aws.dynamodb.Resource;
+import onyx.entities.api.request.v1.webauthn.WebAuthnAuthenticationRequest;
+import onyx.entities.api.request.v1.webauthn.WebAuthnRegistrationRequest;
 
-import java.net.URL;
+import javax.annotation.Nullable;
 
-public interface AssetManager {
+public interface WebAuthnChallengeManager {
 
-    String ONYX_METADATA_PATH_PREFIX = ".onyx";
+    @Nullable
+    String signRegistrationRequest(
+            final WebAuthnRegistrationRequest request);
 
-    URL getPresignedInfoUrlForResource(
-            final Resource resource);
+    @Nullable
+    WebAuthnRegistrationRequest extractRegistrationRequest(
+            final String signedRequest);
 
-    URL getPresignedDownloadUrlForResource(
-            final Resource resource);
+    @Nullable
+    String signAuthenticationRequest(
+            final WebAuthnAuthenticationRequest request);
 
-    URL getPresignedUploadUrlForResource(
-            final Resource resource);
-
-    long getResourceObjectSize(
-            final Resource resource);
-
-    void deleteResource(
-            final Resource resource,
-            final boolean permanent);
-
-    void deleteResourceAsync(
-            final Resource resource,
-            final boolean permanent);
+    @Nullable
+    WebAuthnAuthenticationRequest extractAuthenticationRequest(
+            final String signedRequest);
 
 }

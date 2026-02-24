@@ -41,7 +41,6 @@ import onyx.components.authentication.twofactor.TwoFactorAuthCodeManager;
 import onyx.components.authentication.twofactor.TwoFactorAuthTokenManager;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
-import onyx.components.security.StringSigner;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.User;
 import onyx.entities.authentication.twofactor.TrustedDeviceToken;
@@ -62,7 +61,6 @@ import javax.annotation.Nullable;
 
 import static curacao.annotations.RequestMapping.Method.POST;
 import static onyx.components.authentication.CookieManager.RETURN_TO_COOKIE_NAME;
-import static onyx.components.authentication.CookieManager.SESSION_COOKIE_NAME;
 import static onyx.components.authentication.CookieManager.TRUSTED_DEVICE_COOKIE_NAME;
 import static org.apache.commons.codec.binary.StringUtils.getBytesUtf8;
 
@@ -86,8 +84,6 @@ public final class Session extends AbstractOnyxFreeMarkerController {
     private final TwoFactorAuthTokenManager twoFactorAuthTokenManager_;
     private final TwoFactorAuthCodeManager twoFactorAuthCodeManager_;
 
-    private final StringSigner stringSigner_;
-
     @Injectable
     public Session(
             final OnyxConfig onyxConfig,
@@ -97,8 +93,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
             final UserAuthenticator userAuthenticator,
             final TwoFactorAuthConfig twoFactorAuthConfig,
             final TwoFactorAuthTokenManager twoFactorAuthTokenManager,
-            final TwoFactorAuthCodeManager twoFactorAuthCodeManager,
-            final StringSigner stringSigner) {
+            final TwoFactorAuthCodeManager twoFactorAuthCodeManager) {
         super(onyxConfig, resourceManager);
         cookieManager_ = cookieManager;
         sessionManager_ = sessionManager;
@@ -106,7 +101,6 @@ public final class Session extends AbstractOnyxFreeMarkerController {
         twoFactorAuthConfig_ = twoFactorAuthConfig;
         twoFactorAuthTokenManager_ = twoFactorAuthTokenManager;
         twoFactorAuthCodeManager_ = twoFactorAuthCodeManager;
-        stringSigner_ = stringSigner;
     }
 
     @RequestMapping("^/login$")
@@ -241,20 +235,8 @@ public final class Session extends AbstractOnyxFreeMarkerController {
             @Nullable final String returnToCookie,
             final HttpResponse response,
             final AsyncContext context) throws Exception {
-        final String signedSession = sessionManager_.signSession(session);
-        cookieManager_.setCookie(SESSION_COOKIE_NAME, signedSession, response);
-
-        cookieManager_.clearCookie(RETURN_TO_COOKIE_NAME, response);
-
-        String redirectTo = onyxConfig_.getViewSafeFullUri() + "/browse/" + session.getUsername();
-        if (StringUtils.isNotBlank(returnToCookie)) {
-            final String verifiedReturnTo = stringSigner_.verifyAndGet(returnToCookie);
-            if (verifiedReturnTo != null && verifiedReturnTo.startsWith("/")) {
-                redirectTo = onyxConfig_.getViewSafeFullUri() + verifiedReturnTo;
-            }
-        }
-
-        response.sendRedirect(redirectTo);
+        final String redirectUrl = sessionManager_.processLogin(session, returnToCookie, response);
+        response.sendRedirect(redirectUrl);
         context.complete();
     }
 
@@ -289,15 +271,8 @@ public final class Session extends AbstractOnyxFreeMarkerController {
     private void processLogout(
             final HttpResponse response,
             final AsyncContext context) throws Exception {
-        cookieManager_.clearCookie(SESSION_COOKIE_NAME, response);
-        cookieManager_.clearCookie(RETURN_TO_COOKIE_NAME, response);
-
-        final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
-        if (twoFactorAuthEnabled) {
-            cookieManager_.clearCookie(TRUSTED_DEVICE_COOKIE_NAME, response);
-        }
-
-        response.sendRedirect(onyxConfig_.getViewSafeFullUri());
+        final String redirectUrl = sessionManager_.processLogout(response);
+        response.sendRedirect(redirectUrl);
         context.complete();
     }
 

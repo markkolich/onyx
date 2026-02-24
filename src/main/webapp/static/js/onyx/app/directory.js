@@ -21,6 +21,8 @@
                         $modal.find('input[data-directory="name"]').focus();
 
                         $modal.find('form').unbind().on('submit', function(e) {
+                            e.preventDefault();
+
                             var rootPath = $('body[data-path]').data('path');
                             var name = $modal.find('input[data-directory="name"]').val();
                             var resource = rootPath + '/' + encodeURIComponent(name);
@@ -43,7 +45,6 @@
                                 }
                             });
 
-                            e.preventDefault();
                             return false;
                         });
                     });
@@ -71,6 +72,8 @@
                         $modal.find('input[data-directory="description"]').focus();
 
                         $modal.find('form').unbind().on('submit', function(e) {
+                            e.preventDefault();
+
                             var resource = $('body[data-path]').data('path');
 
                             var newDescription = $modal.find('input[data-directory="description"]').val();
@@ -89,7 +92,6 @@
                                 }
                             });
 
-                            e.preventDefault();
                             return false;
                         });
                     });
@@ -196,39 +198,39 @@
         }()),
 
         init = function() {
-            data.$contentDiv.find('[data-action="create-directory"]').unbind().click(function(e) {
+            data.$contentDiv.find('[data-action="create-directory"]').on('click', function(e) {
+                e.preventDefault();
+
                 create.showModal();
-
-                e.preventDefault();
                 return true;
             });
-            data.$contentDiv.find('[data-action="edit-directory"]').unbind().click(function(e) {
+            data.$contentDiv.find('[data-action="edit-directory"]').on('click', function(e) {
+                e.preventDefault();
+
                 edit.showModal();
-
-                e.preventDefault();
                 return true;
             });
-            data.$contentDiv.find('[data-action="toggle-directory-visibility"]').unbind().click(function(e) {
+            data.$contentDiv.find('[data-action="toggle-directory-visibility"]').on('click', function(e) {
+                e.preventDefault();
+
                 var resource = $(this).closest('tr[data-resource]').data('resource');
                 var visibility = $(this).closest('tr[data-resource-visibility]').data('resource-visibility');
                 edit.toggleVisibility(resource, visibility);
-
-                e.preventDefault();
                 return true;
             });
-            data.$contentDiv.find('[data-action="toggle-directory-favorite"]').unbind().click(function(e) {
+            data.$contentDiv.find('[data-action="toggle-directory-favorite"]').on('click', function(e) {
+                e.preventDefault();
+
                 var resource = $(this).closest('tr[data-resource]').data('resource');
                 var favorite = $(this).closest('tr[data-resource-favorite]').data('resource-favorite');
                 edit.toggleFavorite(resource, favorite);
-
-                e.preventDefault();
                 return true;
             });
-            data.$contentDiv.find('[data-action="delete-directory"]').unbind().click(function(e) {
+            data.$contentDiv.find('[data-action="delete-directory"]').on('click', function(e) {
+                e.preventDefault();
+
                 var resource = $(this).closest('tr[data-resource]').data('resource');
                 del.showModal(resource);
-
-                e.preventDefault();
                 return true;
             });
         };

@@ -47,10 +47,10 @@
         }()),
 
         init = function() {
-            data.$contentDiv.find('[data-action="get-shortlink"]').unbind().click(function(e) {
-                getShortLink.showModal();
-
+            data.$contentDiv.find('[data-action="get-shortlink"]').on('click', function(e) {
                 e.preventDefault();
+
+                getShortLink.showModal();
                 return true;
             });
         };

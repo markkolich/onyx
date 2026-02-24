@@ -24,34 +24,50 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage;
+package onyx.components.config.authentication.webauthn;
 
-import onyx.entities.storage.aws.dynamodb.Resource;
+import com.typesafe.config.Config;
+import curacao.annotations.Component;
+import curacao.annotations.Injectable;
+import onyx.components.config.OnyxConfig;
 
-import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
-public interface AssetManager {
+@Component
+public final class OnyxTypesafeWebAuthnConfig implements WebAuthnConfig {
 
-    String ONYX_METADATA_PATH_PREFIX = ".onyx";
+    private final Config config_;
 
-    URL getPresignedInfoUrlForResource(
-            final Resource resource);
+    @Injectable
+    public OnyxTypesafeWebAuthnConfig(
+            final OnyxConfig onyxConfig) {
+        config_ = onyxConfig.getOnyxConfig().getConfig(WEBAUTHN_CONFIG_PATH);
+    }
 
-    URL getPresignedDownloadUrlForResource(
-            final Resource resource);
+    @Override
+    public boolean isWebAuthnEnabled() {
+        return config_.getBoolean(ENABLED_PROP);
+    }
 
-    URL getPresignedUploadUrlForResource(
-            final Resource resource);
+    @Override
+    public String getRpId() {
+        return config_.getString(RP_ID_PROP);
+    }
 
-    long getResourceObjectSize(
-            final Resource resource);
+    @Override
+    public String getRpName() {
+        return config_.getString(RP_NAME_PROP);
+    }
 
-    void deleteResource(
-            final Resource resource,
-            final boolean permanent);
+    @Override
+    public String getRpOrigin() {
+        return config_.getString(RP_ORIGIN_PROP);
+    }
 
-    void deleteResourceAsync(
-            final Resource resource,
-            final boolean permanent);
+    @Override
+    public long getChallengeTimeout(
+            final TimeUnit timeUnit) {
+        return config_.getDuration(CHALLENGE_TIMEOUT_PROP, timeUnit);
+    }
 
 }

@@ -26,6 +26,7 @@
 
 package onyx.components.authentication;
 
+import curacao.core.servlet.HttpResponse;
 import onyx.entities.authentication.Session;
 
 import javax.annotation.Nullable;
@@ -39,5 +40,13 @@ public interface SessionManager {
     @Nullable
     Session extractSignedSession(
             final String signedSession);
+
+    String processLogin(
+            final Session session,
+            @Nullable final String returnToCookie,
+            final HttpResponse response);
+
+    String processLogout(
+            final HttpResponse response);
 
 }

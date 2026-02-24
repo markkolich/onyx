@@ -23,7 +23,7 @@
         <maven-frontend-npm.version>10.5.0</maven-frontend-npm.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
-        <maven-pmd-plugin.pmd.version>7.21.0</maven-pmd-plugin.pmd.version>
+        <maven-pmd-plugin.pmd.version>7.22.0</maven-pmd-plugin.pmd.version>
         <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
         <maven-dependency-plugin.version>3.10.0</maven-dependency-plugin.version>
         <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
@@ -37,9 +37,9 @@
 
         <jetty.version>11.0.26</jetty.version>
 
-        <typesafe-config.version>1.4.5</typesafe-config.version>
+        <typesafe-config.version>1.4.6</typesafe-config.version>
 
-        <jackson.version>2.21.0</jackson.version>
+        <jackson.version>2.21.1</jackson.version>
         <jackson-databind-nullable.version>0.2.9</jackson-databind-nullable.version>
 
         <commons-lang3.version>3.20.0</commons-lang3.version>
@@ -47,7 +47,7 @@
         <commons-io.version>2.21.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
 
-        <aws-sdk-v2.version>2.41.34</aws-sdk-v2.version>
+        <aws-sdk-v2.version>2.42.4</aws-sdk-v2.version>
 
         <guava.version>33.5.0-jre</guava.version>
 
@@ -69,12 +69,14 @@
 
         <quartz.version>2.5.2</quartz.version>
 
-        <checkstyle.version>13.2.0</checkstyle.version>
+        <webauthn-server-core.version>2.8.1</webauthn-server-core.version>
+
+        <checkstyle.version>13.3.0</checkstyle.version>
 
         <!-- Test dependency versions -->
 
         <junit.jupiter.version>6.0.3</junit.jupiter.version>
-        <mockito-core.version>5.21.0</mockito-core.version>
+        <mockito-core.version>5.22.0</mockito-core.version>
     </properties>
 
     <issueManagement>
@@ -361,6 +363,12 @@
             <version>${picocli.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.yubico</groupId>
+            <artifactId>webauthn-server-core</artifactId>
+            <version>${webauthn-server-core.version}</version>
+        </dependency>
+
         <!-- ###################### -->
         <!--   Test dependencies    -->
         <!-- ###################### -->
@@ -599,6 +607,7 @@
                         <ignoredResourcePattern>.*about\.html$</ignoredResourcePattern>
                         <ignoredResourcePattern>javax/servlet/resources/.*</ignoredResourcePattern>
                         <ignoredResourcePattern>javax/servlet/catalog\.xml</ignoredResourcePattern>
+                        <ignoredResourcePattern>COPYING</ignoredResourcePattern>
                     </ignoredResourcePatterns>
                     <ignoredClassPatterns>
                         <!--

@@ -30,6 +30,11 @@
                         </div>
                         <input type="submit" class="btn btn-primary btn-block pt-8" value="Login">
                       </form>
+                      <div class="text-center mt-3">
+                        <button id="webauthn-login-btn" type="button" class="btn btn-link d-none">
+                          Sign in with Passkey
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(mvn clean package:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(mvn package:*)",
+      "Bash(unzip:*)"
     ]
   }
 }

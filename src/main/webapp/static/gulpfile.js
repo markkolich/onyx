@@ -63,6 +63,7 @@ function concatJs() {
         'js/onyx/app/directory.js',
         'js/onyx/app/shortlink.js',
         'js/onyx/app/previewer.js',
+        'js/onyx/app/webauthn.js',
         'js/onyx/app/widgets/dark-mode.js'
     ];
 
