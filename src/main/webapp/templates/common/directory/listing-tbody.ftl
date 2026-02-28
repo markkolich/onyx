@@ -1,20 +1,7 @@
+<#import "../macros/resource-icon.ftl" as icons>
 <tr data-resource="${child.getPath()}" data-resource-visibility="${child.getVisibility()}" data-resource-favorite="${child.getFavorite()?then('true','false')}">
   <td class="align-middle">
-
-      <#if child.getType() == "DIRECTORY">
-          <#if child.getVisibility() == "PRIVATE">
-              <a href="${contextPath}/details${child.getPath()}"><i class="pl-2 fas fa-folder text-body"></i></a>
-          <#else>
-              <a href="${contextPath}/details${child.getPath()}"><i class="pl-2 far fa-folder text-body"></i></a>
-          </#if>
-      <#elseif child.getType() == "FILE">
-          <#if child.getVisibility() == "PRIVATE">
-              <a href="${contextPath}/details${child.getPath()}"><i class="pl-2 fas fa-file text-body"></i></a>
-          <#else>
-              <a href="${contextPath}/details${child.getPath()}"><i class="pl-2 far fa-file text-body"></i></a>
-          </#if>
-      </#if>
-
+      <@icons.resource_icon type=child.getType() visibility=child.getVisibility() href="${contextPath}/details${child.getPath()}" />
   </td>
   <td class="align-middle">
       <#if child.getType() == "DIRECTORY">

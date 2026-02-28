@@ -70,6 +70,13 @@ public final class Application {
     public static void main(
             final String... args) {
         try {
+            final BuildVersion buildVersion = BuildVersion.getInstance();
+            LOG.info("Onyx-{}; built: {}; git: {}; jvm {}",
+                    buildVersion.getVersion(),
+                    buildVersion.getTimestamp(),
+                    buildVersion.getBuildNumber(),
+                    System.getProperty("java.runtime.version", System.getProperty("java.version")));
+
             final Application onyx = new Application();
             new CommandLine(onyx).parseArgs(args);
 

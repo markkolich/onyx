@@ -26,7 +26,7 @@
                 },
 
                 showModal = function() {
-                    $modal.on('shown.bs.modal', function() {
+                    $modal.one('shown.bs.modal', function() {
                         // Reset upload state
                         uploadInProgress = false;
 
@@ -115,7 +115,7 @@
                     });
 
                     // Prevent modal from being closed during upload
-                    $modal.on('hide.bs.modal', function(e) {
+                    $modal.one('hide.bs.modal', function(e) {
                         if (uploadInProgress) {
                             if (!confirm('File upload in progress. Are you sure you want to close? ' +
                                     'Upload will be interrupted.')) {
@@ -130,7 +130,7 @@
                     });
 
                     // Clean up handler if modal is closed without upload
-                    $modal.on('hidden.bs.modal', function() {
+                    $modal.one('hidden.bs.modal', function() {
                         uploadInProgress = false;
                         $(window).off('beforeunload', beforeUnloadHandler);
                     });
@@ -153,7 +153,7 @@
                     var description = $('body[data-description]').data('description');
                     $modal.find('input[data-file="description"]').val(description);
 
-                    $modal.on('shown.bs.modal', function() {
+                    $modal.one('shown.bs.modal', function() {
                         // Convenience
                         $modal.find('input[data-file="description"]').focus();
 
@@ -233,12 +233,12 @@
 
                 showModal = function(resource) {
                     var name = decodeURIComponent(resource.split('/').pop());
-                    $modal.find('[data-modal="name"]').html(name);
+                    $modal.find('[data-modal="name"]').text(name);
 
                     var kpListener = new window.keypress.Listener();
                     permanent = false;
 
-                    $modal.on('shown.bs.modal', function() {
+                    $modal.one('shown.bs.modal', function() {
                         var $submitButton = $modal.find('button[type="submit"]');
                         kpListener.register_combo({
                             'keys': 'shift',
@@ -269,7 +269,7 @@
                         });
                     });
 
-                    $modal.on('hidden.bs.modal', function() {
+                    $modal.one('hidden.bs.modal', function() {
                         kpListener.reset();
                         kpListener.destroy();
                     });

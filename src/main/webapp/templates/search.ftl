@@ -1,3 +1,4 @@
+<#import "common/macros/resource-icon.ftl" as icons>
 <!doctype html>
 <html lang="en">
 <head>
@@ -40,19 +41,7 @@
                               <#list results as result>
                                   <tr data-resource="${result.getLeft().getPath()}" data-resource-visibility="${result.getLeft().getVisibility()}" data-resource-favorite="${result.getLeft().getFavorite()?then('true','false')}">
                                       <td class="align-middle">
-                                          <#if result.getLeft().getType() == "DIRECTORY">
-                                              <#if result.getLeft().getVisibility() == "PRIVATE">
-                                                  <a href="${contextPath}/details${result.getLeft().getPath()}"><i class="pl-2 fas fa-folder text-body"></i></a>
-                                              <#else>
-                                                  <a href="${contextPath}/details${result.getLeft().getPath()}"><i class="pl-2 far fa-folder text-body"></i></a>
-                                              </#if>
-                                          <#elseif result.getLeft().getType() == "FILE">
-                                              <#if result.getLeft().getVisibility() == "PRIVATE">
-                                                  <a href="${contextPath}/details${result.getLeft().getPath()}"><i class="pl-2 fas fa-file text-body"></i></a>
-                                              <#else>
-                                                  <a href="${contextPath}/details${result.getLeft().getPath()}"><i class="pl-2 far fa-file text-body"></i></a>
-                                              </#if>
-                                          </#if>
+                                          <@icons.resource_icon type=result.getLeft().getType() visibility=result.getLeft().getVisibility() href="${contextPath}/details${result.getLeft().getPath()}" />
                                       </td>
                                       <td class="align-middle">
                                         <span class="mr-1">/</span>

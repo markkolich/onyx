@@ -1,14 +1,10 @@
+<#import "../common/macros/modal-header.ftl" as headers>
 <!-- Edit Directory modal -->
 <div class="modal fade" id="edit-directory-modal" tabindex="-1" role="dialog" aria-hidden="true">
 <div class="modal-dialog" role="document">
   <form>
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Edit Directory</h5>
-          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true"><i class="fas fa-times fa-sm"></i></span>
-          </button>
-        </div>
+        <@headers.modal_header title="Edit Directory" />
         <div class="modal-body">
           <div class="form-group">
             <label class="col-form-label">Description (optional)</label>

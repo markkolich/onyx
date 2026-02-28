@@ -26,7 +26,7 @@
                       <form action="${contextPath}/login/verify" method="post">
                         <input type="hidden" name="token" value="${token}">
                         <div class="form-group">
-                          <input type="text" maxlength="32" name="code" class="form-control form-control-user" placeholder="Code" autofocus="autofocus" required="required">
+                          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="32" name="code" class="form-control form-control-user" placeholder="Code" autofocus="autofocus" required="required">
                         </div>
                         <div class="form-group">
                           <div class="custom-control custom-checkbox text-center">
