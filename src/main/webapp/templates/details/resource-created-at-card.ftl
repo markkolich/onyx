@@ -1,13 +1,2 @@
-<div class="card shadow mb-4">
-    <div class="card-body">
-        <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Created At</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800">${resource.getCreatedDate()?datetime?string["MMM dd, yyyy, h:mm a"]}</div>
-            </div>
-            <div class="col-auto">
-              <i class="fas fa-calendar fa-2x text-gray-300"></i>
-            </div>
-        </div>
-    </div>
-</div>
+<#import "../common/macros/detail-card.ftl" as cards>
+<@cards.detail_card label="Created At" icon="fas fa-calendar">${resource.getCreatedDate()?datetime?string["MMM dd, yyyy, h:mm a"]}</@cards.detail_card>

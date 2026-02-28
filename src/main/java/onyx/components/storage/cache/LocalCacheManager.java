@@ -28,6 +28,7 @@ package onyx.components.storage.cache;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import curacao.components.ComponentDestroyable;
 import curacao.core.servlet.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaders;
 import onyx.components.config.OnyxConfig;
@@ -48,8 +49,10 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -57,7 +60,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.asynchttpclient.Dsl.asyncHttpClient;
 
 @Component
-public final class LocalCacheManager implements CacheManager {
+public final class LocalCacheManager implements CacheManager, ComponentDestroyable {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalCacheManager.class);
 
@@ -69,6 +72,8 @@ public final class LocalCacheManager implements CacheManager {
     private final CachedResourceSigner cachedResourceSigner_;
 
     private final ExecutorService asyncCacheExecutorService_;
+
+    private final AsyncHttpClient asyncHttpClient_;
 
     @Injectable
     public LocalCacheManager(
@@ -85,6 +90,17 @@ public final class LocalCacheManager implements CacheManager {
 
         // Create the local cache directory if it does not exist.
         createCacheDirectoryIfDoesNotExist();
+
+        final long readTimeoutMs =
+                localCacheConfig_.getLocalCacheDownloaderReadTimeout(TimeUnit.MILLISECONDS);
+        final long requestTimeoutMs =
+                localCacheConfig_.getLocalCacheDownloaderRequestTimeout(TimeUnit.MILLISECONDS);
+        final DefaultAsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder()
+                // Very long read & connect timeout; intentional.
+                .setReadTimeout(Duration.ofMillis(readTimeoutMs))
+                .setRequestTimeout(Duration.ofMillis(requestTimeoutMs))
+                .build();
+        asyncHttpClient_ = asyncHttpClient(clientConfig);
     }
 
     @Override
@@ -166,21 +182,10 @@ public final class LocalCacheManager implements CacheManager {
         checkNotNull(resource, "Resource cannot be null.");
 
         final URL downloadUrl = assetManager_.getPresignedDownloadUrlForResource(resource);
-
-        final long readTimeoutMs =
-                localCacheConfig_.getLocalCacheDownloaderReadTimeout(TimeUnit.MILLISECONDS);
-        final long requestTimeoutMs =
-                localCacheConfig_.getLocalCacheDownloaderRequestTimeout(TimeUnit.MILLISECONDS);
-        final DefaultAsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder()
-                // Very long read & connect timeout; intentional.
-                .setReadTimeout(Duration.ofMillis(readTimeoutMs))
-                .setRequestTimeout(Duration.ofMillis(requestTimeoutMs))
-                .build();
-
         final Path cachedResource = generateCachedResourcePath(resource.getPath());
 
-        try (AsyncHttpClient asyncHttpClient = asyncHttpClient(clientConfig)) {
-            final ListenableFuture<Path> future = asyncHttpClient.prepareGet(downloadUrl.toString())
+        try {
+            final ListenableFuture<Path> future = asyncHttpClient_.prepareGet(downloadUrl.toString())
                     .execute(new StreamedFileDownloadAsyncHandler(cachedResource));
             future.toCompletableFuture()
                 .exceptionally(t -> {
@@ -272,6 +277,11 @@ public final class LocalCacheManager implements CacheManager {
         return DigestUtils.sha256Hex(resourcePath);
     }
 
+    @Override
+    public void destroy() throws Exception {
+        asyncHttpClient_.close();
+    }
+
     /**
      * An {@link AsyncHandler} implementation that streams a file download directly to disk,
      * buffering very little in memory.
@@ -281,6 +291,7 @@ public final class LocalCacheManager implements CacheManager {
         private static final Logger LOG = LoggerFactory.getLogger(StreamedFileDownloadAsyncHandler.class);
 
         private final Path filePath_;
+        private final Path tempFilePath_;
         private final OutputStream os_;
 
         private boolean failed_ = false;
@@ -288,13 +299,17 @@ public final class LocalCacheManager implements CacheManager {
         private StreamedFileDownloadAsyncHandler(
                 final Path filePath) throws Exception {
             filePath_ = filePath;
-            os_ = Files.newOutputStream(filePath);
+            tempFilePath_ = filePath.resolveSibling(filePath.getFileName() + "-"
+                    + UUID.randomUUID() + ".tmp");
+            os_ = Files.newOutputStream(tempFilePath_);
         }
 
         @Override
         public State onStatusReceived(
                 final HttpResponseStatus responseStatus) throws Exception {
             if (responseStatus.getStatusCode() != HttpStatus.SC_OK) {
+                failed_ = true;
+                closeAndCleanup();
                 return State.ABORT;
             }
 
@@ -323,18 +338,34 @@ public final class LocalCacheManager implements CacheManager {
                 final Throwable t) {
             failed_ = true;
             LOG.error("Failed to write local cache file from async stream: {}", filePath_, t);
+            closeAndCleanup();
         }
 
         @Override
         public Path onCompleted() throws Exception {
             if (failed_) {
-                os_.close();
-                Files.delete(filePath_);
+                closeAndCleanup();
                 return null;
             }
 
             os_.close();
+            Files.move(tempFilePath_, filePath_, StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING);
             return filePath_;
+        }
+
+        private void closeAndCleanup() {
+            try {
+                os_.close();
+            } catch (final Exception e) {
+                LOG.warn("Failed to close output stream for cached resource: {}", filePath_, e);
+            }
+
+            try {
+                Files.deleteIfExists(tempFilePath_);
+            } catch (final Exception e) {
+                LOG.warn("Failed to delete partial cache file: {}", tempFilePath_, e);
+            }
         }
 
     }

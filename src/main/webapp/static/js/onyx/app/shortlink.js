@@ -19,7 +19,7 @@
                     // Clear any shortlink that may already be in the input field.
                     $modal.find('input[data-shortlink="link"]').val('');
 
-                    $modal.on('shown.bs.modal', function() {
+                    $modal.one('shown.bs.modal', function() {
                         var path = $('body[data-path]').data('path');
 
                         $.ajax({

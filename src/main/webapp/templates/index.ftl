@@ -1,3 +1,4 @@
+<#import "common/macros/resource-icon.ftl" as icons>
 <!doctype html>
 <html lang="en">
 <head>
@@ -35,11 +36,7 @@
                             <#list children as child>
                                 <tr data-resource="${child.getPath()}">
                                     <td class="align-middle">
-                                        <#if child.getType() == "DIRECTORY">
-                                            <a href="${contextPath}/details${child.getPath()}"><i class="pl-2 far fa-folder text-body"></i></a>
-                                        <#elseif child.getType() == "FILE">
-                                            <a href="${contextPath}/details${child.getPath()}"><i class="pl-2 far fa-file text-body"></i></a>
-                                        </#if>
+                                        <@icons.resource_icon type=child.getType() visibility=child.getVisibility() href="${contextPath}/details${child.getPath()}" />
                                     </td>
                                     <td class="align-middle">
                                         <#if child.getType() == "DIRECTORY">

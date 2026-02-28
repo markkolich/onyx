@@ -1,14 +1,11 @@
+<#import "../macros/resource-icon.ftl" as icons>
 <table class="table table-striped table-hover mb-0">
 
   <#if allChildren?has_content>
       <thead>
           <tr>
               <td class="align-middle">
-                  <#if resource.getVisibility() == "PRIVATE">
-                      <a href="${contextPath}/<#if view == "browse">details<#else>browse</#if>${resource.getPath()}"><i class="pl-2 fas fa-folder-open text-body"></i></a>
-                  <#else>
-                      <a href="${contextPath}/<#if view == "browse">details<#else>browse</#if>${resource.getPath()}"><i class="pl-2 far fa-folder-open text-body"></i></a>
-                  </#if>
+                  <@icons.folder_open_icon visibility=resource.getVisibility() href="${contextPath}/<#if view == 'browse'>details<#else>browse</#if>${resource.getPath()}" />
               </td>
               <td class="align-middle" <#if view == "browse">colspan="4"<#else>colspan="5"</#if>>
                   <span>${resource.getHtmlName()}</span>
