@@ -1,7 +1,6 @@
 /*dark mode*/
 body.dark-mode{
     background-color:#333 !important;
-    color:rgb(220,220,220);
 }
 
 .dark-mode .navbar {
@@ -14,10 +13,6 @@ body.dark-mode{
     color:rgb(220,220,220) !important;
 }
 .dark-mode .navbar span {
-    color:rgb(220,220,220) !important;
-}
-
-.dark-mode h3 {
     color:rgb(220,220,220) !important;
 }
 
@@ -404,4 +399,15 @@ body.dark-mode{
 
 .dark-mode ::-webkit-scrollbar-thumb:hover {
     background: #666;
+}
+
+/* Textarea */
+.dark-mode textarea {
+    color: rgb(220,220,220);
+    background-color: #222;
+    border-color: #444;
+}
+
+.dark-mode .editable-description textarea {
+    background-color: #0a0a0a;
 }

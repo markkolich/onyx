@@ -29,6 +29,7 @@ package onyx.entities.storage.aws.dynamodb;
 import onyx.components.aws.dynamodb.converters.InstantToStringTypeConverter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
@@ -258,7 +259,11 @@ public final class Resource {
      */
     @DynamoDbIgnore
     public String getHtmlDescription() {
-        return escapeHtml4(description_);
+        if (StringUtils.isBlank(description_)) {
+            return description_;
+        }
+
+        return escapeHtml4(description_).replace("\n", "&#10;");
     }
 
     /**

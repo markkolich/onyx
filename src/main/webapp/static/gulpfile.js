@@ -56,6 +56,7 @@ function concatJs() {
         'vendor/magnific-popup/jquery.magnific-popup.min.js',
         'vendor/keypress/keypress-2.1.5.min.js',
         'vendor/underscore/underscore-1.9.2.min.js',
+        'vendor/marked/marked.min.js',
         'js/sb-admin-2.js',
         'js/onyx/onyx.js',
         'js/onyx/app/app.js',
@@ -64,7 +65,8 @@ function concatJs() {
         'js/onyx/app/shortlink.js',
         'js/onyx/app/previewer.js',
         'js/onyx/app/webauthn.js',
-        'js/onyx/app/widgets/dark-mode.js'
+        'js/onyx/app/widgets/dark-mode.js',
+        'js/onyx/app/widgets/markdown.js'
     ];
 
     return gulp.src(jsResources)

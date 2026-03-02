@@ -28,6 +28,7 @@ package onyx.controllers.api.v1;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.yubico.webauthn.*;
 import com.yubico.webauthn.data.*;
 import curacao.annotations.Controller;
@@ -61,7 +62,6 @@ import org.apache.commons.lang3.RandomUtils;
 
 import java.time.Instant;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -114,7 +114,7 @@ public final class WebAuthn extends AbstractOnyxApiController {
         relyingParty_ = RelyingParty.builder()
                 .identity(rpIdentity)
                 .credentialRepository(webAuthnCredentialRepository)
-                .origins(Set.of(webAuthnConfig.getRpOrigin()))
+                .origins(ImmutableSet.of(webAuthnConfig.getRpOrigin()))
                 .build();
     }
 

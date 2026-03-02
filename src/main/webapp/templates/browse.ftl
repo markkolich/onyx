@@ -5,7 +5,7 @@
     <#include "common/css.ftl">
 </head>
 
-<body class="bg-gray-100 dark-mode" data-path="${resource.getPath()}" data-description="<#if resource.getHtmlDescription()?has_content>${resource.getHtmlDescription()}</#if>"<#if session?has_content> data-session="${session.id}"</#if>>
+<body class="bg-gray-100 dark-mode" data-path="${resource.getPath()}"<#if session?has_content> data-session="${session.id}"</#if>>
 
   <!-- Page Wrapper -->
   <div id="wrapper">
@@ -46,7 +46,6 @@
                               <a class="dropdown-item" href="#" data-action="upload-file"><i class="fas fa-upload fa-sm fa-fw mr-2 text-gray-400"></i> Upload File</a>
                               <div class="dropdown-divider"></div>
                               <a class="dropdown-item" href="#" data-action="create-directory"><i class="fas fa-folder-plus fa-sm fa-fw mr-2 text-gray-400"></i> Create Directory</a>
-                              <a class="dropdown-item" href="#" data-action="edit-directory"><i class="fas fa-edit fa-sm fa-fw mr-2 text-gray-400"></i> Edit Directory</a>
                               <#if resource.getVisibility() == "PUBLIC">
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" data-action="get-shortlink"><i class="fas fa-link fa-sm fa-fw mr-2 text-gray-400"></i> Get Shortlink</a>
@@ -59,8 +58,16 @@
                 <!-- Card Body -->
                 <div class="card-body table-responsive">
 
-                  <#if resource.getHtmlDescription()?has_content>
-                      <p class="text-muted mb-3" data-clipboard-text="${resource.getHtmlDescription()}">${resource.getHtmlDescription()}</p>
+                  <#if session?has_content && userIsOwner>
+                      <div class="mb-3 editable-description" data-editable="description" data-resource-type="DIRECTORY" data-raw-description="<#if resource.getDescription()?has_content>${resource.getHtmlDescription()}</#if>" title="Click to edit description">
+                          <#if resource.getDescription()?has_content>
+                              <div class="rendered-markdown"></div>
+                          <#else>
+                              <div class="rendered-markdown"><em class="text-muted">Click to add a description...</em></div>
+                          </#if>
+                      </div>
+                  <#elseif resource.getHtmlDescription()?has_content>
+                      <div class="mb-3 rendered-markdown" data-raw-description="${resource.getHtmlDescription()}"></div>
                   </#if>
 
                   <#include "common/directory/listing.ftl">

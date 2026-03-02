@@ -61,44 +61,6 @@
         edit = (function() {
 
             var
-                $modal = $('#edit-directory-modal'),
-
-                showModal = function() {
-                    var description = $('body[data-description]').data('description');
-                    $modal.find('input[data-directory="description"]').val(description);
-
-                    $modal.one('shown.bs.modal', function() {
-                        // Convenience
-                        $modal.find('input[data-directory="description"]').focus();
-
-                        $modal.find('form').unbind().on('submit', function(e) {
-                            e.preventDefault();
-
-                            var resource = $('body[data-path]').data('path');
-
-                            var newDescription = $modal.find('input[data-directory="description"]').val();
-
-                            $.ajax({
-                                type: 'PUT',
-                                url: parent.baseApiUrl + '/v1/directory' + resource,
-                                contentType: 'application/json',
-                                data: JSON.stringify({
-                                    description: newDescription
-                                }),
-                                success: function(res, status, xhr) {
-                                    $modal.modal('hide');
-
-                                    window.location.reload(true);
-                                }
-                            });
-
-                            return false;
-                        });
-                    });
-
-                    $modal.modal('show');
-                },
-
                 toggleVisibility = function(resource, visibility) {
                     var newVisibility = (visibility === 'PUBLIC') ? 'PRIVATE' : 'PUBLIC';
 
@@ -132,7 +94,6 @@
                 };
 
             return {
-                'showModal': showModal,
                 'toggleVisibility': toggleVisibility,
                 'toggleFavorite': toggleFavorite
             };
@@ -202,12 +163,6 @@
                 e.preventDefault();
 
                 create.showModal();
-                return true;
-            });
-            data.$contentDiv.find('[data-action="edit-directory"]').on('click', function(e) {
-                e.preventDefault();
-
-                edit.showModal();
                 return true;
             });
             data.$contentDiv.find('[data-action="toggle-directory-visibility"]').on('click', function(e) {
