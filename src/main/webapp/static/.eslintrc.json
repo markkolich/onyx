@@ -9,7 +9,8 @@
   },
   "globals": {
     "Onyx": true,
-    "_": true
+    "_": true,
+    "marked": true
   },
   "rules": {
     "comma-dangle": "error",

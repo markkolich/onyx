@@ -11032,3 +11032,25 @@ footer.sticky-footer .copyright {
 body.sidebar-toggled footer.sticky-footer {
   width: 100%;
 }
+
+.editable-description {
+  cursor: pointer;
+}
+
+.editable-description textarea {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 85%;
+  width: 100%;
+  height: auto;
+  border: none;
+  padding: 0;
+  margin: 0;
+  resize: none;
+  outline: none;
+  overflow: hidden;
+  background: transparent;
+}
+
+.rendered-markdown p:last-child {
+  margin-bottom: 0;
+}
