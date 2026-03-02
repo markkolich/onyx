@@ -9,7 +9,7 @@
         init = function() {
             // Auto-focus input elements in dropdowns on shown:
             // https://stackoverflow.com/a/52186879
-            $('.dropdown').on('shown.bs.dropdown', function(e) {
+            $('.dropdown').one('shown.bs.dropdown', function(e) {
                 $('.dropdown-menu input').focus();
             });
         };

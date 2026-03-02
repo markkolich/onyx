@@ -98,7 +98,7 @@ public final class Application {
         final Server server = new Server(pool);
         final HttpConfiguration config = new HttpConfiguration();
         config.setSendXPoweredBy(false); // Hide X-Powered-By: Jetty
-        config.setSendServerVersion(false); // Hide Server: Jetty-9.z
+        config.setSendServerVersion(false); // Hide Server: Jetty-*
 
         // Grab a NIO connector for the server.
         final HttpConnectionFactory factory = new HttpConnectionFactory(config);
