@@ -43,6 +43,7 @@ import onyx.components.authentication.UserAuthenticator;
 import onyx.components.authentication.webauthn.WebAuthnCredentialRepository;
 import onyx.components.authentication.webauthn.WebAuthnChallengeManager;
 import onyx.components.config.OnyxConfig;
+import onyx.components.config.authentication.SessionConfig;
 import onyx.components.config.authentication.webauthn.WebAuthnConfig;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.authentication.Session;
@@ -78,6 +79,8 @@ public final class WebAuthn extends AbstractOnyxApiController {
 
     private static final String PUBLIC_KEY = "publicKey";
 
+    private final SessionConfig sessionConfig_;
+
     private final WebAuthnConfig webAuthnConfig_;
     private final WebAuthnChallengeManager challengeManager_;
     private final WebAuthnCredentialRepository webAuthnCredentialRepository_;
@@ -92,6 +95,7 @@ public final class WebAuthn extends AbstractOnyxApiController {
     @Injectable
     public WebAuthn(
             final OnyxConfig onyxConfig,
+            final SessionConfig sessionConfig,
             final WebAuthnConfig webAuthnConfig,
             final WebAuthnChallengeManager challengeManager,
             final WebAuthnCredentialRepository webAuthnCredentialRepository,
@@ -99,6 +103,7 @@ public final class WebAuthn extends AbstractOnyxApiController {
             final SessionManager sessionManager,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         super(onyxConfig);
+        sessionConfig_ = sessionConfig;
         webAuthnConfig_ = webAuthnConfig;
         challengeManager_ = challengeManager;
         webAuthnCredentialRepository_ = webAuthnCredentialRepository;
@@ -123,10 +128,8 @@ public final class WebAuthn extends AbstractOnyxApiController {
             final Session session) throws Exception {
         if (session == null) {
             throw new ApiUnauthorizedException("User not authenticated.");
-        }
-
-        if (!webAuthnConfig_.isWebAuthnEnabled()) {
-            throw new ApiBadRequestException("WebAuthn is not enabled.");
+        } else if (!sessionConfig_.isWebAuthnAuthEnabled()) {
+            throw new ApiForbiddenException("WebAuthn authentication is disabled.");
         }
 
         final String username = session.getUsername();
@@ -190,10 +193,8 @@ public final class WebAuthn extends AbstractOnyxApiController {
             final Session session) throws Exception {
         if (session == null) {
             throw new ApiUnauthorizedException("User not authenticated.");
-        }
-
-        if (!webAuthnConfig_.isWebAuthnEnabled()) {
-            throw new ApiBadRequestException("WebAuthn is not enabled.");
+        } else if (!sessionConfig_.isWebAuthnAuthEnabled()) {
+            throw new ApiForbiddenException("WebAuthn authentication is disabled.");
         }
 
         if (requestId == null || credentialJson == null) {
@@ -246,8 +247,8 @@ public final class WebAuthn extends AbstractOnyxApiController {
 
     @RequestMapping(value = "^/api/v1/webauthn/login/begin$", methods = POST)
     public WebAuthnLoginBeginResponse loginBegin() throws Exception {
-        if (!webAuthnConfig_.isWebAuthnEnabled()) {
-            throw new ApiBadRequestException("WebAuthn is not enabled.");
+        if (!sessionConfig_.isWebAuthnAuthEnabled()) {
+            throw new ApiForbiddenException("WebAuthn authentication is disabled.");
         }
 
         // No username required - the authenticator will present available resident credentials
@@ -295,8 +296,8 @@ public final class WebAuthn extends AbstractOnyxApiController {
             @RequestBody(CREDENTIAL_FIELD) final String credentialJson,
             @Cookie(RETURN_TO_COOKIE_NAME) final String returnToCookie,
             final HttpResponse response) throws Exception {
-        if (!webAuthnConfig_.isWebAuthnEnabled()) {
-            throw new ApiBadRequestException("WebAuthn is not enabled.");
+        if (!sessionConfig_.isWebAuthnAuthEnabled()) {
+            throw new ApiForbiddenException("WebAuthn authentication is disabled.");
         }
 
         if (requestId == null || credentialJson == null) {

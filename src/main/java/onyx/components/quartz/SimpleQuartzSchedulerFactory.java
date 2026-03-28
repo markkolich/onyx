@@ -29,8 +29,11 @@ package onyx.components.quartz;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.CuracaoComponent;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
 import org.quartz.Scheduler;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.listeners.JobListenerSupport;
 
 import javax.annotation.Nonnull;
 import java.util.Properties;
@@ -58,6 +61,19 @@ public final class SimpleQuartzSchedulerFactory
         p.put(PROP_THREAD_POOL_USE_DAEMONS, Boolean.toString(quartzConfig_.getUseDaemonThreads()));
 
         quartzScheduler_ = new StdSchedulerFactory(p).getScheduler();
+        quartzScheduler_.getListenerManager().addJobListener(new JobListenerSupport() {
+            @Override
+            public String getName() {
+                return SimpleQuartzSchedulerFactory.class.getSimpleName();
+            }
+
+            @Override
+            public void jobToBeExecuted(
+                    final JobExecutionContext context) {
+                final JobDetail jobDetail = context.getJobDetail();
+                Thread.currentThread().setName(jobDetail.getKey().getName());
+            }
+        });
     }
 
     @Nonnull

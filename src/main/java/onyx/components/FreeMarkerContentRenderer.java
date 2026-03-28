@@ -34,6 +34,8 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import onyx.BuildVersion;
 import onyx.components.config.OnyxConfig;
+import onyx.components.config.authentication.SessionConfig;
+
 import onyx.entities.freemarker.FreeMarkerContent;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -53,14 +55,20 @@ public final class FreeMarkerContentRenderer {
     private static final String FULL_URI_ATTR = "fullUri";
     private static final String DEV_MODE_ATTR = "devMode";
 
+    private static final String PASSWORD_AUTH_ENABLED_ATTR = "passwordAuthEnabled";
+    private static final String WEBAUTHN_AUTH_ENABLED_ATTR = "webAuthnAuthEnabled";
+
     private final OnyxConfig onyxConfig_;
+    private final SessionConfig sessionConfig_;
     private final OnyxFreeMarkerConfig onyxFreeMarkerConfig_;
 
     @Injectable
     public FreeMarkerContentRenderer(
             final OnyxConfig onyxConfig,
-            final OnyxFreeMarkerConfig onyxFreeMarkerConfig) throws Exception {
+            final SessionConfig sessionConfig,
+            final OnyxFreeMarkerConfig onyxFreeMarkerConfig) {
         onyxConfig_ = onyxConfig;
+        sessionConfig_ = sessionConfig;
         onyxFreeMarkerConfig_ = onyxFreeMarkerConfig;
     }
 
@@ -95,6 +103,9 @@ public final class FreeMarkerContentRenderer {
         map.put(CONTEXT_PATH_ATTR, onyxConfig_.getViewSafeContentPath());
         map.put(FULL_URI_ATTR, onyxConfig_.getViewSafeFullUri());
         map.put(DEV_MODE_ATTR, onyxConfig_.isDevMode());
+
+        map.put(PASSWORD_AUTH_ENABLED_ATTR, sessionConfig_.isPasswordAuthEnabled());
+        map.put(WEBAUTHN_AUTH_ENABLED_ATTR, sessionConfig_.isWebAuthnAuthEnabled());
 
         return map.build();
     }

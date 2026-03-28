@@ -61,6 +61,16 @@ public final class OnyxTypesafeSessionConfig implements SessionConfig {
     }
 
     @Override
+    public boolean isPasswordAuthEnabled() {
+        return config_.getBoolean(SESSION_PASSWORD_AUTH_ENABLED_PROP);
+    }
+
+    @Override
+    public boolean isWebAuthnAuthEnabled() {
+        return config_.getBoolean(SESSION_WEBAUTHN_AUTH_ENABLED_PROP);
+    }
+
+    @Override
     public Map<String, String> getApiKeys() {
         return config_.getObjectList(SESSION_API_KEYS_PROP).stream()
                 .map(ConfigObject::toConfig)

@@ -29,8 +29,10 @@ package onyx.controllers;
 import onyx.AbstractOnyxTest;
 import onyx.components.FreeMarkerContentRenderer;
 import onyx.components.OnyxFreeMarkerConfig;
+import onyx.components.config.authentication.SessionConfig;
 import onyx.entities.authentication.Session;
 import onyx.entities.authentication.Session.Type;
+import org.mockito.Mockito;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -39,14 +41,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public abstract class AbstractOnyxControllerTest extends AbstractOnyxTest {
 
+    protected final SessionConfig sessionConfig_;
+
     protected final OnyxFreeMarkerConfig onyxFreeMarkerConfig_;
 
     protected final FreeMarkerContentRenderer fmcRenderer_;
 
     public AbstractOnyxControllerTest() throws Exception {
+        sessionConfig_ = Mockito.mock(SessionConfig.class);
+        Mockito.when(sessionConfig_.isPasswordAuthEnabled()).thenReturn(true);
+        Mockito.when(sessionConfig_.isWebAuthnAuthEnabled()).thenReturn(true);
+
         onyxFreeMarkerConfig_ = new OnyxFreeMarkerConfig(servletContext_);
 
-        fmcRenderer_ = new FreeMarkerContentRenderer(onyxConfig_, onyxFreeMarkerConfig_);
+        fmcRenderer_ = new FreeMarkerContentRenderer(onyxConfig_, sessionConfig_, onyxFreeMarkerConfig_);
     }
 
     protected static Session generateNewSession(

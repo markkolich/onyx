@@ -21,20 +21,27 @@
                       <div class="text-center">
                         <h3 class="text-dark mb-4">Onyx</h3>
                       </div>
-                      <form action="${contextPath}/login" method="post">
-                        <div class="form-group">
-                          <input type="text" name="username" class="form-control form-control-user" placeholder="Username" autofocus="autofocus" required="required">
+
+                      <#if passwordAuthEnabled>
+                        <form action="${contextPath}/login" method="post">
+                          <div class="form-group">
+                            <input type="text" name="username" class="form-control form-control-user" placeholder="Username" autofocus="autofocus" required="required">
+                          </div>
+                          <div class="form-group">
+                            <input type="password" name="password" class="form-control form-control-user" placeholder="Password" required="required">
+                          </div>
+                          <input type="submit" class="btn btn-primary btn-block pt-8" value="Login">
+                        </form>
+                      </#if>
+
+                      <#if webAuthnAuthEnabled>
+                        <div class="text-center mt-3">
+                          <button id="webauthn-login-btn" type="button" class="btn btn-link d-none">
+                            Sign in with Passkey
+                          </button>
                         </div>
-                        <div class="form-group">
-                          <input type="password" name="password" class="form-control form-control-user" placeholder="Password" required="required">
-                        </div>
-                        <input type="submit" class="btn btn-primary btn-block pt-8" value="Login">
-                      </form>
-                      <div class="text-center mt-3">
-                        <button id="webauthn-login-btn" type="button" class="btn btn-link d-none">
-                          Sign in with Passkey
-                        </button>
-                      </div>
+                      </#if>
+
                     </div>
                   </div>
                 </div>
