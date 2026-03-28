@@ -45,11 +45,6 @@ public final class OnyxTypesafeWebAuthnConfig implements WebAuthnConfig {
     }
 
     @Override
-    public boolean isWebAuthnEnabled() {
-        return config_.getBoolean(ENABLED_PROP);
-    }
-
-    @Override
     public String getRpId() {
         return config_.getString(RP_ID_PROP);
     }

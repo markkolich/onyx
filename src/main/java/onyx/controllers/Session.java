@@ -40,6 +40,7 @@ import onyx.components.authentication.UserAuthenticator;
 import onyx.components.authentication.twofactor.TwoFactorAuthCodeManager;
 import onyx.components.authentication.twofactor.TwoFactorAuthTokenManager;
 import onyx.components.config.OnyxConfig;
+import onyx.components.config.authentication.SessionConfig;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.User;
@@ -75,6 +76,8 @@ public final class Session extends AbstractOnyxFreeMarkerController {
     private static final String CODE_FIELD = "code";
     private static final String TRUST_DEVICE_FIELD = "trustDevice";
 
+    private final SessionConfig sessionConfig_;
+
     private final CookieManager cookieManager_;
     private final SessionManager sessionManager_;
 
@@ -88,6 +91,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
     public Session(
             final OnyxConfig onyxConfig,
             final ResourceManager resourceManager,
+            final SessionConfig sessionConfig,
             final CookieManager cookieManager,
             final SessionManager sessionManager,
             final UserAuthenticator userAuthenticator,
@@ -95,6 +99,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
             final TwoFactorAuthTokenManager twoFactorAuthTokenManager,
             final TwoFactorAuthCodeManager twoFactorAuthCodeManager) {
         super(onyxConfig, resourceManager);
+        sessionConfig_ = sessionConfig;
         cookieManager_ = cookieManager;
         sessionManager_ = sessionManager;
         userAuthenticator_ = userAuthenticator;
@@ -117,7 +122,9 @@ public final class Session extends AbstractOnyxFreeMarkerController {
             @RequestBody(PASSWORD_FIELD) final String password,
             final HttpResponse response,
             final AsyncContext context) throws Exception {
-        if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
+        if (!sessionConfig_.isPasswordAuthEnabled()) {
+            return login();
+        } else if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
             return login();
         }
 
@@ -130,8 +137,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
         final User user = sessionPair.getLeft();
         final onyx.entities.authentication.Session session = sessionPair.getRight();
 
-        final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
-        if (!twoFactorAuthEnabled) {
+        if (!twoFactorAuthConfig_.twoFactorAuthEnabled()) {
             // If 2FA is not enabled, process the login and let the user in.
             processLogin(session, returnToCookie, response, context);
             return null;
@@ -165,8 +171,12 @@ public final class Session extends AbstractOnyxFreeMarkerController {
             @RequestBody(TRUST_DEVICE_FIELD) final String trustDevice,
             final HttpResponse response,
             final AsyncContext context) throws Exception {
-        final boolean twoFactorAuthEnabled = twoFactorAuthConfig_.twoFactorAuthEnabled();
-        if (!twoFactorAuthEnabled) {
+        if (!sessionConfig_.isPasswordAuthEnabled()) {
+            logout(response, context);
+            return;
+        }
+
+        if (!twoFactorAuthConfig_.twoFactorAuthEnabled()) {
             logout(response, context);
             return;
         } else if (StringUtils.isBlank(signedToken) || StringUtils.isBlank(code)) {

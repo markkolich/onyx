@@ -56,8 +56,8 @@ public final class SessionTest extends AbstractOnyxControllerTest {
         final TwoFactorAuthTokenManager twoFactorAuthTokenManager = Mockito.mock(TwoFactorAuthTokenManager.class);
         final TwoFactorAuthCodeManager twoFactorAuthCodeManager = Mockito.mock(TwoFactorAuthCodeManager.class);
 
-        final Session controller = new Session(onyxConfig_, resourceManager, cookieManager,
-                sessionManager, userAuthenticator, twoFactorAuthConfig,
+        final Session controller = new Session(onyxConfig_, resourceManager, sessionConfig_,
+                cookieManager, sessionManager, userAuthenticator, twoFactorAuthConfig,
                 twoFactorAuthTokenManager, twoFactorAuthCodeManager);
 
         final FreeMarkerContent responseEntity = controller.login();

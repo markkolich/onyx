@@ -32,15 +32,11 @@ public interface WebAuthnConfig {
 
     String WEBAUTHN_CONFIG_PATH = "webauthn";
 
-    String ENABLED_PROP = "enabled";
-
     String RP_ID_PROP = "rp-id";
     String RP_NAME_PROP = "rp-name";
     String RP_ORIGIN_PROP = "rp-origin";
 
     String CHALLENGE_TIMEOUT_PROP = "challenge-timeout";
-
-    boolean isWebAuthnEnabled();
 
     String getRpId();
 
