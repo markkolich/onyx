@@ -45,6 +45,8 @@ public interface AwsConfig {
     String AWS_S3_ASSET_URL_VALIDITY_DURATION_PROP = "s3.asset-url-validity-duration";
     String AWS_S3_DEFAULT_STORAGE_CLASS_PROP = "s3.default-storage-class";
     String AWS_S3_MAX_UPLOAD_FILE_SIZE_PROP = "s3.max-upload-file-size";
+    String AWS_S3_MULTIPART_UPLOAD_PART_SIZE_PROP = "s3.multipart-upload-part-size";
+    String AWS_S3_MULTIPART_UPLOAD_MAX_FILE_SIZE_PROP = "s3.multipart-upload-max-file-size";
 
     String AWS_SNS_REGION_PROP = "sns.region";
 
@@ -74,6 +76,10 @@ public interface AwsConfig {
     String getAwsS3DefaultStorageClass();
 
     long getAwsS3MaxUploadFileSize();
+
+    long getAwsS3MultipartUploadPartSize();
+
+    long getAwsS3MultipartUploadMaxFileSize();
 
     // SNS config
 

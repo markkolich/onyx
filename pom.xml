@@ -44,22 +44,22 @@
 
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-text.version>1.15.0</commons-text.version>
-        <commons-io.version>2.21.0</commons-io.version>
+        <commons-io.version>2.22.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
 
-        <aws-sdk-v2.version>2.42.23</aws-sdk-v2.version>
+        <aws-sdk-v2.version>2.42.39</aws-sdk-v2.version>
 
-        <guava.version>33.5.0-jre</guava.version>
+        <guava.version>33.6.0-jre</guava.version>
 
         <freemarker.version>2.3.34</freemarker.version>
 
         <htmlcompressor.version>1.5.2</htmlcompressor.version>
         <yuicompressor.version>2.4.8</yuicompressor.version>
 
-        <bcprov-jdk18on.version>1.83</bcprov-jdk18on.version>
+        <bcprov-jdk18on.version>1.84</bcprov-jdk18on.version>
         <jbcrypt.version>0.4</jbcrypt.version>
 
-        <async-http-client.version>3.0.8</async-http-client.version>
+        <async-http-client.version>3.0.9</async-http-client.version>
 
         <picocli.version>4.7.7</picocli.version>
 

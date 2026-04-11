@@ -104,6 +104,16 @@ public final class OnyxTypesafeAwsConfig implements AwsConfig {
         return config_.getBytes(AWS_S3_MAX_UPLOAD_FILE_SIZE_PROP);
     }
 
+    @Override
+    public long getAwsS3MultipartUploadPartSize() {
+        return config_.getBytes(AWS_S3_MULTIPART_UPLOAD_PART_SIZE_PROP);
+    }
+
+    @Override
+    public long getAwsS3MultipartUploadMaxFileSize() {
+        return config_.getBytes(AWS_S3_MULTIPART_UPLOAD_MAX_FILE_SIZE_PROP);
+    }
+
     // SNS config
 
     @Override

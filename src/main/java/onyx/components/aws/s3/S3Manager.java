@@ -34,6 +34,7 @@ import curacao.util.http.ContentTypes;
 import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.async.AsyncAssetThreadPool;
+import onyx.entities.api.request.v1.CompleteMultipartUploadRequest;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -45,6 +46,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.HeadObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.UploadPartPresignRequest;
 
 import java.net.URL;
 import java.time.Duration;
@@ -210,6 +212,108 @@ public final class S3Manager implements AssetManager {
             final Resource resource,
             final boolean permanent) {
         asyncAssetExecutorService_.submit(() -> deleteResource(resource, permanent));
+    }
+
+    @Override
+    public String initiateMultipartUpload(
+            final Resource resource) {
+        final String bucketName = awsConfig_.getAwsS3BucketName();
+        final String key = resource.getS3Key();
+        final String defaultStorageClass = awsConfig_.getAwsS3DefaultStorageClass();
+
+        final CreateMultipartUploadRequest req = CreateMultipartUploadRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .storageClass(defaultStorageClass)
+                .build();
+
+        return s3_.createMultipartUpload(req).uploadId();
+    }
+
+    @Override
+    public URL getPresignedUploadUrlForPart(
+            final Resource resource,
+            final String uploadId,
+            final int partNumber,
+            final long partSize) {
+        final long linkValidityDurationInSeconds =
+                awsConfig_.getAwsS3PresignedAssetUrlValidityDuration(TimeUnit.SECONDS);
+
+        final String bucketName = awsConfig_.getAwsS3BucketName();
+        final String key = resource.getS3Key();
+
+        final String defaultStorageClass = awsConfig_.getAwsS3DefaultStorageClass();
+
+        // https://github.com/aws/aws-sdk-java-v2/issues/1849#issuecomment-642919219
+        final AwsRequestOverrideConfiguration overrideConfig = AwsRequestOverrideConfiguration.builder()
+                .putRawQueryParameter(X_AMZ_STORAGE_CLASS, defaultStorageClass)
+                .build();
+
+        final UploadPartRequest uploadPartRequest = UploadPartRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .uploadId(uploadId)
+                .partNumber(partNumber)
+                .contentLength(partSize)
+                .overrideConfiguration(overrideConfig)
+                .build();
+
+        final UploadPartPresignRequest presignRequest = UploadPartPresignRequest.builder()
+                .signatureDuration(Duration.ofSeconds(linkValidityDurationInSeconds))
+                .uploadPartRequest(uploadPartRequest)
+                .build();
+
+        return presigner_.presignUploadPart(presignRequest).url();
+    }
+
+    @Override
+    public void completeMultipartUpload(
+            final Resource resource,
+            final String uploadId,
+            final List<CompleteMultipartUploadRequest.Part> parts) {
+        final String bucketName = awsConfig_.getAwsS3BucketName();
+        final String key = resource.getS3Key();
+
+        final ImmutableList.Builder<CompletedPart> completedPartsBuilder = ImmutableList.builder();
+        for (final CompleteMultipartUploadRequest.Part p : parts) {
+            final CompletedPart completedPart = CompletedPart.builder()
+                    .partNumber(p.getPartNumber())
+                    .eTag(p.getETag())
+                    .build();
+            completedPartsBuilder.add(completedPart);
+        }
+
+        final List<CompletedPart> completedParts = completedPartsBuilder.build();
+
+        final CompletedMultipartUpload completedMultipartUpload = CompletedMultipartUpload.builder()
+                .parts(completedParts)
+                .build();
+
+        final software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest completeRequest =
+                software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .uploadId(uploadId)
+                .multipartUpload(completedMultipartUpload)
+                .build();
+
+        s3_.completeMultipartUpload(completeRequest);
+    }
+
+    @Override
+    public void abortMultipartUpload(
+            final Resource resource,
+            final String uploadId) {
+        final String bucketName = awsConfig_.getAwsS3BucketName();
+        final String key = resource.getS3Key();
+
+        final AbortMultipartUploadRequest abortRequest = AbortMultipartUploadRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .uploadId(uploadId)
+                .build();
+
+        s3_.abortMultipartUpload(abortRequest);
     }
 
     private void deleteObject(
