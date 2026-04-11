@@ -43,7 +43,6 @@ import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.sizer.cost.CostAnalyzer;
-import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.request.v1.UpdateFileRequest;
 import onyx.entities.api.request.v1.UploadFileRequest;
 import onyx.entities.api.response.v1.ResourceResponse;
@@ -54,14 +53,10 @@ import onyx.exceptions.api.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
 import java.net.URL;
-import java.time.Instant;
-import java.util.List;
 
 import static curacao.annotations.RequestMapping.Method.DELETE;
 import static curacao.annotations.RequestMapping.Method.GET;
@@ -69,22 +64,15 @@ import static curacao.annotations.RequestMapping.Method.POST;
 import static curacao.annotations.RequestMapping.Method.PUT;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
-import static onyx.util.PathUtils.splitNormalizedPathToElements;
 import static onyx.util.UserUtils.userIsNotOwner;
 
 @Controller
-public final class File extends AbstractOnyxApiController {
+public final class File extends AbstractOnyxFileApiController {
 
     private static final Logger LOG = LoggerFactory.getLogger(File.class);
 
     private final AwsConfig awsConfig_;
     private final LocalCacheConfig localCacheConfig_;
-
-    private final AssetManager assetManager_;
-    private final ResourceManager resourceManager_;
-    private final CacheManager cacheManager_;
-
-    private final CostAnalyzer costAnalyzer_;
 
     private final ObjectMapper objectMapper_;
 
@@ -98,13 +86,9 @@ public final class File extends AbstractOnyxApiController {
             final CacheManager cacheManager,
             final CostAnalyzer costAnalyzer,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(onyxConfig);
+        super(onyxConfig, assetManager, cacheManager, resourceManager, costAnalyzer);
         awsConfig_ = awsConfig;
         localCacheConfig_ = localCacheConfig;
-        assetManager_ = assetManager;
-        resourceManager_ = resourceManager;
-        cacheManager_ = cacheManager;
-        costAnalyzer_ = costAnalyzer;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
@@ -157,16 +141,7 @@ public final class File extends AbstractOnyxApiController {
         }
 
         final String normalizedPath = normalizePath(username, path);
-        final Resource file = resourceManager_.getResourceAtPath(normalizedPath);
-        if (file != null && BooleanUtils.isTrue(overwrite)) {
-            LOG.warn("Overwrite is true - skipping existing resource check: {}",
-                    file.getPath());
-            // Delete the asset before overwriting the resource.
-            assetManager_.deleteResource(file, true);
-        } else if (file != null) {
-            throw new ApiConflictException("File or other resource at path already exists: "
-                    + normalizedPath);
-        }
+        checkAndHandleExistingFile(normalizedPath, overwrite);
 
         final long uploadRequestSize = request.getSize();
         final long maxUploadRequestSize = awsConfig_.getAwsS3MaxUploadFileSize();
@@ -181,63 +156,12 @@ public final class File extends AbstractOnyxApiController {
 
         final String parentPath = normalizePath(username, FilenameUtils.getPathNoEndSeparator(path));
 
-        // Recursively create the parent directories, only if asked.
         if (BooleanUtils.isTrue(recursive)) {
-            final List<Triple<String, String, String>> elements =
-                    splitNormalizedPathToElements(parentPath);
-
-            for (final Triple<String, String, String> element : elements) {
-                final String elementParentPath = element.getLeft();
-                final String elementPath = element.getMiddle();
-
-                final Resource elementParent = resourceManager_.getResourceAtPath(elementPath);
-                if (elementParent == null) {
-                    final Resource newDirectory = new Resource.Builder()
-                            .setPath(elementPath)
-                            .setParent(elementParentPath)
-                            .setDescription("") // intentional
-                            .setType(Resource.Type.DIRECTORY)
-                            .setVisibility(request.getVisibility())
-                            .setOwner(session.getUsername())
-                            .setCreatedAt(Instant.now()) // now
-                            .build();
-
-                    resourceManager_.createResource(newDirectory);
-                } else if (!Resource.Type.DIRECTORY.equals(elementParent.getType())) {
-                    throw new ApiBadRequestException("Found no parent directory resource at path: "
-                            + parentPath);
-                }
-            }
+            createParentDirectoriesIfNeeded(parentPath, request, session);
         }
 
-        final Resource parent = resourceManager_.getResourceAtPath(parentPath);
-        if (parent == null) {
-            throw new ApiNotFoundException("No parent directory resource at path: "
-                    + parentPath);
-        } else if (!Resource.Type.DIRECTORY.equals(parent.getType())) {
-            throw new ApiBadRequestException("Found no parent directory resource at path: "
-                    + parentPath);
-        } else if (userIsNotOwner(parent, session)) {
-            throw new ApiForbiddenException("Authenticated user is not the owner of parent directory: "
-                    + parentPath);
-        }
-
-        // Compute the initial cost based on the file's size and the applicable tier.
-        final Instant now = Instant.now();
-        final BigDecimal cost = costAnalyzer_.computeResourceCost(request.getSize(), now);
-
-        final Resource newFile = new Resource.Builder()
-                .setPath(normalizedPath)
-                .setParent(parent.getPath())
-                .setSize(request.getSize())
-                .setDescription(request.getDescription())
-                .setType(Resource.Type.FILE)
-                .setVisibility(request.getVisibility())
-                .setOwner(session.getUsername())
-                .setCreatedAt(now)
-                .setLastAccessedAt(now)
-                .setCost(cost)
-                .build();
+        final Resource parent = validateAndGetParentDirectory(parentPath, session);
+        final Resource newFile = buildNewFileResource(normalizedPath, parent, request, session);
 
         resourceManager_.createResource(newFile);
 

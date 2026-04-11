@@ -150,7 +150,7 @@ public final class Directory extends AbstractOnyxApiController {
                     final Resource newDirectory = new Resource.Builder()
                             .setPath(elementPath)
                             .setParent(elementParentPath)
-                            .setDescription("") // intentional
+                            .setDescription(StringUtils.EMPTY) // intentional
                             .setType(Resource.Type.DIRECTORY)
                             .setVisibility(request.getVisibility())
                             .setOwner(session.getUsername())

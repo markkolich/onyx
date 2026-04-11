@@ -26,9 +26,11 @@
 
 package onyx.components.storage;
 
+import onyx.entities.api.request.v1.CompleteMultipartUploadRequest;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
 import java.net.URL;
+import java.util.List;
 
 public interface AssetManager {
 
@@ -53,5 +55,23 @@ public interface AssetManager {
     void deleteResourceAsync(
             final Resource resource,
             final boolean permanent);
+
+    String initiateMultipartUpload(
+            final Resource resource);
+
+    URL getPresignedUploadUrlForPart(
+            final Resource resource,
+            final String uploadId,
+            final int partNumber,
+            final long partSize);
+
+    void completeMultipartUpload(
+            final Resource resource,
+            final String uploadId,
+            final List<CompleteMultipartUploadRequest.Part> parts);
+
+    void abortMultipartUpload(
+            final Resource resource,
+            final String uploadId);
 
 }

@@ -28,6 +28,7 @@ package onyx.components.storage.sizer;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import onyx.components.config.aws.AwsConfig;
 import onyx.components.quartz.QuartzSchedulerFactory;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.ResourceManager;
@@ -47,6 +48,7 @@ public final class SizerJobScheduler {
     public SizerJobScheduler(
             final QuartzSchedulerFactory quartzSchedulerFactory,
             final SizerConfig sizerConfig,
+            final AwsConfig awsConfig,
             final ResourceManager resourceManager,
             final AssetManager assetManager,
             final CostAnalyzer costAnalyzer) throws Exception {
@@ -54,6 +56,7 @@ public final class SizerJobScheduler {
 
         final JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put(SizerConfig.class.getSimpleName(), sizerConfig);
+        jobDataMap.put(AwsConfig.class.getSimpleName(), awsConfig);
         jobDataMap.put(ResourceManager.class.getSimpleName(), resourceManager);
         jobDataMap.put(AssetManager.class.getSimpleName(), assetManager);
         jobDataMap.put(CostAnalyzer.class.getSimpleName(), costAnalyzer);

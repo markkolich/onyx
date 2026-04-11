@@ -47,7 +47,7 @@
         <commons-io.version>2.21.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
 
-        <aws-sdk-v2.version>2.42.23</aws-sdk-v2.version>
+        <aws-sdk-v2.version>2.42.33</aws-sdk-v2.version>
 
         <guava.version>33.5.0-jre</guava.version>
 
@@ -59,7 +59,7 @@
         <bcprov-jdk18on.version>1.83</bcprov-jdk18on.version>
         <jbcrypt.version>0.4</jbcrypt.version>
 
-        <async-http-client.version>3.0.8</async-http-client.version>
+        <async-http-client.version>3.0.9</async-http-client.version>
 
         <picocli.version>4.7.7</picocli.version>
 

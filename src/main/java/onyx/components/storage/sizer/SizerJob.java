@@ -27,6 +27,7 @@
 package onyx.components.storage.sizer;
 
 import com.google.common.collect.ImmutableSet;
+import onyx.components.config.aws.AwsConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.sizer.cost.CostAnalyzer;
@@ -42,8 +43,10 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static onyx.util.CurrencyUtils.humanReadableCost;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
@@ -67,6 +70,8 @@ public final class SizerJob implements Job {
 
         final SizerConfig sizerConfig =
                 (SizerConfig) jobDataMap.get(SizerConfig.class.getSimpleName());
+        final AwsConfig awsConfig =
+                (AwsConfig) jobDataMap.get(AwsConfig.class.getSimpleName());
         final ResourceManager resourceManager =
                 (ResourceManager) jobDataMap.get(ResourceManager.class.getSimpleName());
         final AssetManager assetManager =
@@ -89,7 +94,7 @@ public final class SizerJob implements Job {
                     () -> resourceManager.getResourceAtPath(normalizedPath));
             if (resource != null) {
                 rootNode.plus(sizeResource(backoffMaxRetries, backoffThrottle,
-                        resourceManager, assetManager, costAnalyzer, resource));
+                        awsConfig, resourceManager, assetManager, costAnalyzer, resource));
             }
 
             final long end = System.currentTimeMillis();
@@ -106,6 +111,7 @@ public final class SizerJob implements Job {
     private static TreeNode sizeResource(
             final int backoffMaxRetries,
             final Duration backoffThrottle,
+            final AwsConfig awsConfig,
             final ResourceManager resourceManager,
             final AssetManager assetManager,
             final CostAnalyzer costAnalyzer,
@@ -115,9 +121,24 @@ public final class SizerJob implements Job {
         if (Resource.Type.FILE.equals(resource.getType())) {
             final long resourceObjectSizeFromS3 = assetManager.getResourceObjectSize(resource);
             if (resourceObjectSizeFromS3 < 0L) {
-                // If the file resource exists but does not resolve to a valid asset in S3
-                // then log a warning and skip indexing of the file.
-                LOG.warn("Sizer skipping non-existent resource in S3: {}", resource.getPath());
+                // The file resource exists in DynamoDB but has no backing object in S3. This can
+                // happen when an upload was initiated (creating the DDB record) but the client
+                // never completed it. Distinguish between uploads still within their presigned URL
+                // validity window (may be legitimately in progress) and those past it (confirmed
+                // zombie records that will never be completed).
+                final long validityDurationMillis =
+                        awsConfig.getAwsS3PresignedAssetUrlValidityDuration(TimeUnit.MILLISECONDS);
+                final Instant uploadDeadline =
+                        resource.getCreatedAt().plusMillis(validityDurationMillis);
+                if (Instant.now().isAfter(uploadDeadline)) {
+                    LOG.warn("Sizer skipping non-existent resource in S3 - multipart upload window expired"
+                            + " at {}, record is a confirmed zombie: {}",
+                            uploadDeadline, resource.getPath());
+                } else {
+                    LOG.warn("Sizer skipping non-existent resource in S3 - upload may be"
+                            + " in progress (window closes {}): {}",
+                            uploadDeadline, resource.getPath());
+                }
                 return TreeNode.of();
             }
 
@@ -155,7 +176,7 @@ public final class SizerJob implements Job {
                 try {
                     // Recursive!
                     treeNode.plus(sizeResource(backoffMaxRetries, backoffThrottle,
-                            resourceManager, assetManager, costAnalyzer, child));
+                            awsConfig, resourceManager, assetManager, costAnalyzer, child));
                 } catch (final Exception e) {
                     LOG.warn("Skipping resource - failed to size or cost: {}", child.getPath(), e);
                 }
