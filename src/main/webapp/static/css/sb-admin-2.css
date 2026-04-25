@@ -11054,3 +11054,8 @@ body.sidebar-toggled footer.sticky-footer {
 .rendered-markdown p:last-child {
   margin-bottom: 0;
 }
+
+/* Keyboard navigation: highlight selected row */
+tr.keyboard-selected > td {
+    background-color: rgba(78, 115, 223, 0.15) !important;
+}

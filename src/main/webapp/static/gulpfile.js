@@ -66,7 +66,8 @@ function concatJs() {
         'js/onyx/app/previewer.js',
         'js/onyx/app/webauthn.js',
         'js/onyx/app/widgets/dark-mode.js',
-        'js/onyx/app/widgets/markdown.js'
+        'js/onyx/app/widgets/markdown.js',
+        'js/onyx/app/widgets/keyboard.js'
     ];
 
     return gulp.src(jsResources)
