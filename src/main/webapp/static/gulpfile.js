@@ -4,7 +4,7 @@ const gulp = require('gulp'),
     del = require('del'),
     concat = require('gulp-concat'),
     eslint = require('gulp-eslint'),
-    uglify = require('gulp-uglify'),
+    terser = require('gulp-terser'),
     cleanCSS = require('gulp-clean-css'),
     rename = require('gulp-rename'),
     banner = require('gulp-banner'),
@@ -66,7 +66,8 @@ function concatJs() {
         'js/onyx/app/previewer.js',
         'js/onyx/app/webauthn.js',
         'js/onyx/app/widgets/dark-mode.js',
-        'js/onyx/app/widgets/markdown.js'
+        'js/onyx/app/widgets/markdown.js',
+        'js/onyx/app/widgets/keyboard.js'
     ];
 
     return gulp.src(jsResources)
@@ -78,7 +79,7 @@ function minifyJs(callback) {
     // uglify() wants pump()
     pump([
         gulp.src('build/app.js'),
-        uglify(),
+        terser(),
         rename({suffix: '.min'}),
         gulp.dest('release')
     ], callback);

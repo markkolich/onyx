@@ -4,7 +4,7 @@ this['Onyx'] = this['Onyx'] || {};
 (function(hv, parent, window, document) {
     'use strict';
 
-    var
+    const
 
         // Namespace.
         self = parent,
@@ -16,31 +16,29 @@ this['Onyx'] = this['Onyx'] || {};
 
         devMode = (hostname === 'localhost'),
 
-        appPath = (function() {
-            var path = (devMode ? '/onyx' : ''),
+        appPath = (() => {
+            const path = (devMode ? '/onyx' : ''),
                 port = (devMode ? '8080' : location.port);
             return {
                 'path': path,
                 'port': port
             };
-        }()),
+        })(),
 
-        apiVersion = (function() {
-            return 'v1';
-        }()),
-        apiPath = (function() {
-            var path = (appPath.path + '/api'),
+        apiVersion = (() => 'v1')(),
+        apiPath = (() => {
+            const path = `${appPath.path}/api`,
                 port = (devMode ? '8080' : location.port);
             return {
                 'path': path,
                 'port': port
             };
-        }()),
+        })(),
 
         // Dynamically build the base app URL.
-        baseUrl = protocol + '//' + hostname + ((appPath.port !== '') ? ':' + appPath.port : ''),
-        baseAppUrl = baseUrl + appPath.path,
-        baseApiUrl = baseUrl + apiPath.path,
+        baseUrl = `${protocol}//${hostname}${appPath.port !== '' ? `:${appPath.port}` : ''}`,
+        baseAppUrl = `${baseUrl}${appPath.path}`,
+        baseApiUrl = `${baseUrl}${apiPath.path}`,
         baseApiVersion = apiVersion;
 
     // Exports

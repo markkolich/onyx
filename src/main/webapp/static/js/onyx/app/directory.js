@@ -1,7 +1,7 @@
 (function(parent, window, document) {
     'use strict';
 
-    var
+    const
 
         // Namespace
         self = parent.Directory = parent.Directory || {},
@@ -12,33 +12,33 @@
 
         create = (function() {
 
-            var
+            const
                 $modal = $('#create-directory-modal'),
 
-                showModal = function() {
-                    $modal.one('shown.bs.modal', function() {
+                showModal = () => {
+                    $modal.one('shown.bs.modal', () => {
                         // Convenience
                         $modal.find('input[data-directory="name"]').focus();
 
-                        $modal.find('form').unbind().on('submit', function(e) {
+                        $modal.find('form').unbind().on('submit', (e) => {
                             e.preventDefault();
 
-                            var rootPath = $('body[data-path]').data('path');
-                            var name = $modal.find('input[data-directory="name"]').val();
-                            var resource = rootPath + '/' + encodeURIComponent(name);
+                            const rootPath = $('body[data-path]').data('path');
+                            const name = $modal.find('input[data-directory="name"]').val();
+                            const resource = `${rootPath}/${encodeURIComponent(name)}`;
 
-                            var description = $modal.find('input[data-directory="description"]').val();
-                            var visibility = $modal.find('select[data-directory="visibility"]').val();
+                            const description = $modal.find('input[data-directory="description"]').val();
+                            const visibility = $modal.find('select[data-directory="visibility"]').val();
 
                             $.ajax({
                                 type: 'POST',
-                                url: parent.baseApiUrl + '/v1/directory' + resource,
+                                url: `${parent.baseApiUrl}/v1/directory${resource}`,
                                 contentType: 'application/json',
                                 data: JSON.stringify({
                                     description: description,
                                     visibility: visibility
                                 }),
-                                success: function(res, status, xhr) {
+                                success: () => {
                                     $modal.modal('hide');
 
                                     window.location.reload(true);
@@ -60,34 +60,34 @@
 
         edit = (function() {
 
-            var
-                toggleVisibility = function(resource, visibility) {
-                    var newVisibility = (visibility === 'PUBLIC') ? 'PRIVATE' : 'PUBLIC';
+            const
+                toggleVisibility = (resource, visibility) => {
+                    const newVisibility = (visibility === 'PUBLIC') ? 'PRIVATE' : 'PUBLIC';
 
                     $.ajax({
                         type: 'PUT',
-                        url: parent.baseApiUrl + '/v1/directory' + resource,
+                        url: `${parent.baseApiUrl}/v1/directory${resource}`,
                         contentType: 'application/json',
                         data: JSON.stringify({
                             visibility: newVisibility
                         }),
-                        success: function(res, status, xhr) {
+                        success: () => {
                             window.location.reload(true);
                         }
                     });
                 },
 
-                toggleFavorite = function(resource, favorite) {
-                    var newFavorite = (favorite === false) ? true : false;
+                toggleFavorite = (resource, favorite) => {
+                    const newFavorite = (favorite === false) ? true : false;
 
                     $.ajax({
                         type: 'PUT',
-                        url: parent.baseApiUrl + '/v1/directory' + resource,
+                        url: `${parent.baseApiUrl}/v1/directory${resource}`,
                         contentType: 'application/json',
                         data: JSON.stringify({
                             favorite: newFavorite
                         }),
-                        success: function(res, status, xhr) {
+                        success: () => {
                             window.location.reload(true);
                         }
                     });
@@ -102,55 +102,53 @@
 
         del = (function() {
 
-            var
-                $modal = $('#delete-directory-modal'),
-                permanent = false,
+            const $modal = $('#delete-directory-modal');
+            let permanent = false;
 
-                showModal = function(resource) {
-                    var name = decodeURIComponent(resource.split('/').pop());
-                    $modal.find('[data-modal="name"]').text(name);
+            const showModal = (resource) => {
+                const name = decodeURIComponent(resource.split('/').pop());
+                $modal.find('[data-modal="name"]').text(name);
 
-                    var kpListener = new window.keypress.Listener();
-                    permanent = false;
+                const kpListener = new window.keypress.Listener();
+                permanent = false;
 
-                    $modal.one('shown.bs.modal', function() {
-                        var $submitButton = $modal.find('button[type="submit"]');
-                        kpListener.register_combo({
-                            'keys': 'shift',
-                            'is_exclusive': true,
-                            'on_keydown': function() {
-                                $submitButton.text('Delete Permanently');
-                                permanent = true;
-                            },
-                            'on_keyup': function() {
-                                $submitButton.text('Delete');
-                                permanent = false;
+                $modal.one('shown.bs.modal', () => {
+                    const $submitButton = $modal.find('button[type="submit"]');
+                    kpListener.register_combo({
+                        'keys': 'shift',
+                        'is_exclusive': true,
+                        'on_keydown': () => {
+                            $submitButton.text('Delete Permanently');
+                            permanent = true;
+                        },
+                        'on_keyup': () => {
+                            $submitButton.text('Delete');
+                            permanent = false;
+                        }
+                    });
+
+                    $modal.find('button[type="submit"]').unbind().click(() => {
+                        kpListener.stop_listening();
+
+                        $.ajax({
+                            type: 'DELETE',
+                            url: `${parent.baseApiUrl}/v1/directory${resource}?${$.param({'permanent': permanent})}`,
+                            success: () => {
+                                $modal.modal('hide');
+
+                                window.location.reload(true);
                             }
                         });
-
-                        $modal.find('button[type="submit"]').unbind().click(function() {
-                            kpListener.stop_listening();
-
-                            $.ajax({
-                                type: 'DELETE',
-                                url: parent.baseApiUrl + '/v1/directory' + resource
-                                    + '?' + $.param({'permanent':permanent}),
-                                success: function(res, status, xhr) {
-                                    $modal.modal('hide');
-
-                                    window.location.reload(true);
-                                }
-                            });
-                        });
                     });
+                });
 
-                    $modal.one('hidden.bs.modal', function() {
-                        kpListener.reset();
-                        kpListener.destroy();
-                    });
+                $modal.one('hidden.bs.modal', () => {
+                    kpListener.reset();
+                    kpListener.destroy();
+                });
 
-                    $modal.modal('show');
-                };
+                $modal.modal('show');
+            };
 
             return {
                 'showModal': showModal
@@ -158,8 +156,8 @@
 
         }()),
 
-        init = function() {
-            data.$contentDiv.find('[data-action="create-directory"]').on('click', function(e) {
+        init = () => {
+            data.$contentDiv.find('[data-action="create-directory"]').on('click', (e) => {
                 e.preventDefault();
 
                 create.showModal();
@@ -168,23 +166,23 @@
             data.$contentDiv.find('[data-action="toggle-directory-visibility"]').on('click', function(e) {
                 e.preventDefault();
 
-                var resource = $(this).closest('tr[data-resource]').data('resource');
-                var visibility = $(this).closest('tr[data-resource-visibility]').data('resource-visibility');
+                const resource = $(this).closest('tr[data-resource]').data('resource');
+                const visibility = $(this).closest('tr[data-resource-visibility]').data('resource-visibility');
                 edit.toggleVisibility(resource, visibility);
                 return true;
             });
             data.$contentDiv.find('[data-action="toggle-directory-favorite"]').on('click', function(e) {
                 e.preventDefault();
 
-                var resource = $(this).closest('tr[data-resource]').data('resource');
-                var favorite = $(this).closest('tr[data-resource-favorite]').data('resource-favorite');
+                const resource = $(this).closest('tr[data-resource]').data('resource');
+                const favorite = $(this).closest('tr[data-resource-favorite]').data('resource-favorite');
                 edit.toggleFavorite(resource, favorite);
                 return true;
             });
             data.$contentDiv.find('[data-action="delete-directory"]').on('click', function(e) {
                 e.preventDefault();
 
-                var resource = $(this).closest('tr[data-resource]').data('resource');
+                const resource = $(this).closest('tr[data-resource]').data('resource');
                 del.showModal(resource);
                 return true;
             });

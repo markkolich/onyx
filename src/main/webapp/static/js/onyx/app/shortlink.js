@@ -1,7 +1,7 @@
 (function(parent, window, document) {
     'use strict';
 
-    var
+    const
 
         // Namespace
         self = parent.ShortLink = parent.ShortLink || {},
@@ -12,22 +12,22 @@
 
         getShortLink = (function() {
 
-            var
+            const
                 $modal = $('#get-shortlink-modal'),
 
-                showModal = function() {
+                showModal = () => {
                     // Clear any shortlink that may already be in the input field.
                     $modal.find('input[data-shortlink="link"]').val('');
 
-                    $modal.one('shown.bs.modal', function() {
-                        var path = $('body[data-path]').data('path');
+                    $modal.one('shown.bs.modal', () => {
+                        const path = $('body[data-path]').data('path');
 
                         $.ajax({
                             type: 'POST',
-                            url: parent.baseApiUrl + '/v1/shortlink' + path,
+                            url: `${parent.baseApiUrl}/v1/shortlink${path}`,
                             contentType: 'application/json',
-                            success: function(res, status, xhr) {
-                                var shortLinkUrl = res.shortLinkUrl;
+                            success: (res) => {
+                                const shortLinkUrl = res.shortLinkUrl;
 
                                 // Convenience
                                 $modal.find('input[data-shortlink="link"]')
@@ -46,8 +46,8 @@
 
         }()),
 
-        init = function() {
-            data.$contentDiv.find('[data-action="get-shortlink"]').on('click', function(e) {
+        init = () => {
+            data.$contentDiv.find('[data-action="get-shortlink"]').on('click', (e) => {
                 e.preventDefault();
 
                 getShortLink.showModal();

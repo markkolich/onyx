@@ -1,7 +1,7 @@
 (function(parent, window, document) {
     'use strict';
 
-    var
+    const
 
         // Namespace
         self = parent.Markdown = parent.Markdown || {},
@@ -14,51 +14,50 @@
 
         renderer = (function() {
 
-            var
-                configure = function() {
+            const
+                configure = () => {
                     marked.use({
                         renderer: {
                             // Double underscores render as underline instead of bold.
                             strong: function(token) {
-                                var content = this.parser.parseInline(token.tokens);
+                                const content = this.parser.parseInline(token.tokens);
                                 if (token.raw.indexOf('__') === 0) {
-                                    return '<u>' + content + '</u>';
+                                    return `<u>${content}</u>`;
                                 }
-                                return '<strong>' + content + '</strong>';
+                                return `<strong>${content}</strong>`;
                             },
                             // Add Bootstrap table class to rendered tables.
                             table: function(token) {
-                                var self = this;
-                                var renderCell = function(cell) {
-                                    var align = cell.align ? ' style="text-align:' + cell.align + '"' : '';
-                                    return '<td' + align + '>' + self.parser.parseInline(cell.tokens) + '</td>';
+                                const self = this;
+                                const renderCell = (cell) => {
+                                    const align = cell.align ? ` style="text-align:${cell.align}"` : '';
+                                    return `<td${align}>${self.parser.parseInline(cell.tokens)}</td>`;
                                 };
-                                var headerCells = token.header.map(renderCell).join('\n');
-                                var bodyRows = token.rows.map(function(row) {
-                                    return '<tr>' + row.map(renderCell).join('\n') + '</tr>';
+                                const headerCells = token.header.map(renderCell).join('\n');
+                                const bodyRows = token.rows.map((row) => {
+                                    return `<tr>${row.map(renderCell).join('\n')}</tr>`;
                                 }).join('\n');
                                 return '<table class="table table-striped table-hover mb-0">\n' +
-                                    '<thead><tr>' + headerCells + '</tr></thead>\n' +
-                                    '<tbody>' + bodyRows + '</tbody>\n</table>\n';
+                                    `<thead><tr>${headerCells}</tr></thead>\n` +
+                                    `<tbody>${bodyRows}</tbody>\n</table>\n`;
                             },
                             // Strip images, images are not supported.
-                            image: function() {
-                                return '';
-                            },
+                            image: () => '',
                             // Escape raw HTML so it renders as literal text as HTML is not supported in this editor.
-                            html: function(token) {
-                                return token.raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                            }
+                            html: (token) => token.raw
+                                .replace(/&/g, '&amp;')
+                                .replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;')
                         }
                     });
                 },
 
-                render = function() {
+                render = () => {
                     $('[data-raw-description]').each(function() {
-                        var $el = $(this);
-                        var raw = $el.attr('data-raw-description');
+                        const $el = $(this);
+                        const raw = $el.attr('data-raw-description');
                         if (raw) {
-                            var $target = $el.find('.rendered-markdown');
+                            let $target = $el.find('.rendered-markdown');
                             if ($target.length === 0) {
                                 $target = $el.filter('.rendered-markdown');
                             }
@@ -69,7 +68,7 @@
                     });
                 },
 
-                init = function() {
+                init = () => {
                     configure();
                     render();
                 };
@@ -82,47 +81,46 @@
 
         inlineEdit = (function() {
 
-            var
-                editing = false,
+            let editing = false,
                 rawDescription = '',
+                kpListener = null;
 
-                kpListener = null,
-
-                enterEditMode = function() {
+            const
+                enterEditMode = () => {
                     if (editing) {
                         return;
                     }
                     editing = true;
 
-                    var $textarea = $('<textarea>').attr('rows', 1).val(rawDescription);
+                    const $textarea = $('<textarea>').attr('rows', 1).val(rawDescription);
                     data.$rendered.hide();
                     data.$editable.append($textarea);
 
-                    var autoResize = function() {
-                        var scrollX = window.pageXOffset;
-                        var scrollY = window.pageYOffset;
+                    const autoResize = () => {
+                        const scrollX = window.pageXOffset;
+                        const scrollY = window.pageYOffset;
                         $textarea[0].style.height = '0';
-                        $textarea[0].style.height = $textarea[0].scrollHeight + 'px';
+                        $textarea[0].style.height = `${$textarea[0].scrollHeight}px`;
                         window.scrollTo(scrollX, scrollY);
                     };
                     autoResize();
                     $textarea.on('input', autoResize);
                     $textarea.focus();
 
-                    $textarea.on('blur', function() {
+                    $textarea.on('blur', () => {
                         save($textarea.val());
                     });
 
                     kpListener = new window.keypress.Listener($textarea[0]);
                     kpListener.register_combo({
                         'keys': 'escape',
-                        'on_keydown': function() {
+                        'on_keydown': () => {
                             cancelEditMode();
                         }
                     });
                 },
 
-                cancelEditMode = function() {
+                cancelEditMode = () => {
                     if (kpListener) {
                         kpListener.reset();
                         kpListener.destroy();
@@ -133,23 +131,23 @@
                     data.$rendered.show();
                 },
 
-                save = function(newValue) {
+                save = (newValue) => {
                     if (newValue === rawDescription) {
                         cancelEditMode();
                         return;
                     }
 
-                    var resourceType = data.$editable.attr('data-resource-type') || 'DIRECTORY';
-                    var apiPath = (resourceType === 'FILE') ? '/v1/file' : '/v1/directory';
+                    const resourceType = data.$editable.attr('data-resource-type') || 'DIRECTORY';
+                    const apiPath = (resourceType === 'FILE') ? '/v1/file' : '/v1/directory';
 
                     $.ajax({
                         type: 'PUT',
-                        url: parent.baseApiUrl + apiPath + data.resource,
+                        url: `${parent.baseApiUrl}${apiPath}${data.resource}`,
                         contentType: 'application/json',
                         data: JSON.stringify({
                             description: newValue
                         }),
-                        success: function() {
+                        success: () => {
                             rawDescription = newValue;
                             if (newValue) {
                                 data.$rendered.html(marked.parse(newValue));
@@ -158,20 +156,20 @@
                             }
                             cancelEditMode();
                         },
-                        error: function() {
+                        error: () => {
                             cancelEditMode();
                         }
                     });
                 },
 
-                init = function() {
+                init = () => {
                     if (data.$editable.length === 0) {
                         return;
                     }
 
                     rawDescription = data.$editable.attr('data-raw-description') || '';
 
-                    data.$editable.on('click', function(e) {
+                    data.$editable.on('click', (e) => {
                         if (!$(e.target).is('textarea')) {
                             enterEditMode();
                         }
@@ -184,7 +182,7 @@
 
         }()),
 
-        init = function() {
+        init = () => {
             renderer.init();
 
             // Only enable inline editing for authenticated users.

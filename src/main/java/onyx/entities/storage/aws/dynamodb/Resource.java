@@ -238,6 +238,17 @@ public final class Resource {
     }
 
     /**
+     * Returns the lowercase file extension of a resource derived from its name,
+     * or an empty string if there is no extension. For example, given a resource
+     * with path "/foo/bar/baz.TXT" this method would return "txt". If the resource
+     * name is "/foo/bar" this method returns "" (empty string).
+     */
+    @DynamoDbIgnore
+    public String getExtension() {
+        return FilenameUtils.getExtension(getName()).toLowerCase();
+    }
+
+    /**
      * Returns a human-readable/friendly size of the resource.
      */
     @DynamoDbIgnore

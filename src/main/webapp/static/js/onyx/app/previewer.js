@@ -1,7 +1,7 @@
 (function(parent, window, document) {
     'use strict';
 
-    var
+    const
 
         // Namespace
         self = parent.Previewer = parent.Previewer || {},
@@ -10,9 +10,20 @@
             $contentDiv: $('#content')
         },
 
-        init = function() {
+        // Suspend/resume keyboard shortcuts via keyboard.js exports. MFP uses
+        // triggerHandler() internally so its events do not bubble to document —
+        // the only reliable hook is the callbacks option passed to magnificPopup().
+        onMfpOpen = () => {
+            parent.Keyboard && parent.Keyboard.suspend();
+        },
+
+        onMfpAfterClose = () => {
+            parent.Keyboard && parent.Keyboard.resume();
+        },
+
+        init = () => {
             // Collect all previewable image resources
-            var $imageLinks = data.$contentDiv.find('a[data-resource-type="FILE"]').filter(function() {
+            const $imageLinks = data.$contentDiv.find('a[data-resource-type="FILE"]').filter(function() {
                 return this.href.match(/\.(gif|jpe?g|tiff|png|webp)$/i);
             });
             // Show image resources in a Magnific Popup lightbox with gallery navigation
@@ -26,9 +37,11 @@
                     arrowMarkup: ''
                 },
                 image: {
-                    titleSrc: function(item) {
-                        return item.el.attr('title') || '';
-                    }
+                    titleSrc: (item) => item.el.attr('title') || ''
+                },
+                callbacks: {
+                    open: onMfpOpen,
+                    afterClose: onMfpAfterClose
                 },
                 showCloseBtn: false,
                 closeBtnInside: true,
@@ -38,7 +51,7 @@
             });
 
             // Collect all previewable media resources
-            var $mediaLinks = data.$contentDiv.find('a[data-resource-type="FILE"]').filter(function() {
+            const $mediaLinks = data.$contentDiv.find('a[data-resource-type="FILE"]').filter(function() {
                 return this.href.match(/\.(mp4|mp3)$/i);
             });
             // Show media in a Magnific Popup iframe with gallery navigation
@@ -62,25 +75,28 @@
                     srcAction: 'iframe_src'
                 },
                 callbacks: {
-                    open: function() {
+                    open: () => {
+                        onMfpOpen();
+
                         // Reach into the <iframe> and force the browser default video player
                         // to 100% width & 100% height so the player fills the lightbox.
-                        var $iframe = $('.mfp-iframe');
+                        const $iframe = $('.mfp-iframe');
                         //$iframe.attr('allow', 'autoplay; fullscreen');
                         //$iframe.attr('allowfullscreen', '');
                         $iframe.on('load', function() {
-                            var $video = $(this).contents().find('video')
+                            const $video = $(this).contents().find('video')
                                 .css('width', '100%')
                                 .css('height', '100%');
 
                             // Attempt to autoplay the <video>
                             if ($video.length) {
-                                $video[0].play().catch(function() {
+                                $video[0].play().catch(() => {
                                     // Autoplay was prevented, user must click play manually
                                 });
                             }
                         });
-                    }
+                    },
+                    afterClose: onMfpAfterClose
                 },
                 showCloseBtn: false,
                 closeBtnInside: true,

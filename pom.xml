@@ -23,7 +23,7 @@
         <maven-frontend-npm.version>10.5.0</maven-frontend-npm.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
-        <maven-pmd-plugin.pmd.version>7.23.0</maven-pmd-plugin.pmd.version>
+        <maven-pmd-plugin.pmd.version>7.24.0</maven-pmd-plugin.pmd.version>
         <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
         <maven-dependency-plugin.version>3.10.0</maven-dependency-plugin.version>
         <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
@@ -37,9 +37,9 @@
 
         <jetty.version>11.0.26</jetty.version>
 
-        <typesafe-config.version>1.4.6</typesafe-config.version>
+        <typesafe-config.version>1.4.7</typesafe-config.version>
 
-        <jackson.version>2.21.2</jackson.version>
+        <jackson.version>2.21.3</jackson.version>
         <jackson-databind-nullable.version>0.2.10</jackson-databind-nullable.version>
 
         <commons-lang3.version>3.20.0</commons-lang3.version>
@@ -47,7 +47,7 @@
         <commons-io.version>2.22.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
 
-        <aws-sdk-v2.version>2.42.39</aws-sdk-v2.version>
+        <aws-sdk-v2.version>2.43.1</aws-sdk-v2.version>
 
         <guava.version>33.6.0-jre</guava.version>
 
@@ -71,7 +71,7 @@
 
         <webauthn-server-core.version>2.8.1</webauthn-server-core.version>
 
-        <checkstyle.version>13.4.0</checkstyle.version>
+        <checkstyle.version>13.4.1</checkstyle.version>
 
         <!-- Test dependency versions -->
 

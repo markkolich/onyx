@@ -2,30 +2,30 @@
 (function(parent, window, document) {
     'use strict';
 
-    var
+    const
 
         // Namespace
         self = parent.WebAuthn = parent.WebAuthn || {},
 
-        base64UrlToArrayBuffer = function(base64Url) {
-            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'),
-                padding = base64.length % 4;
+        base64UrlToArrayBuffer = (base64Url) => {
+            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const padding = base64.length % 4;
             if (padding) {
                 base64 += '='.repeat(4 - padding);
             }
-            var binary = window.atob(base64),
+            const binary = window.atob(base64),
                 buffer = new ArrayBuffer(binary.length),
                 view = new Uint8Array(buffer);
-            for (var ii = 0; ii < binary.length; ii++) {
+            for (let ii = 0; ii < binary.length; ii++) {
                 view[ii] = binary.charCodeAt(ii);
             }
             return buffer;
         },
 
-        arrayBufferToBase64Url = function(buffer) {
-            var bytes = new Uint8Array(buffer),
-                binary = '';
-            for (var ii = 0; ii < bytes.byteLength; ii++) {
+        arrayBufferToBase64Url = (buffer) => {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let ii = 0; ii < bytes.byteLength; ii++) {
                 binary += String.fromCharCode(bytes[ii]);
             }
             return window.btoa(binary)
@@ -34,38 +34,38 @@
                 .replace(/=+$/, '');
         },
 
-        isAvailable = function(callback) {
+        isAvailable = (callback) => {
             if (window.PublicKeyCredential
                     && window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
                 window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-                    .then(function(available) {
+                    .then((available) => {
                         available && callback();
                     });
             }
         },
 
-        register = function(baseApiUrl) {
-            var beginUrl = baseApiUrl + '/v1/webauthn/register/begin',
-                finishUrl = baseApiUrl + '/v1/webauthn/register/finish';
+        register = (baseApiUrl) => {
+            const beginUrl = `${baseApiUrl}/v1/webauthn/register/begin`,
+                finishUrl = `${baseApiUrl}/v1/webauthn/register/finish`;
 
             return $.post(beginUrl)
-                .then(function(beginResponse) {
-                    var options = beginResponse.publicKeyCredentialCreationOptions,
+                .then((beginResponse) => {
+                    const options = beginResponse.publicKeyCredentialCreationOptions,
                         requestId = beginResponse.requestId;
 
                     options.challenge = base64UrlToArrayBuffer(options.challenge);
                     options.user.id = base64UrlToArrayBuffer(options.user.id);
 
                     if (options.excludeCredentials) {
-                        options.excludeCredentials = options.excludeCredentials.map(function(cred) {
+                        options.excludeCredentials = options.excludeCredentials.map((cred) => {
                             cred.id = base64UrlToArrayBuffer(cred.id);
                             return cred;
                         });
                     }
 
                     return navigator.credentials.create({publicKey: options})
-                        .then(function(credential) {
-                            var credentialResponse = {
+                        .then((credential) => {
+                            const credentialResponse = {
                                 id: credential.id,
                                 rawId: arrayBufferToBase64Url(credential.rawId),
                                 type: credential.type,
@@ -82,7 +82,7 @@
                                     credential.response.getTransports();
                             }
 
-                            var clientExtensionResults = credential.getClientExtensionResults();
+                            const clientExtensionResults = credential.getClientExtensionResults();
                             if (clientExtensionResults) {
                                 credentialResponse.clientExtensionResults = clientExtensionResults;
                             }
@@ -95,27 +95,27 @@
                 });
         },
 
-        authenticate = function(baseApiUrl) {
-            var beginUrl = baseApiUrl + '/v1/webauthn/login/begin',
-                finishUrl = baseApiUrl + '/v1/webauthn/login/finish';
+        authenticate = (baseApiUrl) => {
+            const beginUrl = `${baseApiUrl}/v1/webauthn/login/begin`,
+                finishUrl = `${baseApiUrl}/v1/webauthn/login/finish`;
 
             return $.post(beginUrl)
-                .then(function(beginResponse) {
-                    var options = beginResponse.publicKeyCredentialRequestOptions,
+                .then((beginResponse) => {
+                    const options = beginResponse.publicKeyCredentialRequestOptions,
                         requestId = beginResponse.requestId;
 
                     options.challenge = base64UrlToArrayBuffer(options.challenge);
 
                     if (options.allowCredentials) {
-                        options.allowCredentials = options.allowCredentials.map(function(cred) {
+                        options.allowCredentials = options.allowCredentials.map((cred) => {
                             cred.id = base64UrlToArrayBuffer(cred.id);
                             return cred;
                         });
                     }
 
                     return navigator.credentials.get({publicKey: options})
-                        .then(function(credential) {
-                            var credentialResponse = {
+                        .then((credential) => {
+                            const credentialResponse = {
                                 id: credential.id,
                                 rawId: arrayBufferToBase64Url(credential.rawId),
                                 type: credential.type,
@@ -134,7 +134,7 @@
                                     arrayBufferToBase64Url(credential.response.userHandle);
                             }
 
-                            var clientExtensionResults = credential.getClientExtensionResults();
+                            const clientExtensionResults = credential.getClientExtensionResults();
                             if (clientExtensionResults) {
                                 credentialResponse.clientExtensionResults = clientExtensionResults;
                             }
@@ -144,7 +144,7 @@
                                 credential: JSON.stringify(credentialResponse)
                             });
                         })
-                        .then(function(finishResponse) {
+                        .then((finishResponse) => {
                             if (finishResponse.success && finishResponse.redirectUrl) {
                                 window.location.href = finishResponse.redirectUrl;
                             }
@@ -153,21 +153,21 @@
                 });
         },
 
-        init = function() {
-            isAvailable(function() {
-                var $webauthnLoginBtn = $('button#webauthn-login-btn');
+        init = () => {
+            isAvailable(() => {
+                const $webauthnLoginBtn = $('button#webauthn-login-btn');
                 if ($webauthnLoginBtn.length) {
                     $webauthnLoginBtn.removeClass('d-none');
-                    $webauthnLoginBtn.on('click', function(e) {
+                    $webauthnLoginBtn.on('click', (e) => {
                         e.preventDefault();
                         authenticate(parent.baseApiUrl);
                     });
                 }
 
-                var $registerPasskey = $('a#webauthn-register-passkey');
+                const $registerPasskey = $('a#webauthn-register-passkey');
                 if ($registerPasskey.length) {
                     $registerPasskey.removeClass('d-none');
-                    $registerPasskey.on('click', function(e) {
+                    $registerPasskey.on('click', (e) => {
                         e.preventDefault();
                         register(parent.baseApiUrl);
                     });

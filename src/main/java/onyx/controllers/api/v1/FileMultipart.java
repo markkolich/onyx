@@ -204,8 +204,6 @@ public final class FileMultipart extends AbstractOnyxFileApiController {
 
         if (StringUtils.isBlank(uploadId)) {
             throw new ApiBadRequestException("uploadId query parameter is required.");
-        } else if (request == null) {
-            throw new ApiBadRequestException("Request body is required.");
         }
 
         final String normalizedPath = normalizePath(username, path);

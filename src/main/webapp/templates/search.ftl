@@ -60,7 +60,14 @@
                                       </td>
                                       <td class="align-middle d-none d-lg-table-cell">
                                           <#if result.getLeft().getHtmlDescription()?has_content>
-                                              <span title="${result.getLeft().getHtmlDescription()}" data-clipboard-text="${result.getLeft().getHtmlDescription()}">${result.getLeft().getHtmlDescription()?truncate(100, '...')}</span>
+                                              <#-- .txt files render their description in a <code> block to signal that the
+                                                   content is plain-text/preformatted (e.g. a script path or command). All
+                                                   other file types use a plain <span>. -->
+                                              <#if result.getLeft().getExtension() == "txt">
+                                                  <code title="${result.getLeft().getHtmlDescription()}" data-clipboard-text="${result.getLeft().getHtmlDescription()}">${result.getLeft().getHtmlDescription()?truncate(100, '...')}</code>
+                                              <#else>
+                                                  <span title="${result.getLeft().getHtmlDescription()}" data-clipboard-text="${result.getLeft().getHtmlDescription()}">${result.getLeft().getHtmlDescription()?truncate(100, '...')}</span>
+                                              </#if>
                                           <#else>
                                               <div class="mt-2 invisible">&nbsp;</div> <#-- vertical spacer! -->
                                           </#if>

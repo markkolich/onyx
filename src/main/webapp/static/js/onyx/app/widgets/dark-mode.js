@@ -1,7 +1,7 @@
 (function(parent, window, document) {
     'use strict';
 
-    var
+    const
 
         // Namespace
         self = parent.DarkMode = parent.DarkMode || {},
@@ -14,19 +14,19 @@
 
         localStorageKey = 'onyx.dark-mode',
 
-        enable = function() {
+        enable = () => {
             data.$body.addClass('dark-mode');
             localStorage.setItem(localStorageKey, 'true');
             data.$icon.removeClass('fa-sun').addClass('fa-moon');
         },
 
-        disable = function() {
+        disable = () => {
             data.$body.removeClass('dark-mode');
             localStorage.setItem(localStorageKey, 'false');
             data.$icon.removeClass('fa-moon').addClass('fa-sun');
         },
 
-        toggle = function() {
+        toggle = () => {
             if (data.$body.hasClass('dark-mode')) {
                 disable();
             } else {
@@ -34,15 +34,15 @@
             }
         },
 
-        init = function() {
+        init = () => {
             // Disable dark mode if explicitly disabled (default is enabled)
-            var savedPreference = localStorage.getItem(localStorageKey);
+            const savedPreference = localStorage.getItem(localStorageKey);
             if (savedPreference === 'false') {
                 disable();
             }
 
             // Bind toggle button click handler
-            data.$toggle.on('click', function(e) {
+            data.$toggle.on('click', (e) => {
                 e.preventDefault();
                 toggle();
             });

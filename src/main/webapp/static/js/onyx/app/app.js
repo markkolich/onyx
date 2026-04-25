@@ -1,15 +1,15 @@
 (function(parent, window, document) {
     'use strict';
 
-    var
+    const
 
         // Namespace
         self = parent.App = parent.App || {},
 
-        init = function() {
+        init = () => {
             // Auto-focus input elements in dropdowns on shown:
             // https://stackoverflow.com/a/52186879
-            $('.dropdown').one('shown.bs.dropdown', function(e) {
+            $('.dropdown').one('shown.bs.dropdown', () => {
                 $('.dropdown-menu input').focus();
             });
         };

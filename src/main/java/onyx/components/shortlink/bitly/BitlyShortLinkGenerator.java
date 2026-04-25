@@ -31,6 +31,7 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
+import curacao.components.ComponentDestroyable;
 import curacao.core.servlet.HttpStatus;
 import onyx.BuildVersion;
 import onyx.components.OnyxJacksonObjectMapper;
@@ -52,7 +53,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.asynchttpclient.Dsl.asyncHttpClient;
 
 @Component
-public final class BitlyShortLinkGenerator implements ShortLinkGenerator {
+public final class BitlyShortLinkGenerator implements ShortLinkGenerator, ComponentDestroyable {
 
     private static final Logger LOG = LoggerFactory.getLogger(BitlyShortLinkGenerator.class);
 
@@ -70,7 +71,7 @@ public final class BitlyShortLinkGenerator implements ShortLinkGenerator {
 
     private final BitlyShortLinkGeneratorConfig shortLinkGeneratorConfig_;
 
-    private final AsyncHttpClientConfig asyncHttpClientConfig_;
+    private final AsyncHttpClient asyncHttpClient_;
 
     private final ObjectMapper objectMapper_;
 
@@ -88,9 +89,10 @@ public final class BitlyShortLinkGenerator implements ShortLinkGenerator {
         final String userAgent = String.format(USER_AGENT_FORMAT,
                 buildVersion.getBuildNumber(), shortLinkGeneratorConfig_.getVisibleBaseAppUrl());
 
-        asyncHttpClientConfig_ = new DefaultAsyncHttpClientConfig.Builder()
+        final AsyncHttpClientConfig asyncHttpClientConfig = new DefaultAsyncHttpClientConfig.Builder()
                 .setUserAgent(userAgent)
                 .build();
+        asyncHttpClient_ = asyncHttpClient(asyncHttpClientConfig);
     }
 
     @Override
@@ -98,7 +100,7 @@ public final class BitlyShortLinkGenerator implements ShortLinkGenerator {
             final Resource resource) {
         checkNotNull(resource, "Resource cannot be null.");
 
-        try (AsyncHttpClient asyncHttpClient = asyncHttpClient(asyncHttpClientConfig_)) {
+        try {
             final String longUrlForResource = getLongUrlForResource(resource);
             final BitlyShortenUrlRequest bitlyShortenUrlRequest = new BitlyShortenUrlRequest.Builder()
                     .setLongUrl(longUrlForResource)
@@ -113,7 +115,7 @@ public final class BitlyShortLinkGenerator implements ShortLinkGenerator {
             final String shortenUrlRequestBody =
                     objectMapper_.writeValueAsString(bitlyShortenUrlRequest);
 
-            final ListenableFuture<Response> futureResponse = asyncHttpClient.preparePost(shortenApiUrl)
+            final ListenableFuture<Response> futureResponse = asyncHttpClient_.preparePost(shortenApiUrl)
                     .setHeader(HttpHeaders.AUTHORIZATION, authorizationHeader)
                     .setHeader(HttpHeaders.CONTENT_TYPE, JSON_UTF_8)
                     .setBody(shortenUrlRequestBody)
@@ -143,6 +145,11 @@ public final class BitlyShortLinkGenerator implements ShortLinkGenerator {
                     resource.getPath(), e);
             return null;
         }
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        asyncHttpClient_.close();
     }
 
     private String getLongUrlForResource(
