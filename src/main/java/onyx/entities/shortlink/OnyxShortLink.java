@@ -24,33 +24,41 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.shortlink.bitly;
+package onyx.entities.shortlink;
 
-import java.util.concurrent.TimeUnit;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-public interface BitlyShortLinkGeneratorConfig {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    String BITLY_SHORTLINK_GENERATOR_CONFIG_PATH = "bitly";
+@JsonDeserialize(builder = OnyxShortLink.Builder.class)
+public interface OnyxShortLink {
 
-    String BITLY_API_BASE_URL_PROP = "api-base-url";
-    String BITLY_API_ACCESS_TOKEN_PROP = "api-access-token";
-    String BITLY_API_CLIENT_TIMEOUT_PROP = "api-client-timeout";
+    @JsonProperty("resourcePath")
+    String getResourcePath();
 
-    String BITLY_VISIBLE_BASE_APP_URL_PROP = "visible-base-app-url";
+    final class Builder {
 
-    String getApiBaseUrl();
+        private String resourcePath_;
 
-    String getApiAccessToken();
+        @JsonProperty("resourcePath")
+        public Builder setResourcePath(
+                final String resourcePath) {
+            resourcePath_ = resourcePath;
+            return this;
+        }
 
-    long getApiClientTimeout(
-            final TimeUnit timeUnit);
+        public OnyxShortLink build() {
+            checkNotNull(resourcePath_, "Resource path cannot be null.");
 
-    /**
-     * The bit.ly API does not support shortening <code>localhost</code> URLs,
-     * so when running Onyx in dev mode an optional configuration property can
-     * be set here to explicitly override the "visible base app URL" as seen by
-     * bit.ly.
-     */
-    String getVisibleBaseAppUrl();
+            return new OnyxShortLink() {
+                @Override
+                public String getResourcePath() {
+                    return resourcePath_;
+                }
+            };
+        }
+
+    }
 
 }

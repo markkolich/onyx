@@ -62,7 +62,7 @@
                                 $target = $el.filter('.rendered-markdown');
                             }
                             if ($target.length > 0) {
-                                $target.html(marked.parse(raw));
+                                $target.html(DOMPurify.sanitize(marked.parse(raw)));
                             }
                         }
                     });
@@ -150,7 +150,7 @@
                         success: () => {
                             rawDescription = newValue;
                             if (newValue) {
-                                data.$rendered.html(marked.parse(newValue));
+                                data.$rendered.html(DOMPurify.sanitize(marked.parse(newValue)));
                             } else {
                                 data.$rendered.html('<em class="text-muted">Click to add a description...</em>');
                             }

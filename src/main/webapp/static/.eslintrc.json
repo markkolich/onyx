@@ -10,7 +10,8 @@
   "globals": {
     "Onyx": true,
     "_": true,
-    "marked": true
+    "marked": true,
+    "DOMPurify": true
   },
   "rules": {
     "comma-dangle": "error",

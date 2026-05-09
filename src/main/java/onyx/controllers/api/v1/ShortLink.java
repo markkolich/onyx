@@ -31,18 +31,23 @@ import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpResponse;
 import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
+import onyx.components.shortlink.OnyxShortLinkGenerator;
 import onyx.components.shortlink.ShortLinkGenerator;
 import onyx.components.storage.ResourceManager;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.response.v1.CreateShortLinkResponse;
 import onyx.entities.authentication.Session;
+import onyx.entities.shortlink.OnyxShortLink;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.api.*;
 
 import java.net.URL;
 
+import static curacao.annotations.RequestMapping.Method.GET;
 import static curacao.annotations.RequestMapping.Method.POST;
 import static onyx.util.UserUtils.userIsNotOwner;
 import static onyx.util.PathUtils.normalizePath;
@@ -50,9 +55,14 @@ import static onyx.util.PathUtils.normalizePath;
 @Controller
 public final class ShortLink extends AbstractOnyxApiController {
 
+    private static final String BROWSE_RESOURCE_PATH_FORMAT = "%s/browse%s";
+    private static final String DOWNLOAD_RESOURCE_PATH_FORMAT = "%s/api/v1/download%s";
+
     private final ResourceManager resourceManager_;
 
     private final ShortLinkGenerator shortLinkManager_;
+
+    private final OnyxShortLinkGenerator onyxShortLinkGenerator_;
 
     private final ObjectMapper objectMapper_;
 
@@ -61,10 +71,12 @@ public final class ShortLink extends AbstractOnyxApiController {
             final OnyxConfig onyxConfig,
             final ResourceManager resourceManager,
             final ShortLinkGenerator shortLinkManager,
+            final OnyxShortLinkGenerator onyxShortLinkGenerator,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         super(onyxConfig);
         resourceManager_ = resourceManager;
         shortLinkManager_ = shortLinkManager;
+        onyxShortLinkGenerator_ = onyxShortLinkGenerator;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
@@ -110,6 +122,38 @@ public final class ShortLink extends AbstractOnyxApiController {
         return new CreateShortLinkResponse.Builder(objectMapper_)
                 .setShortLinkUrl(shortLinkUrl.toString())
                 .build();
+    }
+
+    @RequestMapping(value = "^/s/(?<code>[a-f0-9]{8})$",
+            methods = GET)
+    public void redirectShortLink(
+            @Path("code") final String code,
+            final HttpResponse response,
+            final AsyncContext context) throws Exception {
+        final OnyxShortLink shortLink = onyxShortLinkGenerator_.getShortLink(code);
+        if (shortLink == null) {
+            throw new ApiNotFoundException("Found no short link for code: " + code);
+        }
+
+        final Resource resource = resourceManager_.getResourceAtPath(shortLink.getResourcePath());
+        if (resource == null) {
+            throw new ApiNotFoundException("Found no resource for short link code: " + code);
+        } else if (Resource.Visibility.PRIVATE.equals(resource.getVisibility())) {
+            // Intentionally throw a ApiNotFoundException to conceal the fact that the resource
+            // exists, but it's not public.
+            throw new ApiNotFoundException("Found no resource for short link code: " + code);
+        }
+
+        final String baseUri = onyxConfig_.getViewSafeFullUri();
+        final String targetUrl;
+        if (Resource.Type.FILE.equals(resource.getType())) {
+            targetUrl = String.format(DOWNLOAD_RESOURCE_PATH_FORMAT, baseUri, resource.getPath());
+        } else {
+            targetUrl = String.format(BROWSE_RESOURCE_PATH_FORMAT, baseUri, resource.getPath());
+        }
+
+        response.sendRedirect(targetUrl);
+        context.complete();
     }
 
 }

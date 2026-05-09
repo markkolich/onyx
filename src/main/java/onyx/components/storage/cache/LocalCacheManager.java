@@ -294,7 +294,7 @@ public final class LocalCacheManager implements CacheManager, ComponentDestroyab
         private final Path tempFilePath_;
         private final OutputStream os_;
 
-        private boolean failed_ = false;
+        private volatile boolean failed_ = false;
 
         private StreamedFileDownloadAsyncHandler(
                 final Path filePath) throws Exception {

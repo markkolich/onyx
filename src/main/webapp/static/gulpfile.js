@@ -57,6 +57,7 @@ function concatJs() {
         'vendor/keypress/keypress-2.1.5.min.js',
         'vendor/underscore/underscore-1.9.2.min.js',
         'vendor/marked/marked.min.js',
+        'vendor/dompurify/purify.min.js',
         'js/sb-admin-2.js',
         'js/onyx/onyx.js',
         'js/onyx/app/app.js',
