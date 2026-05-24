@@ -78,7 +78,7 @@
                 },
 
                 toggleFavorite = (resource, favorite) => {
-                    const newFavorite = (favorite === false) ? true : false;
+                    const newFavorite = favorite === false;
 
                     $.ajax({
                         type: 'PUT',

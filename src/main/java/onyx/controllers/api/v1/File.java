@@ -72,23 +72,21 @@ public final class File extends AbstractOnyxFileApiController {
     private static final Logger LOG = LoggerFactory.getLogger(File.class);
 
     private final AwsConfig awsConfig_;
-    private final LocalCacheConfig localCacheConfig_;
 
     private final ObjectMapper objectMapper_;
 
     @Injectable
     public File(
             final OnyxConfig onyxConfig,
-            final AwsConfig awsConfig,
             final LocalCacheConfig localCacheConfig,
+            final AwsConfig awsConfig,
             final AssetManager assetManager,
             final ResourceManager resourceManager,
             final CacheManager cacheManager,
             final CostAnalyzer costAnalyzer,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(onyxConfig, assetManager, cacheManager, resourceManager, costAnalyzer);
+        super(onyxConfig, localCacheConfig, assetManager, cacheManager, resourceManager, costAnalyzer);
         awsConfig_ = awsConfig;
-        localCacheConfig_ = localCacheConfig;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 

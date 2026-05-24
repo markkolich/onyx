@@ -27,6 +27,7 @@
 package onyx.controllers.api.v1;
 
 import onyx.components.config.OnyxConfig;
+import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
@@ -62,13 +63,17 @@ public abstract class AbstractOnyxFileApiController extends AbstractOnyxApiContr
 
     protected final CostAnalyzer costAnalyzer_;
 
+    protected final LocalCacheConfig localCacheConfig_;
+
     protected AbstractOnyxFileApiController(
             final OnyxConfig onyxConfig,
+            final LocalCacheConfig localCacheConfig,
             final AssetManager assetManager,
             final CacheManager cacheManager,
             final ResourceManager resourceManager,
             final CostAnalyzer costAnalyzer) {
         super(onyxConfig);
+        localCacheConfig_ = localCacheConfig;
         assetManager_ = assetManager;
         cacheManager_ = cacheManager;
         resourceManager_ = resourceManager;
@@ -87,7 +92,13 @@ public abstract class AbstractOnyxFileApiController extends AbstractOnyxApiContr
         if (file != null && BooleanUtils.isTrue(overwrite)) {
             LOG.warn("Overwrite is true - skipping existing resource check: {}",
                     file.getPath());
-            assetManager_.deleteResource(file, true);
+            // Use permanent=false so that on a versioning-enabled S3 bucket a delete marker
+            // is created rather than all versions being permanently wiped, preserving
+            // recoverability in the event the subsequent upload fails.
+            assetManager_.deleteResource(file, false);
+            if (localCacheConfig_.localCacheEnabled()) {
+                cacheManager_.deleteResourceFromCacheAsync(file);
+            }
         } else if (file != null) {
             throw new ApiConflictException("File or other resource at path already exists: "
                     + normalizedPath);

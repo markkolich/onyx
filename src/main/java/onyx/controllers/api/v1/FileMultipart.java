@@ -37,6 +37,7 @@ import curacao.entities.empty.StatusCodeOnlyCuracaoEntity;
 import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.aws.AwsConfig;
+import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
@@ -85,13 +86,14 @@ public final class FileMultipart extends AbstractOnyxFileApiController {
     @Injectable
     public FileMultipart(
             final OnyxConfig onyxConfig,
+            final LocalCacheConfig localCacheConfig,
             final AwsConfig awsConfig,
             final AssetManager assetManager,
             final CacheManager cacheManager,
             final ResourceManager resourceManager,
             final CostAnalyzer costAnalyzer,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(onyxConfig, assetManager, cacheManager, resourceManager, costAnalyzer);
+        super(onyxConfig, localCacheConfig, assetManager, cacheManager, resourceManager, costAnalyzer);
         awsConfig_ = awsConfig;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }

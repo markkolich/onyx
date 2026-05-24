@@ -56,7 +56,7 @@
 
                                 $.ajax({
                                     type: 'POST',
-                                    url: `${parent.baseApiUrl}/v1/file${resource}`,
+                                    url: `${parent.baseApiUrl}/v1/file${resource}?overwrite=true`,
                                     contentType: 'application/json',
                                     data: JSON.stringify({
                                         size: size,
@@ -164,7 +164,7 @@
                 },
 
                 toggleFavorite = (resource, favorite) => {
-                    const newFavorite = (favorite === false) ? true : false;
+                    const newFavorite = favorite === false;
 
                     $.ajax({
                         type: 'PUT',
