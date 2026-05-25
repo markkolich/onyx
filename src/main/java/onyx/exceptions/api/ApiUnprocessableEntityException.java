@@ -24,19 +24,21 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.storage.filter;
+package onyx.exceptions.api;
 
-import java.util.List;
+public final class ApiUnprocessableEntityException extends OnyxApiException {
 
-public interface FilterConfig {
+    private static final int SC_UNPROCESSABLE_ENTITY = 422;
 
-    String FILTER_CONFIG_PATH = "filter";
+    public ApiUnprocessableEntityException(
+            final String message,
+            final Exception cause) {
+        super(SC_UNPROCESSABLE_ENTITY, message, cause);
+    }
 
-    String RESOURCE_EXCLUDES_PROP = "resource.excludes";
-    String UPLOAD_FILTER_PROP = "upload.filter";
-
-    List<String> getResourceExcludes();
-
-    List<String> getUploadFilter();
+    public ApiUnprocessableEntityException(
+            final String message) {
+        super(SC_UNPROCESSABLE_ENTITY, message);
+    }
 
 }

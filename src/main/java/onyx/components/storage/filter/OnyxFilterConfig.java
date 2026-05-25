@@ -49,8 +49,8 @@ public final class OnyxFilterConfig implements FilterConfig {
     }
 
     @Override
-    public List<String> getExcludes() {
-        final ConfigList excludes = config_.getList(EXCLUDES_PROP);
+    public List<String> getResourceExcludes() {
+        final ConfigList excludes = config_.getList(RESOURCE_EXCLUDES_PROP);
 
         final ImmutableList.Builder<String> excludesListBuilder =
                 ImmutableList.builder();
@@ -64,6 +64,24 @@ public final class OnyxFilterConfig implements FilterConfig {
         }
 
         return excludesListBuilder.build();
+    }
+
+    @Override
+    public List<String> getUploadFilter() {
+        final ConfigList filter = config_.getList(UPLOAD_FILTER_PROP);
+
+        final ImmutableList.Builder<String> uploadFilterListBuilder =
+                ImmutableList.builder();
+        for (final ConfigValue filtered : filter) {
+            if (!ConfigValueType.STRING.equals(filtered.valueType())) {
+                continue;
+            }
+
+            // cast intentional, and safe
+            uploadFilterListBuilder.add((String) filtered.unwrapped());
+        }
+
+        return uploadFilterListBuilder.build();
     }
 
 }

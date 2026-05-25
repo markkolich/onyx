@@ -26,17 +26,8 @@
 
 package onyx.components.storage.filter;
 
-import java.util.List;
+import java.util.function.Predicate;
 
-public interface FilterConfig {
-
-    String FILTER_CONFIG_PATH = "filter";
-
-    String RESOURCE_EXCLUDES_PROP = "resource.excludes";
-    String UPLOAD_FILTER_PROP = "upload.filter";
-
-    List<String> getResourceExcludes();
-
-    List<String> getUploadFilter();
+public interface UploadFilter extends Predicate<String> {
 
 }

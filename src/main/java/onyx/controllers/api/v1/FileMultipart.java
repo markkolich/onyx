@@ -41,6 +41,7 @@ import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.filter.UploadFilter;
 import onyx.components.storage.sizer.cost.CostAnalyzer;
 import onyx.entities.api.request.v1.CompleteMultipartUploadRequest;
 import onyx.entities.api.request.v1.UploadFileRequest;
@@ -92,8 +93,9 @@ public final class FileMultipart extends AbstractOnyxFileApiController {
             final CacheManager cacheManager,
             final ResourceManager resourceManager,
             final CostAnalyzer costAnalyzer,
+            final UploadFilter uploadFilter,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(onyxConfig, localCacheConfig, assetManager, cacheManager, resourceManager, costAnalyzer);
+        super(onyxConfig, localCacheConfig, assetManager, cacheManager, resourceManager, costAnalyzer, uploadFilter);
         awsConfig_ = awsConfig;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
@@ -148,6 +150,7 @@ public final class FileMultipart extends AbstractOnyxFileApiController {
         }
 
         final String normalizedPath = normalizePath(username, path);
+        checkAndHandleFilteredUpload(normalizedPath);
         checkAndHandleExistingFile(normalizedPath, overwrite);
 
         final String parentPath = normalizePath(username, FilenameUtils.getPathNoEndSeparator(path));

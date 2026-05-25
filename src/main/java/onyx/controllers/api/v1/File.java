@@ -42,6 +42,7 @@ import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.filter.UploadFilter;
 import onyx.components.storage.sizer.cost.CostAnalyzer;
 import onyx.entities.api.request.v1.UpdateFileRequest;
 import onyx.entities.api.request.v1.UploadFileRequest;
@@ -84,8 +85,9 @@ public final class File extends AbstractOnyxFileApiController {
             final ResourceManager resourceManager,
             final CacheManager cacheManager,
             final CostAnalyzer costAnalyzer,
+            final UploadFilter uploadFilter,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(onyxConfig, localCacheConfig, assetManager, cacheManager, resourceManager, costAnalyzer);
+        super(onyxConfig, localCacheConfig, assetManager, cacheManager, resourceManager, costAnalyzer, uploadFilter);
         awsConfig_ = awsConfig;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
@@ -139,6 +141,7 @@ public final class File extends AbstractOnyxFileApiController {
         }
 
         final String normalizedPath = normalizePath(username, path);
+        checkAndHandleFilteredUpload(normalizedPath);
         checkAndHandleExistingFile(normalizedPath, overwrite);
 
         final long uploadRequestSize = request.getSize();

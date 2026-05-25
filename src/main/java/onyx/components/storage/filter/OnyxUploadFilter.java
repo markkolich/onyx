@@ -26,17 +26,44 @@
 
 package onyx.components.storage.filter;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import curacao.annotations.Component;
+import curacao.annotations.Injectable;
+import curacao.util.helpers.WildcardMatchHelper;
+
 import java.util.List;
 
-public interface FilterConfig {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    String FILTER_CONFIG_PATH = "filter";
+@Component
+public final class OnyxUploadFilter implements UploadFilter {
 
-    String RESOURCE_EXCLUDES_PROP = "resource.excludes";
-    String UPLOAD_FILTER_PROP = "upload.filter";
+    private final List<String> filtered_;
 
-    List<String> getResourceExcludes();
+    @Injectable
+    public OnyxUploadFilter(
+            final FilterConfig filterConfig) {
+        this(filterConfig.getUploadFilter());
+    }
 
-    List<String> getUploadFilter();
+    @VisibleForTesting
+    public OnyxUploadFilter(
+            final List<String> filtered) {
+        checkNotNull(filtered, "Upload filter list cannot be null.");
+        filtered_ = filtered.stream()
+                .map(String::toLowerCase)
+                .collect(ImmutableList.toImmutableList());
+    }
+
+    @Override
+    public boolean test(
+            final String path) {
+        if (path == null) {
+            return false;
+        }
+
+        return WildcardMatchHelper.matchesAny(filtered_, path.toLowerCase());
+    }
 
 }

@@ -31,6 +31,7 @@ import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
 import onyx.components.storage.ResourceManager;
+import onyx.components.storage.filter.UploadFilter;
 import onyx.components.storage.sizer.cost.CostAnalyzer;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.request.v1.UploadFileRequest;
@@ -40,6 +41,7 @@ import onyx.exceptions.api.ApiBadRequestException;
 import onyx.exceptions.api.ApiConflictException;
 import onyx.exceptions.api.ApiForbiddenException;
 import onyx.exceptions.api.ApiNotFoundException;
+import onyx.exceptions.api.ApiUnprocessableEntityException;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -65,19 +67,36 @@ public abstract class AbstractOnyxFileApiController extends AbstractOnyxApiContr
 
     protected final LocalCacheConfig localCacheConfig_;
 
+    protected final UploadFilter uploadFilter_;
+
     protected AbstractOnyxFileApiController(
             final OnyxConfig onyxConfig,
             final LocalCacheConfig localCacheConfig,
             final AssetManager assetManager,
             final CacheManager cacheManager,
             final ResourceManager resourceManager,
-            final CostAnalyzer costAnalyzer) {
+            final CostAnalyzer costAnalyzer,
+            final UploadFilter uploadFilter) {
         super(onyxConfig);
         localCacheConfig_ = localCacheConfig;
         assetManager_ = assetManager;
         cacheManager_ = cacheManager;
         resourceManager_ = resourceManager;
         costAnalyzer_ = costAnalyzer;
+        uploadFilter_ = uploadFilter;
+    }
+
+    /**
+     * Rejects the upload if the normalized path matches any pattern in the configured upload filter
+     * list. Throws a 422 Unprocessable Entity exception so the caller knows the filename itself is the problem,
+     * not a size or conflict issue.
+     */
+    protected void checkAndHandleFilteredUpload(
+            final String normalizedPath) {
+        if (uploadFilter_.test(normalizedPath)) {
+            throw new ApiUnprocessableEntityException("Filename matches a blocked/filtered pattern: "
+                    + normalizedPath);
+        }
     }
 
     /**

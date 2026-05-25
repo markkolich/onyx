@@ -44,13 +44,13 @@ public final class OnyxResourceFilter implements ResourceFilter {
     @Injectable
     public OnyxResourceFilter(
             final FilterConfig filterConfig) {
-        this(filterConfig.getExcludes());
+        this(filterConfig.getResourceExcludes());
     }
 
     @VisibleForTesting
     public OnyxResourceFilter(
             final List<String> excludes) {
-        excludes_ = checkNotNull(excludes, "Excludes list cannot be null.");
+        excludes_ = checkNotNull(excludes, "Resource filter excludes list cannot be null.");
     }
 
     @Override

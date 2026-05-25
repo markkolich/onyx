@@ -52,7 +52,7 @@ public final class OnyxFreeMarkerConfig {
     public OnyxFreeMarkerConfig(
             final ServletContext servletContext) {
         final Resource baseResource =
-                (Resource) servletContext.getAttribute(Application.CONTEXT_ATTRIBUTE_BASE_RESOURCE);
+                servletContext.getAttribute(Application.CONTEXT_ATTRIBUTE_BASE_RESOURCE);
 
         freemarkerConfig_ = new Configuration(Configuration.VERSION_2_3_30);
         freemarkerConfig_.setDefaultEncoding(StandardCharsets.UTF_8.toString());
