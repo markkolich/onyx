@@ -1,17 +1,17 @@
 'use strict';
 
+const {rm} = require('fs/promises');
 const gulp = require('gulp'),
-    del = require('del'),
     concat = require('gulp-concat'),
-    eslint = require('gulp-eslint'),
+    eslint = require('gulp-eslint-new'),
     terser = require('gulp-terser'),
     cleanCSS = require('gulp-clean-css'),
     rename = require('gulp-rename'),
-    banner = require('gulp-banner'),
-    pump = require('pump');
+    header = require('gulp-header');
 
-function clean() {
-    return del(['build/*', 'release/*']);
+async function clean() {
+    await rm('build', {recursive: true, force: true});
+    await rm('release', {recursive: true, force: true});
 }
 
 function concatCss() {
@@ -76,14 +76,11 @@ function concatJs() {
         .pipe(gulp.dest('build'));
 }
 
-function minifyJs(callback) {
-    // uglify() wants pump()
-    pump([
-        gulp.src('build/app.js'),
-        terser(),
-        rename({suffix: '.min'}),
-        gulp.dest('release')
-    ], callback);
+function minifyJs() {
+    return gulp.src('build/app.js')
+        .pipe(terser())
+        .pipe(rename({suffix: '.min'}))
+        .pipe(gulp.dest('release'));
 }
 
 function addBanner() {
@@ -95,7 +92,7 @@ function addBanner() {
         ' */\n';
 
     return gulp.src(['release/*.css', 'release/*.js'])
-        .pipe(banner(comment))
+        .pipe(header(comment))
         .pipe(gulp.dest('release'));
 }
 

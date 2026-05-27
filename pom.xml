@@ -19,8 +19,8 @@
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <maven-frontend-plugin.version>2.0.0</maven-frontend-plugin.version>
-        <maven-frontend-node.version>v20.18.0</maven-frontend-node.version>
-        <maven-frontend-npm.version>10.5.0</maven-frontend-npm.version>
+        <maven-frontend-node.version>v24.16.0</maven-frontend-node.version>
+        <maven-frontend-npm.version>11.13.0</maven-frontend-npm.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
         <maven-pmd-plugin.pmd.version>7.24.0</maven-pmd-plugin.pmd.version>
@@ -413,6 +413,14 @@
                             <directory>dist</directory>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
+                        <fileset>
+                            <directory>src/main/webapp/static/build</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        <fileset>
+                            <directory>src/main/webapp/static/release</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
                     </filesets>
                 </configuration>
             </plugin>
@@ -489,19 +497,13 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>npm install</id>
+                        <id>npm ci</id>
                         <phase>initialize</phase>
                         <goals>
                             <goal>npm</goal>
                         </goals>
                         <configuration>
-                            <!--
-                                NOTE: using `omit=optional` to keep optional dependencies out of the
-                                build which are incompatible with the build environment. E.g., the
-                                `fsevents` dependency is only compatible with macOS and doesn't
-                                work on Linux.
-                            -->
-                            <arguments>install --no-color --omit=optional --no-package-lock</arguments>
+                            <arguments>ci --no-color</arguments>
                         </configuration>
                     </execution>
                     <execution>

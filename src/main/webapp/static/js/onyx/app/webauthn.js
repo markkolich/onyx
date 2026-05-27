@@ -1,4 +1,3 @@
-/* global ArrayBuffer, Uint8Array */
 (function(parent, window, document) {
     'use strict';
 
