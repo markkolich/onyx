@@ -17,6 +17,7 @@ async function clean() {
 function concatCss() {
     const cssResources = [
         'vendor/fontawesome-free/css/all.css',
+        'webfonts/font-awesome-all.css',
         'vendor/magnific-popup/magnific-popup.min.css',
         'css/magnific-popup.css',
         'css/nunito.css',

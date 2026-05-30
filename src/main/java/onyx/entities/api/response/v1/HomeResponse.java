@@ -67,7 +67,6 @@ public interface HomeResponse extends OnyxApiResponseEntity {
 
         public HomeResponse build() {
             checkNotNull(path_, "Path cannot be null.");
-
             checkNotNull(children_, "Children cannot be null.");
 
             return new HomeResponse() {

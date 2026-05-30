@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="onyx-logo" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+     width="978px" height="978px" viewBox="0 0 978 978" style="enable-background:new 0 0 978 978;" xml:space="preserve">
+<g>
+	<path style="fill:#FF69B4"
+          d="M0,913c0,27.6,22.4,50,50,50h110c27.6,0,50,-22.4,50,-50V65c0,-27.6,-22.4,-50,-50,-50H50C22.4,15,0,37.4,0,65V913z"/>
+    <path style="fill:#f5e900"
+          d="M256,913c0,27.6,22.4,50,50,50h110c27.6,0,50,-22.4,50,-50V65c0,-27.6,-22.4,-50,-50,-50H306C278.4,15,256,37.4,256,65V913z"/>
+    <path style="fill:#00e676"
+          d="M512,913c0,27.6,22.4,50,50,50h110c27.6,0,50,-22.4,50,-50V65c0,-27.6,-22.4,-50,-50,-50H562C534.4,15,512,37.4,512,65V913z"/>
+    <path style="fill:#03c2fc"
+          d="M768,913c0,27.6,22.4,50,50,50h110c27.6,0,50,-22.4,50,-50V65c0,-27.6,-22.4,-50,-50,-50H818C790.4,15,768,37.4,768,65V913z"/>
+</g>
+</svg>

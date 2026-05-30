@@ -2,7 +2,7 @@
 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
   <a href="${contextPath}/<#if session?has_content>browse/${session.getUsername()}</#if>" class="navbar-brand d-flex align-items-center justify-content-center">
-    <img src="${contextPath}/static/img/onyx/onyx-logo.svg" width="35" height="35" class="ml-2 d-inline-block align-top" alt="">
+    <img src="${contextPath}/static/img/onyx/logo.svg" width="35" height="35" class="ml-2 d-inline-block align-top" alt="">
     <h3 class="ml-2 my-0 pt-1 text-dark">Onyx</h3>
   </a>
 

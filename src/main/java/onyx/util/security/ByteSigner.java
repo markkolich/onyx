@@ -44,28 +44,18 @@ public final class ByteSigner {
 
     public enum Algorithm {
 
-        // The hash length is the RSA signature size in bytes, determined by the RSA key size
-        // (e.g., 256 bytes for a 2048-bit key, 512 bytes for a 4096-bit key) - not the SHA
-        // digest size.
-        SHA256_WITH_RSA("SHA256withRSA", 256),
-        SHA512_WITH_RSA("SHA512withRSA", 512);
+        SHA256_WITH_RSA("SHA256withRSA"),
+        SHA512_WITH_RSA("SHA512withRSA");
 
         private final String algorithmName_;
-        private final int hashLength_;
 
         Algorithm(
-                final String algorithmName,
-                final int hashLength) {
+                final String algorithmName) {
             algorithmName_ = algorithmName;
-            hashLength_ = hashLength;
         }
 
         public String getAlgorithmName() {
             return algorithmName_;
-        }
-
-        public int getHashLength() {
-            return hashLength_;
         }
 
     }
@@ -97,7 +87,8 @@ public final class ByteSigner {
 
         final byte[] signed = signature.sign();
 
-        return ByteBuffer.allocate(signed.length + message_.length)
+        return ByteBuffer.allocate(Integer.BYTES + signed.length + message_.length)
+                .putInt(signed.length)
                 .put(signed)
                 .put(message_)
                 .array();
@@ -106,19 +97,20 @@ public final class ByteSigner {
     public boolean verify() throws Exception {
         checkNotNull(publicKey_, "Public key cannot be null - cannot verify without a public key.");
 
-        final int hashLength = algorithm_.getHashLength();
+        if (message_.length <= Integer.BYTES) {
+            return false;
+        }
 
-        // The incoming message to verify has to be at least as long as the
-        // signature hash itself - if it is not, then it cannot be valid.
-        if (message_.length <= hashLength) {
+        final int sigLength = ByteBuffer.wrap(message_).getInt();
+        if (sigLength <= 0 || sigLength > message_.length - Integer.BYTES) {
             return false;
         }
 
         final Signature signature = Signature.getInstance(algorithm_.getAlgorithmName());
         signature.initVerify(publicKey_);
-        signature.update(message_, hashLength, message_.length - hashLength);
+        signature.update(message_, Integer.BYTES + sigLength, message_.length - Integer.BYTES - sigLength);
 
-        return signature.verify(message_, 0, hashLength);
+        return signature.verify(message_, Integer.BYTES, sigLength);
     }
 
     /**
@@ -129,15 +121,14 @@ public final class ByteSigner {
     public byte[] extract() throws Exception {
         checkNotNull(publicKey_, "Public key cannot be null - cannot extract without a public key.");
 
-        final int hashLength = algorithm_.getHashLength();
-
-        final boolean signatureVerified = verify();
-        if (!signatureVerified) {
+        if (!verify()) {
             return null;
         }
 
-        return ByteBuffer.allocate(message_.length - hashLength)
-                .put(message_, hashLength, message_.length - hashLength)
+        final int sigLength = ByteBuffer.wrap(message_).getInt();
+
+        return ByteBuffer.allocate(message_.length - Integer.BYTES - sigLength)
+                .put(message_, Integer.BYTES + sigLength, message_.length - Integer.BYTES - sigLength)
                 .array();
     }
 

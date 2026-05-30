@@ -25,10 +25,10 @@ mvn clean package
 ## Architecture
 
 ### Key Technologies
-- **Java 11** with Jetty 9.4.x web server
-- **Curacao** - lightweight web framework (custom, from markkolich.github.io/repo)
-- **AWS SDK v1** - S3, DynamoDB, SNS
-- **Apache Solr 8.11.1** - embedded search
+- **Java 11** with Jetty 11.0.26 web server
+- **Curacao 7.1.3** - lightweight web framework
+- **AWS SDK v2** - S3, DynamoDB, SNS
+- **Apache Solr 9.x** - embedded search
 - **FreeMarker** - HTML templating
 - **Quartz** - scheduled jobs
 
@@ -79,14 +79,41 @@ Uses HOCON (Lightbend/Typesafe Config). Key config sections:
 
 ## Testing
 
-- JUnit 5 + Mockito
+- JUnit 6 + Mockito
 - Tests in `src/test/java/`
 - Run with `mvn test`
 - Tests run in `America/Los_Angeles` timezone
 
 ## Frontend Build
 
-The static assets use a Gulp pipeline:
+The static assets use a Gulp 5 pipeline managed by `frontend-maven-plugin` 2.0.0:
 - Source: `src/main/webapp/static/`
-- Built automatically during `mvn package` via frontend-maven-plugin
-- Node v8.17.0 / npm 6.4.1 installed locally by Maven
+- Built automatically during `mvn package` via `frontend-maven-plugin`
+- Node v24.16.0 / npm 11.13.0 installed locally by Maven into `src/main/webapp/static/node/`
+- Output: `build/app.{css,js}` (concatenated), `release/app.min.{css,js}` (minified + bannered)
+
+### Gulp tasks
+- `release` — full production build (clean → concat → minify → banner)
+- `dev` — concat only (no minify) + watch for CSS/JS changes
+- `eslint-js` — lint `js/onyx/**/*.js` via ESLint 10 (config: `eslint.config.js`)
+
+### CSS pipeline
+Concatenated in order: Font Awesome (vendor + bundled webfonts), Magnific Popup, Nunito font, SB Admin 2 (light + dark themes) → minified with `gulp-clean-css`.
+
+### JS pipeline
+Concatenated in order: jQuery, jQuery UI Widget, Bootstrap bundle, jQuery File Upload (core + process + validate), copy-to-clipboard, jQuery Easing, Magnific Popup, Keypress, Underscore, marked, DOMPurify, SB Admin 2, then onyx app sources → minified with `gulp-terser`.
+
+### Onyx app JS sources (`js/onyx/`)
+- `onyx.js` — core namespace/utilities
+- `app/app.js` — main app init
+- `app/file.js` — file operations
+- `app/directory.js` — directory operations
+- `app/shortlink.js` — short link generation
+- `app/previewer.js` — file preview
+- `app/webauthn.js` — WebAuthn / passkey support
+- `app/widgets/dark-mode.js` — dark mode toggle
+- `app/widgets/markdown.js` — Markdown rendering (marked + DOMPurify)
+- `app/widgets/keyboard.js` — keyboard shortcuts
+
+### Vendor libraries (`vendor/`)
+Bootstrap, Chart.js, DataTables, DOMPurify, Font Awesome Free, jQuery, jQuery Easing, jQuery File Upload, jQuery UI Widget, Keypress, Magnific Popup, marked, Underscore
