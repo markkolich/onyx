@@ -109,7 +109,7 @@ public abstract class AbstractOnyxFileApiController extends AbstractOnyxApiContr
             final Boolean overwrite) {
         final Resource file = resourceManager_.getResourceAtPath(normalizedPath);
         if (file != null && BooleanUtils.isTrue(overwrite)) {
-            LOG.warn("Overwrite is true - skipping existing resource check: {}",
+            LOG.debug("Overwrite is true - skipping existing resource check: {}",
                     file.getPath());
             // Use permanent=false so that on a versioning-enabled S3 bucket a delete marker
             // is created rather than all versions being permanently wiped, preserving
