@@ -71,15 +71,6 @@ public final class OnyxTypesafeSessionConfig implements SessionConfig {
     }
 
     @Override
-    public Map<String, String> getApiKeys() {
-        return config_.getObjectList(SESSION_API_KEYS_PROP).stream()
-                .map(ConfigObject::toConfig)
-                .collect(ImmutableMap.toImmutableMap(
-                        apiKeyConfig -> apiKeyConfig.getString(API_KEY_KEY_PROP),
-                        apiKeyConfig -> apiKeyConfig.getString(API_KEY_USERNAME_PROP)));
-    }
-
-    @Override
     public String getSessionDomain() {
         return config_.getString(SESSION_DOMAIN_PROP);
     }

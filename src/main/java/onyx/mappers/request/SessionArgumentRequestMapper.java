@@ -34,7 +34,7 @@ import curacao.core.servlet.HttpCookie;
 import curacao.core.servlet.HttpRequest;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
 import onyx.components.authentication.SessionManager;
-import onyx.components.authentication.api.ApiKeyAuthenticator;
+import onyx.components.authentication.api.ApiKeyManager;
 import onyx.entities.authentication.Session;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,21 +46,21 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 import static onyx.components.authentication.CookieManager.SESSION_COOKIE_NAME;
-import static onyx.components.authentication.api.ApiKeyAuthenticator.API_KEY_AUTH_HEADER_PREFIX;
+import static onyx.components.authentication.api.ApiKeyManager.API_KEY_AUTH_HEADER_PREFIX;
 import static onyx.util.CookieBaker.getFirstCookieByName;
 
 @Mapper
 public final class SessionArgumentRequestMapper
         extends AbstractControllerArgumentMapper<Session> {
 
-    private final ApiKeyAuthenticator apiKeySessionManager_;
+    private final ApiKeyManager apiKeyManager_;
     private final SessionManager sessionManager_;
 
     @Injectable
     public SessionArgumentRequestMapper(
-            final ApiKeyAuthenticator apiKeySessionManager,
+            final ApiKeyManager apiKeyManager,
             final SessionManager sessionManager) {
-        apiKeySessionManager_ = apiKeySessionManager;
+        apiKeyManager_ = apiKeyManager;
         sessionManager_ = sessionManager;
     }
 
@@ -74,7 +74,7 @@ public final class SessionArgumentRequestMapper
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String apiKey = Strings.CS.removeStart(authHeader, API_KEY_AUTH_HEADER_PREFIX);
         if (StringUtils.isNotBlank(apiKey)) {
-            final Session session = apiKeySessionManager_.getSessionForApiKey(apiKey);
+            final Session session = apiKeyManager_.getSessionForApiKey(apiKey);
             if (session != null) {
                 context.setProperty(SESSION_COOKIE_NAME, session);
                 return session;

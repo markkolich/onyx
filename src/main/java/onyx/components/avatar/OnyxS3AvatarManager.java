@@ -45,9 +45,9 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public final class OnyxAvatarManager implements AvatarManager {
+public final class OnyxS3AvatarManager implements AvatarManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OnyxAvatarManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OnyxS3AvatarManager.class);
 
     private static final String ONYX_AVATAR_PATH_PREFIX =
             AssetManager.ONYX_METADATA_PATH_PREFIX + "/avatars";
@@ -57,7 +57,7 @@ public final class OnyxAvatarManager implements AvatarManager {
     private final S3Presigner presigner_;
 
     @Injectable
-    public OnyxAvatarManager(
+    public OnyxS3AvatarManager(
             final AwsConfig awsConfig,
             final OnyxS3Client onyxS3Client) {
         awsConfig_ = awsConfig;

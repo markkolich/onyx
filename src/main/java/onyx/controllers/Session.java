@@ -114,7 +114,8 @@ public final class Session extends AbstractOnyxFreeMarkerController {
                 .build();
     }
 
-    @RequestMapping(value = "^/login$", methods = POST)
+    @RequestMapping(value = "^/login$",
+            methods = POST)
     public FreeMarkerContent doLogin(
             @Cookie(TRUSTED_DEVICE_COOKIE_NAME) final String trustedDeviceCookie,
             @Cookie(RETURN_TO_COOKIE_NAME) final String returnToCookie,
@@ -163,7 +164,8 @@ public final class Session extends AbstractOnyxFreeMarkerController {
         return processTwoFactorLogin(user, session);
     }
 
-    @RequestMapping(value = "^/login/verify$", methods = POST)
+    @RequestMapping(value = "^/login/verify$",
+            methods = POST)
     public void doLoginVerify(
             @Cookie(RETURN_TO_COOKIE_NAME) final String returnToCookie,
             @RequestBody(TOKEN_FIELD) final String signedToken,

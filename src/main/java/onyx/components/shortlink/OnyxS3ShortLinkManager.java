@@ -53,9 +53,9 @@ import java.net.URL;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @Component
-public final class OnyxShortLinkGenerator implements ShortLinkGenerator {
+public final class OnyxS3ShortLinkManager implements ShortLinkManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OnyxShortLinkGenerator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OnyxS3ShortLinkManager.class);
 
     private static final String SHORTLINKS_S3_PREFIX =
             AssetManager.ONYX_METADATA_PATH_PREFIX + "/shortlinks/";
@@ -73,7 +73,7 @@ public final class OnyxShortLinkGenerator implements ShortLinkGenerator {
     private final ObjectMapper objectMapper_;
 
     @Injectable
-    public OnyxShortLinkGenerator(
+    public OnyxS3ShortLinkManager(
             final OnyxConfig onyxConfig,
             final AwsConfig awsConfig,
             final OnyxS3Client onyxS3Client,
@@ -109,7 +109,8 @@ public final class OnyxShortLinkGenerator implements ShortLinkGenerator {
     }
 
     @Nullable
-    public OnyxShortLink getShortLink(
+    @Override
+    public OnyxShortLink getShortLinkForCode(
             final String code) {
         checkNotNull(code, "Short link code cannot be null.");
 

@@ -35,8 +35,7 @@ import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
 import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
-import onyx.components.shortlink.OnyxShortLinkGenerator;
-import onyx.components.shortlink.ShortLinkGenerator;
+import onyx.components.shortlink.ShortLinkManager;
 import onyx.components.storage.ResourceManager;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.response.v1.CreateShortLinkResponse;
@@ -60,9 +59,7 @@ public final class ShortLink extends AbstractOnyxApiController {
 
     private final ResourceManager resourceManager_;
 
-    private final ShortLinkGenerator shortLinkManager_;
-
-    private final OnyxShortLinkGenerator onyxShortLinkGenerator_;
+    private final ShortLinkManager shortLinkManager_;
 
     private final ObjectMapper objectMapper_;
 
@@ -70,13 +67,11 @@ public final class ShortLink extends AbstractOnyxApiController {
     public ShortLink(
             final OnyxConfig onyxConfig,
             final ResourceManager resourceManager,
-            final ShortLinkGenerator shortLinkManager,
-            final OnyxShortLinkGenerator onyxShortLinkGenerator,
+            final ShortLinkManager shortLinkManager,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         super(onyxConfig);
         resourceManager_ = resourceManager;
         shortLinkManager_ = shortLinkManager;
-        onyxShortLinkGenerator_ = onyxShortLinkGenerator;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
@@ -130,7 +125,7 @@ public final class ShortLink extends AbstractOnyxApiController {
             @Path("code") final String code,
             final HttpResponse response,
             final AsyncContext context) throws Exception {
-        final OnyxShortLink shortLink = onyxShortLinkGenerator_.getShortLink(code);
+        final OnyxShortLink shortLink = shortLinkManager_.getShortLinkForCode(code);
         if (shortLink == null) {
             throw new ApiNotFoundException("Found no short link for code: " + code);
         }

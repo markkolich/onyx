@@ -123,7 +123,8 @@ public final class WebAuthn extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/webauthn/register/begin$", methods = POST)
+    @RequestMapping(value = "^/api/v1/webauthn/register/begin$",
+            methods = POST)
     public WebAuthnRegisterBeginResponse registerBegin(
             final Session session) throws Exception {
         if (session == null) {
@@ -186,7 +187,8 @@ public final class WebAuthn extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/webauthn/register/finish$", methods = POST)
+    @RequestMapping(value = "^/api/v1/webauthn/register/finish$",
+            methods = POST)
     public WebAuthnRegisterFinishResponse registerFinish(
             @RequestBody(REQUEST_ID_FIELD) final String requestId,
             @RequestBody(CREDENTIAL_FIELD) final String credentialJson,
@@ -245,7 +247,8 @@ public final class WebAuthn extends AbstractOnyxApiController {
         }
     }
 
-    @RequestMapping(value = "^/api/v1/webauthn/login/begin$", methods = POST)
+    @RequestMapping(value = "^/api/v1/webauthn/login/begin$",
+            methods = POST)
     public WebAuthnLoginBeginResponse loginBegin() throws Exception {
         if (!sessionConfig_.isWebAuthnAuthEnabled()) {
             throw new ApiForbiddenException("WebAuthn authentication is disabled.");
@@ -290,7 +293,8 @@ public final class WebAuthn extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/webauthn/login/finish$", methods = POST)
+    @RequestMapping(value = "^/api/v1/webauthn/login/finish$",
+            methods = POST)
     public WebAuthnLoginFinishResponse loginFinish(
             @RequestBody(REQUEST_ID_FIELD) final String requestId,
             @RequestBody(CREDENTIAL_FIELD) final String credentialJson,

@@ -24,19 +24,21 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.authentication.api;
+package onyx.components.shortlink;
 
-import onyx.entities.authentication.Session;
+import onyx.entities.shortlink.OnyxShortLink;
+import onyx.entities.storage.aws.dynamodb.Resource;
 
 import javax.annotation.Nullable;
+import java.net.URL;
 
-public interface ApiKeyAuthenticator {
+public interface ShortLinkManager {
 
-    // Note: trailing space is intentional.
-    String API_KEY_AUTH_HEADER_PREFIX = "Onyx ";
+    URL createShortLinkForResource(
+            final Resource resource);
 
     @Nullable
-    Session getSessionForApiKey(
-            final String apiKey);
+    OnyxShortLink getShortLinkForCode(
+            final String code);
 
 }

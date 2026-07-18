@@ -4,6 +4,7 @@
       "Bash(mvn clean package:*)",
       "Bash(mvn compile:*)",
       "Bash(mvn package:*)",
+      "Bash(mvn versions:display-dependency-updates)",
       "Bash(git mv:*)",
       "Bash(unzip:*)",
       "Bash(curl:*)",

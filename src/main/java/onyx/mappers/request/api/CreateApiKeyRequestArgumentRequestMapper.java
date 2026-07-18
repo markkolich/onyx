@@ -24,15 +24,21 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.shortlink;
+package onyx.mappers.request.api;
 
-import onyx.entities.storage.aws.dynamodb.Resource;
+import curacao.annotations.Injectable;
+import curacao.annotations.Mapper;
+import onyx.components.OnyxJacksonObjectMapper;
+import onyx.entities.api.request.v1.CreateApiKeyRequest;
 
-import java.net.URL;
+@Mapper
+public final class CreateApiKeyRequestArgumentRequestMapper
+        extends AbstractApiArgumentRequestMapper<CreateApiKeyRequest> {
 
-public interface ShortLinkGenerator {
-
-    URL createShortLinkForResource(
-            final Resource resource);
+    @Injectable
+    public CreateApiKeyRequestArgumentRequestMapper(
+            final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
+        super(CreateApiKeyRequest.class, onyxJacksonObjectMapper.getObjectMapper());
+    }
 
 }

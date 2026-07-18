@@ -39,7 +39,6 @@ public interface SessionConfig {
     String SESSION_WEBAUTHN_AUTH_ENABLED_PROP = "webauthn-auth-enabled";
 
     String SESSION_USERS_PROP = "users";
-    String SESSION_API_KEYS_PROP = "api-keys";
     String SESSION_DOMAIN_PROP = "domain";
     String SESSION_DURATION_PROP = "duration";
     String SESSION_HTTPS_PROP = "https";
@@ -51,16 +50,11 @@ public interface SessionConfig {
     String USERS_PASSWORD_PROP = "password";
     String USERS_MOBILE_NUMBER_PROP = "mobileNumber";
 
-    String API_KEY_USERNAME_PROP = "username";
-    String API_KEY_KEY_PROP = "key";
-
     boolean isPasswordAuthEnabled();
 
     boolean isWebAuthnAuthEnabled();
 
     Map<String, User> getUsers();
-
-    Map<String, String> getApiKeys();
 
     String getSessionDomain();
 
