@@ -41,6 +41,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
+import java.net.URI;
 import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,7 +67,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         Mockito.when(resourceManager.getResourceAtPath(ArgumentMatchers.eq(privateFileName)))
                 .thenReturn(privateFile);
 
-        final URL redirectUrl = new URL(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + privateFileName);
+        final URL redirectUrl = URI.create(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + privateFileName).toURL();
         Mockito.when(cacheManager.getCachedDownloadUrlForResource(ArgumentMatchers.eq(privateFile)))
                 .thenReturn(redirectUrl);
 
@@ -103,7 +104,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         Mockito.when(resourceManager.getResourceAtPath(ArgumentMatchers.eq(privateFileName)))
                 .thenReturn(privateFile);
 
-        final URL redirectUrl = new URL(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + privateFileName);
+        final URL redirectUrl = URI.create(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + privateFileName).toURL();
         Mockito.when(assetManager.getPresignedDownloadUrlForResource(privateFile))
                 .thenReturn(redirectUrl);
 
@@ -147,7 +148,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         Mockito.when(resourceManager.getResourceAtPath(ArgumentMatchers.eq(privateFileName)))
                 .thenReturn(privateFile);
 
-        final URL redirectUrl = new URL(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + privateFileName);
+        final URL redirectUrl = URI.create(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + privateFileName).toURL();
         Mockito.when(assetManager.getPresignedDownloadUrlForResource(privateFile))
                 .thenReturn(redirectUrl);
 
@@ -185,7 +186,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         Mockito.when(resourceManager.getResourceAtPath(ArgumentMatchers.eq(privateFileName)))
                 .thenReturn(privateFile);
 
-        final URL redirectUrl = new URL(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + privateFileName);
+        final URL redirectUrl = URI.create(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + privateFileName).toURL();
         Mockito.when(assetManager.getPresignedDownloadUrlForResource(privateFile))
                 .thenReturn(redirectUrl);
 
@@ -223,7 +224,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         Mockito.when(resourceManager.getResourceAtPath(ArgumentMatchers.eq(privateFileName)))
                 .thenReturn(privateFileNotFavorite);
 
-        final URL redirectUrl = new URL(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + privateFileName);
+        final URL redirectUrl = URI.create(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + privateFileName).toURL();
         Mockito.when(assetManager.getPresignedDownloadUrlForResource(privateFileNotFavorite))
                 .thenReturn(redirectUrl);
 
@@ -262,7 +263,7 @@ public final class DownloadTest extends AbstractOnyxControllerTest {
         Mockito.when(resourceManager.getResourceAtPath(ArgumentMatchers.eq(publicFileName)))
                 .thenReturn(publicFile);
 
-        final URL redirectUrl = new URL(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + publicFileName);
+        final URL redirectUrl = URI.create(UNIT_TEST_BASE_URI + UNIT_TEST_CONTEXT_PATH + publicFileName).toURL();
         Mockito.when(assetManager.getPresignedDownloadUrlForResource(publicFile))
                 .thenReturn(redirectUrl);
 

@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.OutputStream;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -155,7 +156,7 @@ public final class LocalCacheManager implements CacheManager, ComponentDestroyab
 
         final String signedTokenUrl = String.format("%s/static/cache/%s/%s", onyxConfig_.getViewSafeFullUri(),
                 urlSafeSignedToken, resourceName);
-        return new URL(signedTokenUrl);
+        return URI.create(signedTokenUrl).toURL();
     }
 
     @Nonnull

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code when working with this repository.
 
 ## Project Overview
 
-Onyx is a self-hosted web interface for AWS S3 file management. It stores files in S3 and metadata in DynamoDB, with embedded Solr for full-text search. Built for Java 11, deploys as a single fat JAR.
+Onyx is a self-hosted web interface for AWS S3 file management. It stores files in S3 and metadata in DynamoDB, with embedded Solr for full-text search. Built for Java 21, deploys as a single fat JAR.
 
 ## Build & Run Commands
 
@@ -25,7 +25,7 @@ mvn clean package
 ## Architecture
 
 ### Key Technologies
-- **Java 11** with Jetty 11.0.26 web server
+- **Java 21** with Jetty 11.0.26 web server
 - **Curacao 7.1.3** - lightweight web framework
 - **AWS SDK v2** - S3, DynamoDB, SNS
 - **Apache Solr 9.x** - embedded search
