@@ -41,6 +41,7 @@ import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static onyx.components.aws.dynamodb.DynamoDbManager.FAVORITE_INDEX_NAME;
 import static onyx.components.aws.dynamodb.DynamoDbManager.PARENT_INDEX_NAME;
 import static onyx.util.CurrencyUtils.humanReadableCost;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
@@ -70,6 +71,7 @@ public final class Resource {
     private BigDecimal cost_;
 
     @DynamoDbPartitionKey
+    @DynamoDbSecondarySortKey(indexNames = FAVORITE_INDEX_NAME)
     @DynamoDbAttribute("path")
     public String getPath() {
         return path_;
@@ -182,6 +184,33 @@ public final class Resource {
             final Boolean favorite) {
         favorite_ = favorite;
         return this;
+    }
+
+    /**
+     * Derived, read-only attribute backing the sparse {@code favorite-index} GSI.
+     * Only non-null when this resource is a favorite, so that non-favorited
+     * resources never get projected into the index — this is what keeps
+     * {@code favorite-index} sparse (proportional to favorite count, not total
+     * resource count).
+     */
+    @DynamoDbSecondaryPartitionKey(indexNames = FAVORITE_INDEX_NAME)
+    @DynamoDbAttribute("favoriteOwner")
+    public String getFavoriteOwner() {
+        return getFavorite() ? getOwner() : null;
+    }
+
+    /**
+     * Intentionally a no-op — {@code favoriteOwner} is fully derived from
+     * {@code favorite_}/{@code owner_} (see {@link #getFavoriteOwner()}), never
+     * stored as its own field. This setter only exists because the DynamoDB
+     * Enhanced Client's reflection-based {@code BeanTableSchema} silently drops
+     * any {@code @DynamoDb*}-annotated property that lacks a setter — including
+     * its key annotations — so without this, {@code favoriteOwner} would never
+     * be recognized as the {@code favorite-index} partition key at all.
+     */
+    public void setFavoriteOwner(
+            final String favoriteOwner) {
+        // Deliberately empty — see Javadoc above.
     }
 
     @DynamoDbAttribute("cost")

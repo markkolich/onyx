@@ -36,7 +36,9 @@ find "$@" -type f -print0 | while IFS= read -r -d '' FILEPATH; do
 
   echo "Uploading: $FILEPATH ($FILESIZE bytes, $PART_COUNT parts of $PART_SIZE bytes each)"
 
-  WORK_DIR="$(mktemp -d)"
+  ## WORK_DIR="$(mktemp -d)"
+  WORK_DIR="$(pwd)/.onyx-multipart-upload-$$"
+  mkdir -p "$WORK_DIR"
   PARTS_JSON="[]"
   UPLOAD_FAILED=0
 

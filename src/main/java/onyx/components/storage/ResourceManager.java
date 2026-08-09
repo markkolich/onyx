@@ -80,4 +80,9 @@ public interface ResourceManager {
     @Nonnull
     List<Resource> listHomeDirectories();
 
+    @Nonnull
+    List<Resource> listFavorites(
+            final Resource directory,
+            final Set<Resource.Type> types);
+
 }

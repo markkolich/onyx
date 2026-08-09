@@ -2,7 +2,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Onyx <#if devMode>(dev) </#if>- Search - ${query}</title>
+    <title>Onyx <#if devMode>(dev) </#if>- Favorites - ${directory.getHtmlPath()}</title>
     <#include "common/css.ftl">
 </head>
 
@@ -29,7 +29,20 @@
               <div class="card shadow mb-4">
                 <!-- Card Header - Dropdown -->
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h4 class="m-0 card-title"><i class="fas fa-search fa-fw"></i> ${query}</h4>
+                  <h4 class="m-0 card-title">
+                    <i class="fas fa-heart fa-fw mr-2"></i>
+                    <#list breadcrumbs?reverse?chunk(3)?first?reverse as crumb>
+                      <#if crumb?is_last>
+                        <span class="mr-1">${crumb.getRight()}</span>
+                      <#else>
+                        <a href="${contextPath}/favorites${crumb.getMiddle()}" class="mr-1">${crumb.getRight()}</a>
+                      </#if>
+                      <#sep><span class="mr-1">/</span></#sep>
+                    </#list>
+                  </h4>
+                  <a href="${contextPath}/browse${directory.getPath()}" class="text-gray-400" title="Back to Browse">
+                    <i class="fas fa-folder fa-sm fa-fw"></i>
+                  </a>
                 </div>
                 <!-- Card Body -->
                 <div class="card-body table-responsive">
@@ -48,12 +61,12 @@
                                         <#list result.getRight() as crumb>
                                           <#if crumb?is_last>
                                             <#if result.getLeft().getType() == "DIRECTORY">
-                                              <a href="${contextPath}/browse${crumb.getMiddle()}" data-resource-type="DIRECTORY" class="mr-1">${crumb.getRight()}</a>
+                                              <a href="${contextPath}/favorites${crumb.getMiddle()}" data-resource-type="DIRECTORY" class="mr-1">${crumb.getRight()}</a>
                                             <#elseif result.getLeft().getType() == "FILE">
                                               <a href="${contextPath}/api/v1/download${crumb.getMiddle()}" data-resource-type="FILE" class="mr-1">${crumb.getRight()}</a>
                                             </#if>
                                           <#else>
-                                            <a href="${contextPath}/browse${crumb.getMiddle()}" data-resource-type="DIRECTORY" class="mr-1">${crumb.getRight()}</a>
+                                            <a href="${contextPath}/favorites${crumb.getMiddle()}" data-resource-type="DIRECTORY" class="mr-1">${crumb.getRight()}</a>
                                           </#if>
                                           <#sep><span class="mr-1">/</span></#sep>
                                         </#list>
@@ -90,7 +103,7 @@
                               </#list>
                           <#else>
                               <tr>
-                                  <td><i class="far fa-sad-cry"></i> No results found.</td>
+                                  <td>&macr;\_(&#12484;)_/&macr; No favorites here.</td>
                               </tr>
                           </#if>
                       </tbody>
