@@ -52,6 +52,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class DynamoDbManager implements ResourceManager {
 
     public static final String PARENT_INDEX_NAME = "parent-index";
+    public static final String FAVORITE_INDEX_NAME = "favorite-index";
 
     private final DynamoDbEnhancedClient enhancedClient_;
     private final DynamoDbTable<Resource> resourceTable_;
@@ -178,6 +179,14 @@ public final class DynamoDbManager implements ResourceManager {
     @Override
     public List<Resource> listHomeDirectories() {
         return new ListHomeDirectories().run(resourceTable_);
+    }
+
+    @Nonnull
+    @Override
+    public List<Resource> listFavorites(
+            final Resource directory,
+            final Set<Resource.Type> types) {
+        return new ListFavorites(directory, types).run(resourceTable_);
     }
 
     // Helpers

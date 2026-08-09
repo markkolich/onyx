@@ -38,18 +38,22 @@
                   <#if session?has_content>
                       <#-- Controls are only visible if the authenticated user is the owner of the resource. -->
                       <#if userIsOwner>
-                          <div class="dropdown no-arrow">
-                            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                              <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                          <div class="d-flex align-items-center">
+                            <a href="${contextPath}/favorites${resource.getPath()}" class="text-gray-400 mr-4">
+                              <i class="fas fa-heart fa-sm fa-fw"></i>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
-                              <a class="dropdown-item" href="#" data-action="upload-file"><i class="fas fa-upload fa-sm fa-fw mr-2 text-gray-400"></i> Upload File</a>
-                              <div class="dropdown-divider"></div>
-                              <a class="dropdown-item" href="#" data-action="create-directory"><i class="fas fa-folder-plus fa-sm fa-fw mr-2 text-gray-400"></i> Create Directory</a>
-                              <#if resource.getVisibility() == "PUBLIC">
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-action="get-shortlink"><i class="fas fa-link fa-sm fa-fw mr-2 text-gray-400"></i> Get Shortlink</a>
-                              </#if>
+                            <div class="dropdown no-arrow">
+                              <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                              </a>
+                              <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+                                <a class="dropdown-item" href="#" data-action="upload-file"><i class="fas fa-upload fa-sm fa-fw mr-2 text-gray-400"></i> Upload File</a>
+                                <a class="dropdown-item" href="#" data-action="create-directory"><i class="fas fa-folder-plus fa-sm fa-fw mr-2 text-gray-400"></i> Create Directory</a>
+                                <#if resource.getVisibility() == "PUBLIC">
+                                  <div class="dropdown-divider"></div>
+                                  <a class="dropdown-item" href="#" data-action="get-shortlink"><i class="fas fa-link fa-sm fa-fw mr-2 text-gray-400"></i> Get Shortlink</a>
+                                </#if>
+                              </div>
                             </div>
                           </div>
                       </#if>

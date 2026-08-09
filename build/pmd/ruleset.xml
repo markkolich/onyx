@@ -60,8 +60,6 @@
             <property name="utilityClassPattern" value="[A-Z][a-zA-Z0-9]*" />
         </properties>
     </rule>
-    <rule ref="category/java/codestyle.xml/AvoidProtectedFieldInFinalClass" />
-    <rule ref="category/java/codestyle.xml/AvoidProtectedMethodInFinalClassNotExtending" />
     <rule ref="category/java/codestyle.xml/FieldNamingConventions">
         <properties>
             <property name="publicConstantPattern" value="[A-Z][A-Z_0-9]*" />
@@ -75,6 +73,7 @@
     <rule ref="category/java/codestyle.xml/FieldDeclarationsShouldBeAtStartOfClass" />
 
     <rule ref="category/java/design.xml/CollapsibleIfStatements" />
+    <rule ref="category/java/design.xml/ProtectedMemberInFinalClass" />
     <!--
         A good suggestion, but occasionally makes the code less readable and
         generally harder to understand.
@@ -87,7 +86,7 @@
     <rule ref="category/java/errorprone.xml/AvoidMultipleUnaryOperators" />
     <rule ref="category/java/errorprone.xml/AvoidUsingOctalValues" />
     <rule ref="category/java/errorprone.xml/BrokenNullCheck" />
-    <rule ref="category/java/errorprone.xml/CheckSkipResult" />
+    <rule ref="category/java/errorprone.xml/UnusedReturnValue" />
     <rule ref="category/java/errorprone.xml/ClassCastExceptionWithToArray" />
     <rule ref="category/java/errorprone.xml/DontUseFloatTypeForLoopIndices" />
     <rule ref="category/java/errorprone.xml/EmptyCatchBlock">
