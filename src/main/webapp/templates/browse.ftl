@@ -5,7 +5,11 @@
     <#include "common/css.ftl">
 </head>
 
-<body class="bg-gray-100 dark-mode" data-path="${resource.getPath()}"<#if session?has_content> data-session="${session.id}"</#if>>
+<body class="bg-gray-100 dark-mode" data-path="${resource.getPath()}" data-resource-type="${resource.getType()}"<#if session?has_content> data-session="${session.id}"</#if><#if session?has_content && userIsOwner> data-owner="true"</#if>>
+
+  <#if session?has_content && userIsOwner && resource.getType() == "DIRECTORY">
+    <#include "common/upload-overlay.ftl">
+  </#if>
 
   <!-- Page Wrapper -->
   <div id="wrapper">
