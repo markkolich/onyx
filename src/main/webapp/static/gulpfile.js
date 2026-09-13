@@ -69,7 +69,10 @@ function concatJs() {
         'js/onyx/app/webauthn.js',
         'js/onyx/app/widgets/dark-mode.js',
         'js/onyx/app/widgets/markdown.js',
-        'js/onyx/app/widgets/keyboard.js'
+        'js/onyx/app/widgets/keyboard.js',
+        'js/onyx/app/widgets/upload-overlay.js',
+        'js/onyx/app/widgets/dropzone.js',
+        'js/onyx/app/widgets/pasteboard.js'
     ];
 
     return gulp.src(jsResources)

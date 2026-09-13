@@ -142,7 +142,6 @@ public final class File extends AbstractOnyxFileApiController {
 
         final String normalizedPath = normalizePath(username, path);
         checkAndHandleFilteredUpload(normalizedPath);
-        checkAndHandleExistingFile(normalizedPath, overwrite);
 
         final long uploadRequestSize = request.getSize();
         final long maxUploadRequestSize = awsConfig_.getAwsS3MaxUploadFileSize();
@@ -156,13 +155,13 @@ public final class File extends AbstractOnyxFileApiController {
         }
 
         final String parentPath = normalizePath(username, FilenameUtils.getPathNoEndSeparator(path));
-
         if (BooleanUtils.isTrue(recursive)) {
             createParentDirectoriesIfNeeded(parentPath, request, session);
         }
 
         final Resource parent = validateAndGetParentDirectory(parentPath, session);
-        final Resource newFile = buildNewFileResource(normalizedPath, parent, request, session);
+        final Resource existingFile = fetchAndHandleExistingFile(normalizedPath, overwrite);
+        final Resource newFile = buildNewFileResource(normalizedPath, parent, existingFile, request, session);
 
         resourceManager_.createResource(newFile);
 

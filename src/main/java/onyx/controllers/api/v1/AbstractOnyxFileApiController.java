@@ -48,6 +48,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -101,10 +102,13 @@ public abstract class AbstractOnyxFileApiController extends AbstractOnyxApiContr
 
     /**
      * Checks for an existing resource at the normalized path. If one exists and overwrite is true,
-     * deletes it (and its backing S3 object) to make way for the new upload. If one exists and
-     * overwrite is false, throws a 409 Conflict.
+     * deletes it (and its backing S3 object) to make way for the new upload, and returns it so
+     * callers can carry forward fields (e.g., description) from the resource being replaced. If
+     * one exists and overwrite is false, throws a 409 Conflict. Returns null if no resource exists
+     * at the path.
      */
-    protected void checkAndHandleExistingFile(
+    @Nullable
+    protected Resource fetchAndHandleExistingFile(
             final String normalizedPath,
             final Boolean overwrite) {
         final Resource file = resourceManager_.getResourceAtPath(normalizedPath);
@@ -122,6 +126,7 @@ public abstract class AbstractOnyxFileApiController extends AbstractOnyxApiContr
             throw new ApiConflictException("File or other resource at path already exists: "
                     + normalizedPath);
         }
+        return file;
     }
 
     /**
@@ -184,20 +189,31 @@ public abstract class AbstractOnyxFileApiController extends AbstractOnyxApiContr
     /**
      * Constructs a new file {@link Resource} from the given upload request, parent directory,
      * and owner session. The creation timestamp and cost are computed internally.
+     *
+     * <p>If the request does not specify a description and a resource being replaced (via
+     * overwrite) is supplied, the description is carried forward from that existing resource
+     * rather than being cleared.
      */
     protected Resource buildNewFileResource(
             final String normalizedPath,
             final Resource parent,
+            @Nullable final Resource existingFile,
             final UploadFileRequest request,
             final Session session) {
         final Instant now = Instant.now();
         final BigDecimal cost = costAnalyzer_.computeResourceCost(request.getSize(), now);
 
+        // Preserve the existing description on the file resource, if one exists.
+        final String existingDescription = (existingFile != null) ?
+                existingFile.getDescription() : StringUtils.EMPTY;
+        final String description = StringUtils.defaultIfBlank(request.getDescription(),
+                existingDescription);
+
         return new Resource.Builder()
                 .setPath(normalizedPath)
                 .setParent(parent.getPath())
                 .setSize(request.getSize())
-                .setDescription(StringUtils.trimToEmpty(request.getDescription()))
+                .setDescription(StringUtils.trimToEmpty(description))
                 .setType(Resource.Type.FILE)
                 .setVisibility(request.getVisibility())
                 .setOwner(session.getUsername())

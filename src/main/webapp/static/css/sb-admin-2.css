@@ -542,7 +542,6 @@ pre {
 
 pre code {
   font-size: inherit;
-  color: inherit;
   word-break: normal;
 }
 
@@ -11058,4 +11057,25 @@ body.sidebar-toggled footer.sticky-footer {
 /* Keyboard navigation: highlight selected row */
 tr.keyboard-selected > td {
     background-color: rgba(78, 115, 223, 0.15) !important;
+}
+
+/* Whole-page drop/paste upload overlay */
+#upload-overlay {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  text-align: center;
+  pointer-events: none;
+}
+
+#upload-overlay.upload-overlay-reject {
+  background: rgba(139, 0, 0, 0.75);
 }
