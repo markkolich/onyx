@@ -94,7 +94,7 @@ public final class ReaperJob implements Job {
                     .build();
 
             s3.listObjectsV2Paginator(listRequest).contents().stream()
-                    .filter(objSummary -> !objSummary.key().startsWith(AssetManager.ONYX_METADATA_PATH_PREFIX))
+                    .filter(objSummary -> !objSummary.key().startsWith(AssetManager.DOT_ONYX_PATH_PREFIX))
                     .forEach((S3Object objSummary) -> {
                         final String resourcePath = ResourceManager.ROOT_PATH + objSummary.key();
 

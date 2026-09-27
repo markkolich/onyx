@@ -89,8 +89,11 @@ public final class LocalCacheManager implements CacheManager, ComponentDestroyab
         cachedResourceSigner_ = cachedResourceSigner;
         asyncCacheExecutorService_ = asyncCacheThreadPool.getExecutorService();
 
-        // Create the local cache directory if it does not exist.
-        createCacheDirectoryIfDoesNotExist();
+        // Create the local cache directory if it does not exist - but only if caching is
+        // actually enabled; nothing reads from or writes to this directory otherwise.
+        if (localCacheConfig_.localCacheEnabled()) {
+            createCacheDirectoryIfDoesNotExist();
+        }
 
         final long readTimeoutMs =
                 localCacheConfig_.getLocalCacheDownloaderReadTimeout(TimeUnit.MILLISECONDS);
@@ -243,14 +246,19 @@ public final class LocalCacheManager implements CacheManager, ComponentDestroyab
      * reason, move on with a warning as this won't impact operation of the app. If the
      * cache directory does not exist, resource caching won't work, but the service will
      * continue to hum along just fine.
+     *
+     * <p>Deliberately doesn't check {@link Files#notExists} first - {@link
+     * Files#createDirectories} already treats an existing directory as success on its
+     * own, and a separate check-then-create introduces a race (e.g., against a mount
+     * or tmpfiles rule creating the same directory concurrently at boot) that can throw
+     * {@link java.nio.file.FileAlreadyExistsException} even though the directory ends
+     * up existing exactly as intended.
      */
     private void createCacheDirectoryIfDoesNotExist() {
         final Path localCacheDir = localCacheConfig_.getLocalCacheDirectory();
 
         try {
-            if (Files.notExists(localCacheDir)) {
-                Files.createDirectories(localCacheDir);
-            }
+            Files.createDirectories(localCacheDir);
         } catch (final Exception e) {
             LOG.warn("Failed to auto-create resource cache directory: {}", localCacheDir, e);
         }

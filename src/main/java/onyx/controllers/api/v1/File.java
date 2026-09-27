@@ -41,6 +41,7 @@ import onyx.components.config.aws.AwsConfig;
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
+import onyx.components.storage.MetadataManager;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.filter.UploadFilter;
 import onyx.components.storage.sizer.cost.CostAnalyzer;
@@ -83,11 +84,13 @@ public final class File extends AbstractOnyxFileApiController {
             final AwsConfig awsConfig,
             final AssetManager assetManager,
             final ResourceManager resourceManager,
+            final MetadataManager metadataManager,
             final CacheManager cacheManager,
             final CostAnalyzer costAnalyzer,
             final UploadFilter uploadFilter,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(onyxConfig, localCacheConfig, assetManager, cacheManager, resourceManager, costAnalyzer, uploadFilter);
+        super(onyxConfig, localCacheConfig, assetManager, cacheManager, resourceManager, metadataManager,
+                costAnalyzer, uploadFilter);
         awsConfig_ = awsConfig;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
@@ -283,6 +286,11 @@ public final class File extends AbstractOnyxFileApiController {
         if (localCacheEnabled) {
             cacheManager_.deleteResourceFromCacheAsync(file);
         }
+
+        // Delete all derived metadata for the file asynchronously too - unlike the asset itself,
+        // this is always a full permanent delete regardless of the "permanent" query parameter,
+        // since metadata is disposable/regenerable, not precious user content.
+        metadataManager_.deleteAllMetadataForResourceAsync(file);
 
         return ResourceResponse.Builder.fromResource(objectMapper_, file, session)
                 .build();

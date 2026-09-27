@@ -34,7 +34,7 @@ import java.util.List;
 
 public interface AssetManager {
 
-    String ONYX_METADATA_PATH_PREFIX = ".onyx";
+    String DOT_ONYX_PATH_PREFIX = ".onyx";
 
     URL getPresignedInfoUrlForResource(
             final Resource resource);

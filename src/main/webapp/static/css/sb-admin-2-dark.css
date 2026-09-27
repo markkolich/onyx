@@ -411,3 +411,36 @@ body.dark-mode{
 .dark-mode .editable-description textarea {
     background-color: #0a0a0a;
 }
+
+/* Popovers - Bootstrap's popover CSS (sb-admin-2.css) hardcodes a white background/arrow -
+   override both, matching the same background/border already used for .dropdown-menu. Scoped
+   to .popover generically (not just .screencaps-popover) so any future popover in the
+   app gets correct dark-mode styling for free, same as .dark-mode .dropdown-menu already does. */
+.dark-mode .popover {
+    background-color: #1a1a1a;
+    border-color: #333;
+}
+
+.dark-mode .popover-body {
+    color: rgb(220,220,220);
+}
+
+.dark-mode .bs-popover-top > .arrow::after,
+.dark-mode .bs-popover-auto[x-placement^="top"] > .arrow::after {
+    border-top-color: #1a1a1a;
+}
+
+.dark-mode .bs-popover-right > .arrow::after,
+.dark-mode .bs-popover-auto[x-placement^="right"] > .arrow::after {
+    border-right-color: #1a1a1a;
+}
+
+.dark-mode .bs-popover-bottom > .arrow::after,
+.dark-mode .bs-popover-auto[x-placement^="bottom"] > .arrow::after {
+    border-bottom-color: #1a1a1a;
+}
+
+.dark-mode .bs-popover-left > .arrow::after,
+.dark-mode .bs-popover-auto[x-placement^="left"] > .arrow::after {
+    border-left-color: #1a1a1a;
+}

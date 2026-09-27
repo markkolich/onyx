@@ -36,6 +36,7 @@ import curacao.annotations.parameters.RequestBody;
 import onyx.components.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.AssetManager;
+import onyx.components.storage.MetadataManager;
 import onyx.components.storage.ResourceManager;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.request.v1.CreateDirectoryRequest;
@@ -65,6 +66,7 @@ public final class Directory extends AbstractOnyxApiController {
 
     private final AssetManager assetManager_;
     private final ResourceManager resourceManager_;
+    private final MetadataManager metadataManager_;
 
     private final ObjectMapper objectMapper_;
 
@@ -73,10 +75,12 @@ public final class Directory extends AbstractOnyxApiController {
             final OnyxConfig onyxConfig,
             final AssetManager assetManager,
             final ResourceManager resourceManager,
+            final MetadataManager metadataManager,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         super(onyxConfig);
         assetManager_ = assetManager;
         resourceManager_ = resourceManager;
+        metadataManager_ = metadataManager;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
@@ -296,6 +300,13 @@ public final class Directory extends AbstractOnyxApiController {
         // Recursively delete all assets under the directory, asynchronously.
         final boolean deletePermanently = BooleanUtils.toBooleanDefaultIfNull(permanent, false);
         assetManager_.deleteResourceAsync(directory, deletePermanently);
+
+        // Recursively delete all derived metadata for every descendant file under the directory,
+        // asynchronously too - the directory's own key is already a prefix of every descendant's key,
+        // so one call sweeps the whole subtree. Always a full permanent delete regardless of the
+        // "permanent" query parameter above, same as a single file's metadata delete - it's
+        // disposable/regenerable, not precious user content.
+        metadataManager_.deleteAllMetadataForResourceAsync(directory);
 
         return ResourceResponse.Builder.fromResource(objectMapper_, directory, session)
                 .build();

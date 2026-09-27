@@ -38,7 +38,9 @@ import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 public final class PathUtils {
 
-    private static final Splitter SLASH_SPLITTER = Splitter.on("/").omitEmptyStrings().trimResults();
+    public static final String SLASH_STRING = "/";
+
+    private static final Splitter SLASH_SPLITTER = Splitter.on(SLASH_STRING).omitEmptyStrings().trimResults();
 
     // Cannot instantiate
     private PathUtils() {

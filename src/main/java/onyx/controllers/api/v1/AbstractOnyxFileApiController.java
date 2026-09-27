@@ -30,6 +30,7 @@ import onyx.components.config.OnyxConfig;
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
+import onyx.components.storage.MetadataManager;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.filter.UploadFilter;
 import onyx.components.storage.sizer.cost.CostAnalyzer;
@@ -63,6 +64,7 @@ public abstract class AbstractOnyxFileApiController extends AbstractOnyxApiContr
     protected final AssetManager assetManager_;
     protected final CacheManager cacheManager_;
     protected final ResourceManager resourceManager_;
+    protected final MetadataManager metadataManager_;
 
     protected final CostAnalyzer costAnalyzer_;
 
@@ -76,6 +78,7 @@ public abstract class AbstractOnyxFileApiController extends AbstractOnyxApiContr
             final AssetManager assetManager,
             final CacheManager cacheManager,
             final ResourceManager resourceManager,
+            final MetadataManager metadataManager,
             final CostAnalyzer costAnalyzer,
             final UploadFilter uploadFilter) {
         super(onyxConfig);
@@ -83,6 +86,7 @@ public abstract class AbstractOnyxFileApiController extends AbstractOnyxApiContr
         assetManager_ = assetManager;
         cacheManager_ = cacheManager;
         resourceManager_ = resourceManager;
+        metadataManager_ = metadataManager;
         costAnalyzer_ = costAnalyzer;
         uploadFilter_ = uploadFilter;
     }
@@ -122,6 +126,10 @@ public abstract class AbstractOnyxFileApiController extends AbstractOnyxApiContr
             if (localCacheConfig_.localCacheEnabled()) {
                 cacheManager_.deleteResourceFromCacheAsync(file);
             }
+            // Unlike the asset itself, metadata is always fully purged here regardless - it's
+            // disposable/regenerable derived data that would otherwise become
+            // stale for whatever new content is about to be uploaded to this same path.
+            metadataManager_.deleteAllMetadataForResourceAsync(file);
         } else if (file != null) {
             throw new ApiConflictException("File or other resource at path already exists: "
                     + normalizedPath);
