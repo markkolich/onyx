@@ -40,6 +40,7 @@ import onyx.components.config.aws.AwsConfig;
 import onyx.components.config.cache.LocalCacheConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.CacheManager;
+import onyx.components.storage.MetadataManager;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.filter.UploadFilter;
 import onyx.components.storage.sizer.cost.CostAnalyzer;
@@ -92,10 +93,12 @@ public final class FileMultipart extends AbstractOnyxFileApiController {
             final AssetManager assetManager,
             final CacheManager cacheManager,
             final ResourceManager resourceManager,
+            final MetadataManager metadataManager,
             final CostAnalyzer costAnalyzer,
             final UploadFilter uploadFilter,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
-        super(onyxConfig, localCacheConfig, assetManager, cacheManager, resourceManager, costAnalyzer, uploadFilter);
+        super(onyxConfig, localCacheConfig, assetManager, cacheManager, resourceManager, metadataManager,
+                costAnalyzer, uploadFilter);
         awsConfig_ = awsConfig;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }

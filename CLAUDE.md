@@ -86,10 +86,10 @@ Uses HOCON (Lightbend/Typesafe Config). Key config sections:
 
 ## Frontend Build
 
-The static assets use a Gulp 5 pipeline managed by `frontend-maven-plugin` 2.0.0:
+The static assets use a Gulp 5 pipeline managed by `frontend-maven-plugin` 2.0.2:
 - Source: `src/main/webapp/static/`
 - Built automatically during `mvn package` via `frontend-maven-plugin`
-- Node v24.16.0 / npm 11.13.0 installed locally by Maven into `src/main/webapp/static/node/`
+- Node v24.21.0 / npm 11.19.0 installed locally by Maven into `src/main/webapp/static/node/`
 - Output: `build/app.{css,js}` (concatenated), `release/app.min.{css,js}` (minified + bannered)
 
 ### Gulp tasks

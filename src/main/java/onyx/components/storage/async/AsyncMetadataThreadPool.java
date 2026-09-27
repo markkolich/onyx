@@ -24,55 +24,48 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components.aws.s3;
+package onyx.components.storage.async;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentDestroyable;
-import onyx.components.aws.AwsClientConfig;
-import onyx.components.aws.AwsCredentials;
-import onyx.components.config.aws.AwsConfig;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 @Component
-public final class OnyxS3Client implements ComponentDestroyable {
+public final class AsyncMetadataThreadPool implements ComponentDestroyable {
 
-    private final S3Client s3_;
-    private final S3Presigner presigner_;
+    private static final int DEFAULT_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
+
+    private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder()
+            .setDaemon(true)
+            .setNameFormat("onyx-async-metadata-pool-worker-%d")
+            .build();
+
+    private final ExecutorService executorService_;
 
     @Injectable
-    public OnyxS3Client(
-            final AwsConfig awsConfig,
-            final AwsCredentials awsCredentials,
-            final AwsClientConfig awsClientConfig) {
-        final Region region = Region.of(awsConfig.getAwsS3Region());
-
-        s3_ = S3Client.builder()
-                .credentialsProvider(awsCredentials.getCredentialsProvider())
-                .overrideConfiguration(awsClientConfig.getClientOverrideConfiguration())
-                .region(region)
-                .build();
-
-        presigner_ = S3Presigner.builder()
-                .credentialsProvider(awsCredentials.getCredentialsProvider())
-                .region(region)
-                .build();
+    public AsyncMetadataThreadPool() {
+        this(Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE, THREAD_FACTORY));
     }
 
-    public S3Client getS3Client() {
-        return s3_;
+    @VisibleForTesting
+    public AsyncMetadataThreadPool(
+            final ExecutorService executorService) {
+        executorService_ = executorService;
     }
 
-    public S3Presigner getS3Presigner() {
-        return presigner_;
+    public ExecutorService getExecutorService() {
+        return executorService_;
     }
 
     @Override
     public void destroy() throws Exception {
-        s3_.close();
-        presigner_.close();
+        executorService_.shutdown();
     }
 
 }

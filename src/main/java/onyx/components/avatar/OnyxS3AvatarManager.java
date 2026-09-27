@@ -50,7 +50,7 @@ public final class OnyxS3AvatarManager implements AvatarManager {
     private static final Logger LOG = LoggerFactory.getLogger(OnyxS3AvatarManager.class);
 
     private static final String ONYX_AVATAR_PATH_PREFIX =
-            AssetManager.ONYX_METADATA_PATH_PREFIX + "/avatars";
+            AssetManager.DOT_ONYX_PATH_PREFIX + "/avatars";
 
     private final AwsConfig awsConfig_;
     private final S3Client s3_;
@@ -62,7 +62,7 @@ public final class OnyxS3AvatarManager implements AvatarManager {
             final OnyxS3Client onyxS3Client) {
         awsConfig_ = awsConfig;
         s3_ = onyxS3Client.getS3Client();
-        presigner_ = onyxS3Client.getPresigner();
+        presigner_ = onyxS3Client.getS3Presigner();
     }
 
     @Override

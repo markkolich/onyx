@@ -82,9 +82,9 @@ public final class OnyxS3ApiKeyManager implements ApiKeyManager {
     private static final Logger LOG = LoggerFactory.getLogger(OnyxS3ApiKeyManager.class);
 
     private static final String API_KEYS_S3_PREFIX =
-            AssetManager.ONYX_METADATA_PATH_PREFIX + "/apikeys/";
+            AssetManager.DOT_ONYX_PATH_PREFIX + "/apikeys/";
     private static final String API_KEYS_USERNAME_S3_PREFIX =
-            AssetManager.ONYX_METADATA_PATH_PREFIX + "/apikeys/username/";
+            AssetManager.DOT_ONYX_PATH_PREFIX + "/apikeys/username/";
     private static final String JSON_EXTENSION = ".json";
 
     private static final String APPLICATION_JSON = MediaType.JSON_UTF_8.toString();

@@ -58,7 +58,7 @@ public final class OnyxS3ShortLinkManager implements ShortLinkManager {
     private static final Logger LOG = LoggerFactory.getLogger(OnyxS3ShortLinkManager.class);
 
     private static final String SHORTLINKS_S3_PREFIX =
-            AssetManager.ONYX_METADATA_PATH_PREFIX + "/shortlinks/";
+            AssetManager.DOT_ONYX_PATH_PREFIX + "/shortlinks/";
     private static final String JSON_EXTENSION = ".json";
 
     private static final String SHORT_LINK_PATH_FORMAT = "%s/s/%s";

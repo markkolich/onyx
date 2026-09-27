@@ -63,11 +63,11 @@ public final class OnyxS3WebAuthnCredentialRepository implements WebAuthnCredent
     private static final Logger LOG = LoggerFactory.getLogger(OnyxS3WebAuthnCredentialRepository.class);
 
     private static final String CREDENTIALS_USERNAME_S3_PREFIX =
-            AssetManager.ONYX_METADATA_PATH_PREFIX + "/webauthn/username/";
+            AssetManager.DOT_ONYX_PATH_PREFIX + "/webauthn/username/";
     private static final String CREDENTIALS_USERHANDLE_S3_PREFIX =
-            AssetManager.ONYX_METADATA_PATH_PREFIX + "/webauthn/user-handle/";
+            AssetManager.DOT_ONYX_PATH_PREFIX + "/webauthn/user-handle/";
     private static final String CREDENTIALS_CREDENTIAL_ID_S3_PREFIX =
-            AssetManager.ONYX_METADATA_PATH_PREFIX + "/webauthn/credential-id/";
+            AssetManager.DOT_ONYX_PATH_PREFIX + "/webauthn/credential-id/";
 
     private static final String JSON_EXTENSION = ".json";
 

@@ -75,6 +75,11 @@ public final class OnyxSizerConfig implements SizerConfig {
     }
 
     @Override
+    public Duration getIterationThrottleDuration() {
+        return config_.getDuration(SIZER_ITERATION_THROTTLE_DURATION_PROP);
+    }
+
+    @Override
     public List<StorageTier> getCostAnalysisStorageTiers() {
         return config_.getObjectList(SIZER_COST_ANALYSIS_TIERS_PROP).stream()
                 .map(ConfigObject::toConfig)

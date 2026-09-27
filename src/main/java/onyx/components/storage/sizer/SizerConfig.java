@@ -42,6 +42,8 @@ public interface SizerConfig {
     String SIZER_BACKOFF_MAX_RETRIES_PROP = "backoff-max-retries";
     String SIZER_BACKOFF_THROTTLE_DURATION_PROP = "backoff-throttle-duration";
 
+    String SIZER_ITERATION_THROTTLE_DURATION_PROP = "iteration-throttle-duration";
+
     String SIZER_COST_ANALYSIS_TIERS_PROP = "cost-analysis-storage-tiers";
 
     String SIZER_COST_ANALYSIS_TIER_NAME_PROP = "name";
@@ -57,6 +59,16 @@ public interface SizerConfig {
     int getBackoffMaxRetries();
 
     Duration getBackoffThrottleDuration();
+
+    /**
+     * How long to pause after each resource visited.
+     *
+     * <p>Distinct from {@link #getBackoffThrottleDuration()}, which only applies <em>after</em>
+     * a call has already failed. Without a per-iteration pause the sizer walks flat out and
+     * discovers the provisioned throughput ceiling by hitting it, so a scheduled run shows up
+     * as an hour-long write spike. Mirrors the reaper's iteration throttle.
+     */
+    Duration getIterationThrottleDuration();
 
     List<StorageTier> getCostAnalysisStorageTiers();
 

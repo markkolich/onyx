@@ -72,7 +72,8 @@ function concatJs() {
         'js/onyx/app/widgets/keyboard.js',
         'js/onyx/app/widgets/upload-overlay.js',
         'js/onyx/app/widgets/dropzone.js',
-        'js/onyx/app/widgets/pasteboard.js'
+        'js/onyx/app/widgets/pasteboard.js',
+        'js/onyx/app/widgets/screencaps.js'
     ];
 
     return gulp.src(jsResources)

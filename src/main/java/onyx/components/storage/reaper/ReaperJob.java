@@ -94,7 +94,7 @@ public final class ReaperJob implements Job {
                     .build();
 
             s3.listObjectsV2Paginator(listRequest).contents().stream()
-                    .filter(objSummary -> !objSummary.key().startsWith(AssetManager.ONYX_METADATA_PATH_PREFIX))
+                    .filter(objSummary -> !objSummary.key().startsWith(AssetManager.DOT_ONYX_PATH_PREFIX))
                     .forEach((S3Object objSummary) -> {
                         final String resourcePath = ResourceManager.ROOT_PATH + objSummary.key();
 
@@ -130,13 +130,9 @@ public final class ReaperJob implements Job {
 
                         counter.incrementAndGet();
 
-                        try {
-                            // Micro throttle (sleep) on each iteration to avoid pummeling S3
-                            // and/or DynamoDB.
-                            Thread.sleep(iterationThrottle.toMillis());
-                        } catch (final InterruptedException e) {
-                            // Ignored, intentional.
-                        }
+                        // Micro throttle (sleep) on each iteration to avoid pummeling S3
+                        // and/or DynamoDB.
+                        throttle(iterationThrottle);
                     });
 
             final long end = System.currentTimeMillis();
@@ -146,6 +142,15 @@ public final class ReaperJob implements Job {
                     duration);
         } catch (final Exception e) {
             LOG.error("Reaper job failed after processing {} resources.", counter.get(), e);
+        }
+    }
+
+    private static void throttle(
+            final Duration duration) {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (final InterruptedException e) {
+            // Ignored, intentional.
         }
     }
 

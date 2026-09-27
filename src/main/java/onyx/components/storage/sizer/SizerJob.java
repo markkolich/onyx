@@ -81,6 +81,7 @@ public final class SizerJob implements Job {
 
         final int backoffMaxRetries = sizerConfig.getBackoffMaxRetries();
         final Duration backoffThrottle = sizerConfig.getBackoffThrottleDuration();
+        final Duration iterationThrottle = sizerConfig.getIterationThrottleDuration();
 
         final List<Resource> homeDirectories =
                 callWithRetry(backoffMaxRetries, backoffThrottle, resourceManager::listHomeDirectories);
@@ -93,7 +94,7 @@ public final class SizerJob implements Job {
             final Resource resource = callWithRetry(backoffMaxRetries, backoffThrottle,
                     () -> resourceManager.getResourceAtPath(normalizedPath));
             if (resource != null) {
-                rootNode.plus(sizeResource(backoffMaxRetries, backoffThrottle,
+                rootNode.plus(sizeResource(backoffMaxRetries, backoffThrottle, iterationThrottle,
                         awsConfig, resourceManager, assetManager, costAnalyzer, resource));
             }
 
@@ -111,6 +112,7 @@ public final class SizerJob implements Job {
     private static TreeNode sizeResource(
             final int backoffMaxRetries,
             final Duration backoffThrottle,
+            final Duration iterationThrottle,
             final AwsConfig awsConfig,
             final ResourceManager resourceManager,
             final AssetManager assetManager,
@@ -175,7 +177,7 @@ public final class SizerJob implements Job {
             for (final Resource child : directoryContents) {
                 try {
                     // Recursive!
-                    treeNode.plus(sizeResource(backoffMaxRetries, backoffThrottle,
+                    treeNode.plus(sizeResource(backoffMaxRetries, backoffThrottle, iterationThrottle,
                             awsConfig, resourceManager, assetManager, costAnalyzer, child));
                 } catch (final Exception e) {
                     LOG.warn("Skipping resource - failed to size or cost: {}", child.getPath(), e);
@@ -201,7 +203,22 @@ public final class SizerJob implements Job {
             }
         }
 
+        // Micro throttle (sleep) on each resource visited to avoid pummeling S3 and/or
+        // DynamoDB, same as the reaper. Applied once per resource rather than per write:
+        // a file visit costs an S3 HeadObject whether or not its size changed, and the
+        // DynamoDB writes ride along at the same rate.
+        throttle(iterationThrottle);
+
         return treeNode;
+    }
+
+    private static void throttle(
+            final Duration duration) {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (final InterruptedException e) {
+            // Ignored, intentional.
+        }
     }
 
 }
