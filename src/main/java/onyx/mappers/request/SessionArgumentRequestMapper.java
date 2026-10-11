@@ -45,9 +45,9 @@ import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
+import static curacao.util.http.CookieBaker.getFirstCookieByName;
 import static onyx.components.authentication.CookieManager.SESSION_COOKIE_NAME;
 import static onyx.components.authentication.api.ApiKeyManager.API_KEY_AUTH_HEADER_PREFIX;
-import static onyx.util.CookieBaker.getFirstCookieByName;
 
 @Mapper
 public final class SessionArgumentRequestMapper

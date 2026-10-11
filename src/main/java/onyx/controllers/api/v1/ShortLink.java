@@ -33,7 +33,7 @@ import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.shortlink.ShortLinkManager;
 import onyx.components.storage.ResourceManager;

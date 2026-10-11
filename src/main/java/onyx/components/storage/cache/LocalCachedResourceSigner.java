@@ -29,7 +29,7 @@ package onyx.components.storage.cache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.security.StringSigner;
 import onyx.entities.storage.cache.CachedResourceToken;
 import org.slf4j.Logger;

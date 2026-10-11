@@ -31,7 +31,7 @@ import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.entities.api.response.v1.ApiErrorResponse;
 import onyx.exceptions.api.OnyxApiException;

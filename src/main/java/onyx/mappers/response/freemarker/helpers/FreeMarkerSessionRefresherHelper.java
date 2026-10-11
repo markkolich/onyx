@@ -29,17 +29,18 @@ package onyx.mappers.response.freemarker.helpers;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.core.servlet.HttpResponse;
+import curacao.freemarker.entities.FreeMarkerContent;
 import onyx.components.authentication.CookieManager;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.config.authentication.SessionConfig;
 import onyx.entities.authentication.Session;
-import onyx.entities.freemarker.FreeMarkerContent;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static onyx.components.freemarker.FreeMarkerContentRenderer.SESSION_ATTR;
 import static onyx.components.authentication.CookieManager.SESSION_COOKIE_NAME;
 
 @Component
@@ -70,7 +71,7 @@ public final class FreeMarkerSessionRefresherHelper {
     public void refreshSession(
             final HttpResponse response,
             @Nonnull final FreeMarkerContent content) {
-        final Session session = content.getAttribute(FreeMarkerContent.DATA_MAP_SESSION_ATTR);
+        final Session session = content.getAttribute(SESSION_ATTR);
         if (shouldRefreshSessionAutomatically_ && session != null) {
             refreshSessionIfNeeded(session, response);
         }

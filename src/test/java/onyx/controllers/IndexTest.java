@@ -27,9 +27,9 @@
 package onyx.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import curacao.freemarker.entities.FreeMarkerContent;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
-import onyx.entities.freemarker.FreeMarkerContent;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;

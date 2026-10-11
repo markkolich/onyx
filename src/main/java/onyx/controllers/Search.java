@@ -31,12 +31,13 @@ import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Query;
+import curacao.freemarker.entities.FreeMarkerContent;
 import onyx.components.config.OnyxConfig;
 import onyx.components.search.SearchManager;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.filter.ResourceFilter;
 import onyx.entities.authentication.Session;
-import onyx.entities.freemarker.FreeMarkerContent;
+import onyx.components.freemarker.OnyxFreeMarkerContent;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.resource.ResourceNotFoundException;
 import org.apache.commons.lang3.tuple.Pair;
@@ -47,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static com.kolich.common.util.URLEncodingUtils.urlDecode;
+import static onyx.components.freemarker.FreeMarkerContentRenderer.SESSION_ATTR;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
@@ -92,8 +94,8 @@ public final class Search extends AbstractOnyxFreeMarkerController {
         // HTML-template at render time.
         final String escapedQuery = escapeHtml4(urlDecode(query));
 
-        return new FreeMarkerContent.Builder("templates/search.ftl")
-                .withSession(session)
+        return OnyxFreeMarkerContent.newHtmlBuilder("templates/search.ftl")
+                .withAttr(SESSION_ATTR, session)
                 .withAttr("query", escapedQuery)
                 .withAttr("results", results)
                 .build();

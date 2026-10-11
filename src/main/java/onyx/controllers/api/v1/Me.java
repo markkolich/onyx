@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.controllers.api.AbstractOnyxApiController;
 import onyx.entities.api.response.v1.MeResponse;

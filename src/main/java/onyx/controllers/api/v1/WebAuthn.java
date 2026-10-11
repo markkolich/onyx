@@ -37,7 +37,7 @@ import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.RequestBody;
 import curacao.annotations.parameters.convenience.Cookie;
 import curacao.core.servlet.HttpResponse;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.authentication.webauthn.WebAuthnCredentialRepository;

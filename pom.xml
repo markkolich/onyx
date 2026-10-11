@@ -33,7 +33,7 @@
         <slf4j.version>2.0.20</slf4j.version>
         <logback.version>1.6.5</logback.version>
 
-        <curacao.version>7.1.3</curacao.version>
+        <curacao.version>7.2.0</curacao.version>
 
         <jetty.version>11.0.26</jetty.version>
 
@@ -47,7 +47,7 @@
         <commons-io.version>2.22.0</commons-io.version>
         <commons-collections4.version>4.6.0</commons-collections4.version>
 
-        <aws-sdk-v2.version>2.55.13</aws-sdk-v2.version>
+        <aws-sdk-v2.version>2.55.14</aws-sdk-v2.version>
 
         <guava.version>33.7.2-jre</guava.version>
 
@@ -155,6 +155,11 @@
         <dependency>
             <groupId>curacao</groupId>
             <artifactId>curacao-jackson</artifactId>
+            <version>${curacao.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>curacao</groupId>
+            <artifactId>curacao-freemarker</artifactId>
             <version>${curacao.version}</version>
         </dependency>
 

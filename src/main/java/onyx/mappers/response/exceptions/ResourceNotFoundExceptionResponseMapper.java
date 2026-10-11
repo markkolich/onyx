@@ -30,12 +30,13 @@ import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
-import onyx.components.FreeMarkerContentRenderer;
+import curacao.freemarker.entities.FreeMarkerContent;
+import curacao.freemarker.mappers.AbstractFreeMarkerContentResponseMapper;
+import onyx.components.freemarker.FreeMarkerContentRenderer;
 import onyx.components.authentication.CookieManager;
 import onyx.components.security.StringSigner;
-import onyx.entities.freemarker.FreeMarkerContent;
+import onyx.components.freemarker.OnyxFreeMarkerContent;
 import onyx.exceptions.resource.ResourceNotFoundException;
-import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
@@ -45,7 +46,7 @@ import static onyx.components.authentication.CookieManager.RETURN_TO_COOKIE_NAME
 
 @Mapper
 public final class ResourceNotFoundExceptionResponseMapper
-        extends AbstractFreeMarkerContentAwareResponseMapper<ResourceNotFoundException> {
+        extends AbstractFreeMarkerContentResponseMapper<ResourceNotFoundException> {
 
     private final CookieManager cookieManager_;
     private final StringSigner stringSigner_;
@@ -65,7 +66,7 @@ public final class ResourceNotFoundExceptionResponseMapper
             final AsyncContext context,
             final HttpResponse response,
             @Nonnull final ResourceNotFoundException entity) throws Exception {
-        final FreeMarkerContent content = new FreeMarkerContent.Builder("templates/errors/404.ftl", SC_NOT_FOUND)
+        final FreeMarkerContent content = OnyxFreeMarkerContent.newHtmlBuilder("templates/errors/404.ftl", SC_NOT_FOUND)
                 .build();
 
         final String returnTo = entity.getReturnTo();

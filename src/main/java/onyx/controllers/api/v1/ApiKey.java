@@ -34,7 +34,7 @@ import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.RequestBody;
 import curacao.entities.empty.StatusCodeOnlyCuracaoEntity;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.authentication.api.ApiKeyManager;
 import onyx.components.config.OnyxConfig;
 import onyx.controllers.api.AbstractOnyxApiController;

@@ -30,16 +30,18 @@ import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
+import curacao.freemarker.entities.FreeMarkerContent;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.components.storage.filter.ResourceFilter;
 import onyx.entities.authentication.Session;
 import onyx.entities.freemarker.DirectoryListing;
-import onyx.entities.freemarker.FreeMarkerContent;
+import onyx.components.freemarker.OnyxFreeMarkerContent;
 import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.resource.ResourceForbiddenException;
 import onyx.exceptions.resource.ResourceNotFoundException;
 
+import static onyx.components.freemarker.FreeMarkerContentRenderer.SESSION_ATTR;
 import static onyx.util.UserUtils.userIsNotOwner;
 import static onyx.util.UserUtils.userIsOwner;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
@@ -99,8 +101,8 @@ public final class Browse extends AbstractOnyxResourceFilterAwareController {
 
         final boolean userIsOwner = userIsOwner(resource, session);
 
-        return new FreeMarkerContent.Builder("templates/browse.ftl")
-                .withSession(session)
+        return OnyxFreeMarkerContent.newHtmlBuilder("templates/browse.ftl")
+                .withAttr(SESSION_ATTR, session)
                 .withAttr("view", "browse")
                 .withAttr("resource", resource)
                 .withAttr("breadcrumbs", splitNormalizedPathToElements(resource.getPath()))

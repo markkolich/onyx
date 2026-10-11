@@ -30,10 +30,11 @@ import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
-import onyx.components.FreeMarkerContentRenderer;
-import onyx.entities.freemarker.FreeMarkerContent;
+import curacao.freemarker.entities.FreeMarkerContent;
+import curacao.freemarker.mappers.AbstractFreeMarkerContentResponseMapper;
+import onyx.components.freemarker.FreeMarkerContentRenderer;
+import onyx.components.freemarker.OnyxFreeMarkerContent;
 import onyx.exceptions.resource.ResourceForbiddenException;
-import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
 
 import javax.annotation.Nonnull;
 
@@ -41,7 +42,7 @@ import static curacao.core.servlet.HttpStatus.SC_FORBIDDEN;
 
 @Mapper
 public final class ResourceForbiddenExceptionResponseMapper
-        extends AbstractFreeMarkerContentAwareResponseMapper<ResourceForbiddenException> {
+        extends AbstractFreeMarkerContentResponseMapper<ResourceForbiddenException> {
 
     @Injectable
     public ResourceForbiddenExceptionResponseMapper(
@@ -54,7 +55,7 @@ public final class ResourceForbiddenExceptionResponseMapper
             final AsyncContext context,
             final HttpResponse response,
             @Nonnull final ResourceForbiddenException entity) throws Exception {
-        final FreeMarkerContent content = new FreeMarkerContent.Builder("templates/errors/403.ftl", SC_FORBIDDEN)
+        final FreeMarkerContent content = OnyxFreeMarkerContent.newHtmlBuilder("templates/errors/403.ftl", SC_FORBIDDEN)
                 .build();
 
         renderFreeMarkerContent(response, content);

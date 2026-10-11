@@ -29,7 +29,7 @@ package onyx.components.authentication.twofactor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.security.SecurityConfig;
 import onyx.components.security.StringSigner;
 import onyx.entities.authentication.twofactor.TrustedDeviceToken;

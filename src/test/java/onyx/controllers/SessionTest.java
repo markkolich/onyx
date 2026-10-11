@@ -26,6 +26,7 @@
 
 package onyx.controllers;
 
+import curacao.freemarker.entities.FreeMarkerContent;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.authentication.twofactor.TwoFactorAuthCodeManager;
@@ -33,7 +34,6 @@ import onyx.components.authentication.twofactor.TwoFactorAuthTokenManager;
 import onyx.components.authentication.CookieManager;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
 import onyx.components.storage.ResourceManager;
-import onyx.entities.freemarker.FreeMarkerContent;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

@@ -30,9 +30,9 @@ import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
-import onyx.components.FreeMarkerContentRenderer;
-import onyx.entities.freemarker.FreeMarkerContent;
-import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
+import curacao.freemarker.entities.FreeMarkerContent;
+import curacao.freemarker.mappers.AbstractFreeMarkerContentResponseMapper;
+import onyx.components.freemarker.FreeMarkerContentRenderer;
 import onyx.mappers.response.freemarker.helpers.FreeMarkerLinkHeaderDnsPrefetchHelper;
 import onyx.mappers.response.freemarker.helpers.FreeMarkerSessionRefresherHelper;
 
@@ -40,7 +40,7 @@ import javax.annotation.Nonnull;
 
 @Mapper
 public final class FreeMarkerContentResponseMapper
-        extends AbstractFreeMarkerContentAwareResponseMapper<FreeMarkerContent> {
+        extends AbstractFreeMarkerContentResponseMapper<FreeMarkerContent> {
 
     private final FreeMarkerSessionRefresherHelper sessionRefresherHelper_;
     private final FreeMarkerLinkHeaderDnsPrefetchHelper linkHeaderDnsPrefetchHelper_;

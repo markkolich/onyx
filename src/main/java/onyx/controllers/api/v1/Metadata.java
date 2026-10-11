@@ -36,7 +36,7 @@ import curacao.annotations.parameters.Query;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
 import curacao.entities.empty.StatusCodeOnlyCuracaoEntity;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.MetadataManager;
 import onyx.components.storage.ResourceManager;

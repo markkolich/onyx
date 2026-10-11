@@ -24,31 +24,27 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package onyx.components;
+package onyx.components.freemarker;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
+import curacao.freemarker.components.AbstractFreeMarkerContentRenderer;
 import onyx.BuildVersion;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.authentication.SessionConfig;
 
-import onyx.entities.freemarker.FreeMarkerContent;
-import org.apache.commons.collections4.MapUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.StringWriter;
-import java.io.Writer;
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 @Component
-public final class FreeMarkerContentRenderer {
+public final class FreeMarkerContentRenderer extends AbstractFreeMarkerContentRenderer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FreeMarkerContentRenderer.class);
+    /**
+     * The template attribute that holds the current {@link onyx.entities.authentication.Session},
+     * if there is one.
+     */
+    public static final String SESSION_ATTR = "session";
 
     private static final String BUILD_VERSION_ATTR = "buildVersion";
     private static final String CONTEXT_PATH_ATTR = "contextPath";
@@ -60,38 +56,19 @@ public final class FreeMarkerContentRenderer {
 
     private final OnyxConfig onyxConfig_;
     private final SessionConfig sessionConfig_;
-    private final OnyxFreeMarkerConfig onyxFreeMarkerConfig_;
 
     @Injectable
     public FreeMarkerContentRenderer(
             final OnyxConfig onyxConfig,
             final SessionConfig sessionConfig,
             final OnyxFreeMarkerConfig onyxFreeMarkerConfig) {
+        super(onyxFreeMarkerConfig.getFreeMarkerConfig());
         onyxConfig_ = onyxConfig;
         sessionConfig_ = sessionConfig;
-        onyxFreeMarkerConfig_ = onyxFreeMarkerConfig;
     }
 
-    public String contentToString(
-            final FreeMarkerContent content) throws Exception {
-        try (Writer w = contentToWriter(content)) {
-            return w.toString();
-        }
-    }
-
-    public Writer contentToWriter(
-            final FreeMarkerContent content) throws Exception {
-        final Writer w = new StringWriter();
-        try {
-            final Configuration freeMarkerConfig = onyxFreeMarkerConfig_.getFreeMarkerConfig();
-            final Template tp = freeMarkerConfig.getTemplate(content.getTemplateName());
-            tp.process(getMergedTemplateDataMap(tp, content), w);
-        } catch (final Exception e) {
-            throw new RuntimeException("Failed to process free marker template into string.", e);
-        }
-        return w;
-    }
-
+    @Nonnull
+    @Override
     public Map<String, Object> getGlobalDataMap() {
         final ImmutableMap.Builder<String, Object> map = ImmutableMap.builder();
 
@@ -108,27 +85,6 @@ public final class FreeMarkerContentRenderer {
         map.put(WEBAUTHN_AUTH_ENABLED_ATTR, sessionConfig_.isWebAuthnAuthEnabled());
 
         return map.build();
-    }
-
-    private Map<String, Object> getMergedTemplateDataMap(
-            final Template tp,
-            final FreeMarkerContent content) {
-        // The resulting map is intentionally not immutable here because it's
-        // mutated during template processing.
-        final Map<String, Object> map = Maps.newLinkedHashMap();
-        // Merge in the web-application specific data map.
-        map.putAll(getGlobalDataMap());
-        // Get the entity defined set of template attributes.
-        final Map<String, Object> templateDataMap = content.getDataMap();
-        if (MapUtils.isNotEmpty(templateDataMap)) {
-            map.putAll(templateDataMap);
-        }
-        // Get the template defined set of attributes (these are defined
-        // inline within the .ftl template file itself).
-        for (final String attrName : tp.getCustomAttributeNames()) {
-            map.put(attrName, tp.getCustomAttribute(attrName));
-        }
-        return ImmutableMap.copyOf(map);
     }
 
 }

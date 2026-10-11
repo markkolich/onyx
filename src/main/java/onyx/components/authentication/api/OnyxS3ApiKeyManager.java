@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.net.MediaType;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.aws.s3.OnyxS3Client;
 import onyx.components.config.aws.AwsConfig;

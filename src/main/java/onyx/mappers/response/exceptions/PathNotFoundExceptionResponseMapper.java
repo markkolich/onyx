@@ -31,9 +31,10 @@ import curacao.annotations.Mapper;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
 import curacao.exceptions.routing.PathNotFoundException;
-import onyx.components.FreeMarkerContentRenderer;
-import onyx.entities.freemarker.FreeMarkerContent;
-import onyx.mappers.response.AbstractFreeMarkerContentAwareResponseMapper;
+import curacao.freemarker.entities.FreeMarkerContent;
+import curacao.freemarker.mappers.AbstractFreeMarkerContentResponseMapper;
+import onyx.components.freemarker.FreeMarkerContentRenderer;
+import onyx.components.freemarker.OnyxFreeMarkerContent;
 
 import javax.annotation.Nonnull;
 
@@ -41,7 +42,7 @@ import static curacao.core.servlet.HttpStatus.SC_NOT_FOUND;
 
 @Mapper
 public final class PathNotFoundExceptionResponseMapper
-        extends AbstractFreeMarkerContentAwareResponseMapper<PathNotFoundException> {
+        extends AbstractFreeMarkerContentResponseMapper<PathNotFoundException> {
 
     @Injectable
     public PathNotFoundExceptionResponseMapper(
@@ -54,7 +55,7 @@ public final class PathNotFoundExceptionResponseMapper
             final AsyncContext context,
             final HttpResponse response,
             @Nonnull final PathNotFoundException entity) throws Exception {
-        final FreeMarkerContent content = new FreeMarkerContent.Builder("templates/errors/404.ftl", SC_NOT_FOUND)
+        final FreeMarkerContent content = OnyxFreeMarkerContent.newHtmlBuilder("templates/errors/404.ftl", SC_NOT_FOUND)
                 .build();
 
         renderFreeMarkerContent(response, content);

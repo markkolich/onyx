@@ -29,9 +29,10 @@ package onyx.components.authentication;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.core.servlet.HttpResponse;
+import curacao.servlet.jakarta.JakartaHttpCookie;
+import curacao.util.http.CookieBaker;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.authentication.SessionConfig;
-import onyx.util.CookieBaker;
 
 import javax.annotation.Nullable;
 
@@ -98,7 +99,7 @@ public final class OnyxCookieManager implements CookieManager {
     }
 
     private CookieBaker.Builder newCookieBuilder() {
-        return new CookieBaker.Builder()
+        return JakartaHttpCookie.Extensions.newCookieBuilder()
                 .setDomain(sessionConfig_.getSessionDomain())
                 .setContextPath(onyxConfig_.getContextPath())
                 .setSecure(sessionConfig_.isSessionUsingHttps());

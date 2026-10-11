@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.core.servlet.HttpResponse;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
 import onyx.components.security.StringSigner;

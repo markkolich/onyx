@@ -29,16 +29,17 @@ package onyx.controllers;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
+import curacao.freemarker.entities.FreeMarkerContent;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.Session;
-import onyx.entities.freemarker.FreeMarkerContent;
+import onyx.components.freemarker.OnyxFreeMarkerContent;
 import onyx.entities.storage.aws.dynamodb.Resource;
 
 import java.util.List;
 
-import static onyx.entities.freemarker.Utf8TextEntity.EntityType.TEXT;
-import static onyx.entities.freemarker.Utf8TextEntity.EntityType.XML;
+import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
+import static onyx.components.freemarker.FreeMarkerContentRenderer.SESSION_ATTR;
 
 @Controller
 public final class Index extends AbstractOnyxFreeMarkerController {
@@ -55,15 +56,15 @@ public final class Index extends AbstractOnyxFreeMarkerController {
             final Session session) {
         final List<Resource> homeDirectories = resourceManager_.listHomeDirectories();
 
-        return new FreeMarkerContent.Builder("templates/index.ftl")
-                .withSession(session)
+        return OnyxFreeMarkerContent.newHtmlBuilder("templates/index.ftl")
+                .withAttr(SESSION_ATTR, session)
                 .withAttr("children", homeDirectories)
                 .build();
     }
 
     @RequestMapping("^/robots\\.txt$")
     public FreeMarkerContent robots() {
-        return new FreeMarkerContent.Builder("templates/txt/robots.ftl", TEXT)
+        return OnyxFreeMarkerContent.newBuilder("templates/txt/robots.ftl", PLAIN_TEXT_UTF_8)
                 .build();
     }
 
@@ -71,7 +72,7 @@ public final class Index extends AbstractOnyxFreeMarkerController {
     public FreeMarkerContent sitemap() {
         final List<Resource> homeDirectories = resourceManager_.listHomeDirectories();
 
-        return new FreeMarkerContent.Builder("templates/xml/sitemap.ftl", XML)
+        return OnyxFreeMarkerContent.newXmlBuilder("templates/xml/sitemap.ftl")
                 .withAttr("children", homeDirectories)
                 .build();
     }

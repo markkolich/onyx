@@ -34,6 +34,7 @@ import curacao.annotations.parameters.RequestBody;
 import curacao.annotations.parameters.convenience.Cookie;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
+import curacao.freemarker.entities.FreeMarkerContent;
 import onyx.components.authentication.CookieManager;
 import onyx.components.authentication.SessionManager;
 import onyx.components.authentication.UserAuthenticator;
@@ -46,7 +47,7 @@ import onyx.components.storage.ResourceManager;
 import onyx.entities.authentication.User;
 import onyx.entities.authentication.twofactor.TrustedDeviceToken;
 import onyx.entities.authentication.twofactor.TwoFactorAuthToken;
-import onyx.entities.freemarker.FreeMarkerContent;
+import onyx.components.freemarker.OnyxFreeMarkerContent;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -110,7 +111,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
 
     @RequestMapping("^/login$")
     public FreeMarkerContent login() {
-        return new FreeMarkerContent.Builder("templates/login.ftl")
+        return OnyxFreeMarkerContent.newHtmlBuilder("templates/login.ftl")
                 .build();
     }
 
@@ -275,7 +276,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
         twoFactorAuthCodeManager_.sendVerificationCodeToUser(user, randomCode);
 
         final String signedToken = twoFactorAuthTokenManager_.signToken(token);
-        return new FreeMarkerContent.Builder("templates/login-verification.ftl")
+        return OnyxFreeMarkerContent.newHtmlBuilder("templates/login-verification.ftl")
                 .withAttr(TOKEN_FIELD, signedToken)
                 .build();
     }

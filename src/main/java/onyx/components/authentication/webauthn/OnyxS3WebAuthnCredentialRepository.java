@@ -36,7 +36,7 @@ import com.yubico.webauthn.data.PublicKeyCredentialDescriptor;
 import com.yubico.webauthn.data.PublicKeyCredentialType;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.storage.AssetManager;
 import onyx.components.aws.s3.OnyxS3Client;
 import onyx.components.config.aws.AwsConfig;

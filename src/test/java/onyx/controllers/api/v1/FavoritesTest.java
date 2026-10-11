@@ -28,7 +28,7 @@ package onyx.controllers.api.v1;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableSet;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.storage.ResourceManager;
 import onyx.controllers.AbstractOnyxControllerTest;
 import onyx.entities.api.response.v1.FavoritesResponse;

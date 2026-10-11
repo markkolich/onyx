@@ -33,7 +33,7 @@ import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.RequestBody;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.AssetManager;
 import onyx.components.storage.MetadataManager;

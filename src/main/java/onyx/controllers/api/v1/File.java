@@ -35,7 +35,7 @@ import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.RequestBody;
 import curacao.core.servlet.HttpResponse;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.aws.AwsConfig;
 import onyx.components.config.cache.LocalCacheConfig;

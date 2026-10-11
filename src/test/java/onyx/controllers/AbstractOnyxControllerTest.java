@@ -27,8 +27,8 @@
 package onyx.controllers;
 
 import onyx.AbstractOnyxTest;
-import onyx.components.FreeMarkerContentRenderer;
-import onyx.components.OnyxFreeMarkerConfig;
+import onyx.components.freemarker.FreeMarkerContentRenderer;
+import onyx.components.freemarker.OnyxFreeMarkerConfig;
 import onyx.components.config.authentication.SessionConfig;
 import onyx.entities.authentication.Session;
 import onyx.entities.authentication.Session.Type;

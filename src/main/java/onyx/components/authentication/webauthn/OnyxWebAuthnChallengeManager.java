@@ -29,7 +29,7 @@ package onyx.components.authentication.webauthn;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.components.OnyxJacksonObjectMapper;
+import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.security.StringSigner;
 import onyx.entities.api.request.v1.webauthn.WebAuthnAuthenticationRequest;
 import onyx.entities.api.request.v1.webauthn.WebAuthnRegistrationRequest;

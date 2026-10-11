@@ -26,10 +26,10 @@ mvn clean package
 
 ### Key Technologies
 - **Java 21** with Jetty 11.0.26 web server
-- **Curacao 7.1.3** - lightweight web framework
+- **Curacao 7.2.0** - lightweight web framework; `curacao-freemarker` provides the FreeMarker rendering stack (`FreeMarkerContent`, `Utf8TextEntity`, `AbstractFreeMarkerContentRenderer`, `AbstractFreeMarkerContentResponseMapper`) and `curacao.util.http.CookieBaker`
 - **AWS SDK v2** - S3, DynamoDB, SNS
 - **Apache Solr 9.x** - embedded search
-- **FreeMarker** - HTML templating
+- **FreeMarker** - HTML templating. Start every `FreeMarkerContent` from `onyx.components.freemarker.OnyxFreeMarkerContent` (not curacao's `new FreeMarkerContent.Builder(...)`): `newHtmlBuilder(...)` and `newXmlBuilder(...)` add `HtmlMinifier` + `HtmlCompressor`; `newBuilder(template, mediaType[, status])` adds no transformers (e.g. robots.txt). The current session goes in the `session` template attribute (`FreeMarkerContentRenderer.SESSION_ATTR`)
 - **Quartz** - scheduled jobs
 
 ### Directory Structure
