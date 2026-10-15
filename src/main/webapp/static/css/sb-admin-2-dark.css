@@ -24,6 +24,10 @@ body.dark-mode{
 	color: #00b8ff;
 }
 
+.dark-mode .btn-link:not(:disabled):not(.disabled){
+	color: #00b8ff;
+}
+
 .dark-mode .form-control[type="text"],.dark-mode .form-control[type="password"],.dark-mode textarea.form-control{
 	color:rgb(220,220,220);
     background-color:#222;

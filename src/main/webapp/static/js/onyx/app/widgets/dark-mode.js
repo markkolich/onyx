@@ -17,13 +17,13 @@
         enable = () => {
             data.$body.addClass('dark-mode');
             localStorage.setItem(localStorageKey, 'true');
-            data.$icon.removeClass('fa-sun').addClass('fa-moon');
+            data.$icon.removeClass('fa-moon').addClass('fa-sun');
         },
 
         disable = () => {
             data.$body.removeClass('dark-mode');
             localStorage.setItem(localStorageKey, 'false');
-            data.$icon.removeClass('fa-moon').addClass('fa-sun');
+            data.$icon.removeClass('fa-sun').addClass('fa-moon');
         },
 
         toggle = () => {

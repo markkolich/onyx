@@ -149,6 +149,7 @@ public final class WebAuthn extends AbstractOnyxApiController {
         final AuthenticatorSelectionCriteria authenticatorSelection =
                 AuthenticatorSelectionCriteria.builder()
                 .residentKey(ResidentKeyRequirement.REQUIRED)
+                .userVerification(UserVerificationRequirement.REQUIRED)
                 .build();
 
         final StartRegistrationOptions startRegOptions = StartRegistrationOptions.builder()
@@ -256,9 +257,11 @@ public final class WebAuthn extends AbstractOnyxApiController {
 
         // No username required - the authenticator will present available resident credentials
         // (discoverable passkeys) for this origin and the user picks one. The userHandle in the
-        // assertion response maps back to the username.
-        final StartAssertionOptions startAssertionOptions =
-                StartAssertionOptions.builder().build();
+        // assertion response maps back to the username. User verification (Touch ID, device
+        // password, etc.) is required, and finishAssertion rejects assertions without the UV flag.
+        final StartAssertionOptions startAssertionOptions = StartAssertionOptions.builder()
+                .userVerification(UserVerificationRequirement.REQUIRED)
+                .build();
         final AssertionRequest assertionRequest =
                 relyingParty_.startAssertion(startAssertionOptions);
 

@@ -12,7 +12,7 @@
     <!-- Nav Item - Dark Mode Toggle -->
     <li class="nav-item no-arrow">
       <a class="nav-link text-muted" href="#" id="darkModeToggle" role="button" title="Toggle Dark Mode">
-        <i class="fas fa-moon fa-fw"></i>
+        <i class="fas fa-sun fa-fw"></i>
       </a>
     </li>
 
