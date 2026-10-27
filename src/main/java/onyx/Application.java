@@ -26,6 +26,7 @@
 
 package onyx;
 
+import com.kolich.buildversion.BuildVersion;
 import com.google.common.io.Resources;
 import curacao.servlet.jakarta.CuracaoJakartaContextListener;
 import curacao.servlet.jakarta.CuracaoJakartaDispatcherServlet;

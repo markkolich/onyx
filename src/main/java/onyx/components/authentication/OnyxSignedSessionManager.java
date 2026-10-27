@@ -33,7 +33,7 @@ import curacao.core.servlet.HttpResponse;
 import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.authentication.twofactor.TwoFactorAuthConfig;
-import onyx.components.security.StringSigner;
+import onyx.components.security.OnyxStringSigner;
 import onyx.entities.authentication.Session;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -55,7 +55,7 @@ public final class OnyxSignedSessionManager implements SessionManager {
     private final OnyxConfig onyxConfig_;
     private final CookieManager cookieManager_;
     private final TwoFactorAuthConfig twoFactorAuthConfig_;
-    private final StringSigner stringSigner_;
+    private final OnyxStringSigner stringSigner_;
 
     private final ObjectMapper objectMapper_;
 
@@ -64,7 +64,7 @@ public final class OnyxSignedSessionManager implements SessionManager {
             final OnyxConfig onyxConfig,
             final CookieManager cookieManager,
             final TwoFactorAuthConfig twoFactorAuthConfig,
-            final StringSigner stringSigner,
+            final OnyxStringSigner stringSigner,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         onyxConfig_ = onyxConfig;
         cookieManager_ = cookieManager;

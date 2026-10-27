@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.jackson.OnyxJacksonObjectMapper;
-import onyx.components.security.StringSigner;
+import onyx.components.security.OnyxStringSigner;
 import onyx.entities.storage.cache.CachedResourceToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,13 +45,13 @@ public final class LocalCachedResourceSigner implements CachedResourceSigner {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalCachedResourceSigner.class);
 
-    private final StringSigner stringSigner_;
+    private final OnyxStringSigner stringSigner_;
 
     private final ObjectMapper objectMapper_;
 
     @Injectable
     public LocalCachedResourceSigner(
-            final StringSigner stringSigner,
+            final OnyxStringSigner stringSigner,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         stringSigner_ = stringSigner;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();

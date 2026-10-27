@@ -34,7 +34,7 @@ import curacao.freemarker.entities.FreeMarkerContent;
 import curacao.freemarker.mappers.AbstractFreeMarkerContentResponseMapper;
 import onyx.components.freemarker.FreeMarkerContentRenderer;
 import onyx.components.authentication.CookieManager;
-import onyx.components.security.StringSigner;
+import onyx.components.security.OnyxStringSigner;
 import onyx.components.freemarker.OnyxFreeMarkerContent;
 import onyx.exceptions.resource.ResourceNotFoundException;
 import org.apache.commons.lang3.StringUtils;
@@ -49,13 +49,13 @@ public final class ResourceNotFoundExceptionResponseMapper
         extends AbstractFreeMarkerContentResponseMapper<ResourceNotFoundException> {
 
     private final CookieManager cookieManager_;
-    private final StringSigner stringSigner_;
+    private final OnyxStringSigner stringSigner_;
 
     @Injectable
     public ResourceNotFoundExceptionResponseMapper(
             @Nonnull final FreeMarkerContentRenderer fmcRenderer,
             @Nonnull final CookieManager cookieManager,
-            @Nonnull final StringSigner stringSigner) {
+            @Nonnull final OnyxStringSigner stringSigner) {
         super(fmcRenderer);
         cookieManager_ = cookieManager;
         stringSigner_ = stringSigner;

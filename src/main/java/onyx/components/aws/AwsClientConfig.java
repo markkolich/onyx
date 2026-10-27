@@ -28,7 +28,7 @@ package onyx.components.aws;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.BuildVersion;
+import com.kolich.buildversion.BuildVersion;
 import onyx.components.config.OnyxConfig;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.client.config.SdkAdvancedClientOption;

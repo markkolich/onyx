@@ -27,22 +27,19 @@
 package onyx.components.authentication.twofactor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kolich.security.sign.HmacSigner;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.jackson.OnyxJacksonObjectMapper;
+import onyx.components.security.OnyxStringSigner;
 import onyx.components.security.SecurityConfig;
-import onyx.components.security.StringSigner;
 import onyx.entities.authentication.twofactor.TrustedDeviceToken;
 import onyx.entities.authentication.twofactor.TwoFactorAuthToken;
 import onyx.exceptions.OnyxException;
-import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,23 +49,22 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
 
     private static final Logger LOG = LoggerFactory.getLogger(OnyxTwoFactorAuthTokenManager.class);
 
-    private static final String HMAC_SHA_256 = "HmacSHA256";
     private static final String TOKEN_HASH_FORMAT = "%s_%s";
 
-    private final StringSigner stringSigner_;
+    private final OnyxStringSigner stringSigner_;
 
     private final ObjectMapper objectMapper_;
 
-    private final SecretKeySpec hmacKey_;
+    private final byte[] hmacSecret_;
 
     @Injectable
     public OnyxTwoFactorAuthTokenManager(
-            final StringSigner stringSigner,
+            final OnyxStringSigner stringSigner,
             final SecurityConfig securityConfig,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) throws Exception {
         stringSigner_ = stringSigner;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
-        hmacKey_ = new SecretKeySpec(securityConfig.getSignerPrivateKey().getEncoded(), HMAC_SHA_256);
+        hmacSecret_ = securityConfig.getSignerPrivateKey().getEncoded();
     }
 
     @Nullable
@@ -173,11 +169,13 @@ public final class OnyxTwoFactorAuthTokenManager implements TwoFactorAuthTokenMa
         try {
             final String tokenToHash = String.format(TOKEN_HASH_FORMAT, username, code);
 
-            final Mac mac = Mac.getInstance(HMAC_SHA_256);
-            mac.init(hmacKey_);
-            final byte[] hash = mac.doFinal(tokenToHash.getBytes(StandardCharsets.UTF_8));
-
-            return Hex.encodeHexString(hash, true);
+            return new HmacSigner.Builder()
+                    .setAlgorithm(HmacSigner.Algorithm.HMAC_SHA256)
+                    .setEncoding(HmacSigner.Encoding.HEX)
+                    .setSecret(hmacSecret_)
+                    .setMessage(tokenToHash)
+                    .build()
+                    .sign();
         } catch (final Exception e) {
             throw new OnyxException("Failed to generate 2FA token hash.", e);
         }

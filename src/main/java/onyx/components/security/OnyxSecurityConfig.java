@@ -26,17 +26,14 @@
 
 package onyx.components.security;
 
+import com.kolich.security.sign.KeyDecoder;
 import com.typesafe.config.Config;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.config.OnyxConfig;
 
-import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
 @Component
 public final class OnyxSecurityConfig implements SecurityConfig {
@@ -55,25 +52,15 @@ public final class OnyxSecurityConfig implements SecurityConfig {
     }
 
     @Override
-    public PublicKey getSignerPublicKey() throws Exception {
-        final String publicKeyEncoded = config_.getString(SIGNER_PUBLIC_KEY_PROP);
-        final byte[] keyBytes = Base64.getUrlDecoder().decode(publicKeyEncoded);
-
-        final X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
-        final KeyFactory keyFactory = KeyFactory.getInstance(getSignerKeyAlgorithm());
-
-        return keyFactory.generatePublic(keySpec);
+    public PublicKey getSignerPublicKey() {
+        return KeyDecoder.publicKey(config_.getString(SIGNER_PUBLIC_KEY_PROP),
+                getSignerKeyAlgorithm());
     }
 
     @Override
-    public PrivateKey getSignerPrivateKey() throws Exception {
-        final String privateKeyEncoded = config_.getString(SIGNER_PRIVATE_KEY_PROP);
-        final byte[] keyBytes = Base64.getUrlDecoder().decode(privateKeyEncoded);
-
-        final PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-        final KeyFactory keyFactory = KeyFactory.getInstance(getSignerKeyAlgorithm());
-
-        return keyFactory.generatePrivate(keySpec);
+    public PrivateKey getSignerPrivateKey() {
+        return KeyDecoder.privateKey(config_.getString(SIGNER_PRIVATE_KEY_PROP),
+                getSignerKeyAlgorithm());
     }
 
 }

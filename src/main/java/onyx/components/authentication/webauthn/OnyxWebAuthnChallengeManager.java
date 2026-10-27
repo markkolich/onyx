@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import onyx.components.jackson.OnyxJacksonObjectMapper;
-import onyx.components.security.StringSigner;
+import onyx.components.security.OnyxStringSigner;
 import onyx.entities.api.request.v1.webauthn.WebAuthnAuthenticationRequest;
 import onyx.entities.api.request.v1.webauthn.WebAuthnRegistrationRequest;
 import org.slf4j.Logger;
@@ -46,13 +46,13 @@ public final class OnyxWebAuthnChallengeManager implements WebAuthnChallengeMana
 
     private static final Logger LOG = LoggerFactory.getLogger(OnyxWebAuthnChallengeManager.class);
 
-    private final StringSigner stringSigner_;
+    private final OnyxStringSigner stringSigner_;
 
     private final ObjectMapper objectMapper_;
 
     @Injectable
     public OnyxWebAuthnChallengeManager(
-            final StringSigner stringSigner,
+            final OnyxStringSigner stringSigner,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper) {
         stringSigner_ = stringSigner;
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();

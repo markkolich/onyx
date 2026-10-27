@@ -3,79 +3,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>com.kolich</groupId>
+        <artifactId>kolich-parent</artifactId>
+        <version>1.2.0</version>
+    </parent>
+
     <groupId>onyx</groupId>
     <artifactId>onyx</artifactId>
     <version>0.1</version>
     <packaging>jar</packaging>
 
     <properties>
-        <project.java-source.version>21</project.java-source.version>
-        <project.java-runtime.version>[21,)</project.java-runtime.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.maven.version>3.6.3</project.maven.version>
+        <!-- Libraries kolich-parent does not manage. -->
 
-        <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
-        <maven-buildnumber-plugin.version>3.3.1</maven-buildnumber-plugin.version>
-        <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
-        <maven-frontend-plugin.version>2.0.2</maven-frontend-plugin.version>
-        <maven-frontend-node.version>v24.21.0</maven-frontend-node.version>
-        <maven-frontend-npm.version>11.19.0</maven-frontend-npm.version>
-        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
-        <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
-        <maven-pmd-plugin.pmd.version>7.28.0</maven-pmd-plugin.pmd.version>
-        <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
-        <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
-        <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
-        <maven-duplicate-finder-plugin.version>2.0.1</maven-duplicate-finder-plugin.version>
-        <maven-versions-plugin.version>2.22.0</maven-versions-plugin.version>
-
-        <slf4j.version>2.0.20</slf4j.version>
-        <logback.version>1.6.5</logback.version>
-
-        <curacao.version>7.2.1</curacao.version>
-
-        <jetty.version>11.0.26</jetty.version>
-
-        <typesafe-config.version>1.4.9</typesafe-config.version>
-
-        <jackson.version>2.22.4</jackson.version>
         <jackson-databind-nullable.version>0.2.13</jackson-databind-nullable.version>
-
-        <commons-lang3.version>3.21.0</commons-lang3.version>
-        <commons-text.version>1.15.0</commons-text.version>
-        <commons-io.version>2.22.0</commons-io.version>
-        <commons-collections4.version>4.6.0</commons-collections4.version>
-
-        <aws-sdk-v2.version>2.57.3</aws-sdk-v2.version>
-
-        <guava.version>33.7.2-jre</guava.version>
-
-        <freemarker.version>2.3.35</freemarker.version>
-
-        <htmlcompressor.version>1.5.2</htmlcompressor.version>
-        <yuicompressor.version>2.4.8</yuicompressor.version>
-
-        <jbcrypt.version>0.4</jbcrypt.version>
-
-        <async-http-client.version>3.0.14</async-http-client.version>
-
-        <picocli.version>4.7.7</picocli.version>
-
         <solr.version>9.10.1</solr.version>
-
         <icu4j.version>79.1</icu4j.version>
-
-        <quartz.version>2.5.2</quartz.version>
-
         <webauthn-server-core.version>2.10.1</webauthn-server-core.version>
-
-        <checkstyle.version>14.3.0</checkstyle.version>
-
-        <!-- Test dependency versions -->
-
-        <junit.jupiter.version>6.1.3</junit.jupiter.version>
-        <mockito-core.version>5.24.0</mockito-core.version>
     </properties>
 
     <issueManagement>
@@ -95,99 +40,68 @@
         </developer>
     </developers>
 
-    <dependencyManagement>
-        <dependencies>
-            <!--
-                Pins every Jackson artifact, including those pulled in transitively by curacao-jackson,
-                solr-core, and webauthn-server-core, to a single version so that modules like
-                jackson-datatype-jsr310 never run against an older jackson-databind.
-            -->
-            <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>${jackson.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>${logback.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
         </dependency>
 
         <dependency>
             <groupId>curacao</groupId>
             <artifactId>curacao</artifactId>
-            <version>${curacao.version}</version>
         </dependency>
         <dependency>
             <groupId>curacao</groupId>
             <artifactId>curacao-servlet-jakarta</artifactId>
-            <version>${curacao.version}</version>
         </dependency>
         <dependency>
             <groupId>curacao</groupId>
             <artifactId>curacao-jackson</artifactId>
-            <version>${curacao.version}</version>
         </dependency>
         <dependency>
             <groupId>curacao</groupId>
             <artifactId>curacao-freemarker</artifactId>
-            <version>${curacao.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>${jetty.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
-            <version>${jetty.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlets</artifactId>
-            <version>${jetty.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
-            <version>${typesafe-config.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openapitools</groupId>
@@ -198,22 +112,18 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>${commons-text.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>${commons-collections4.version}</version>
         </dependency>
 
         <dependency>
@@ -225,7 +135,6 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
-            <version>${aws-sdk-v2.version}</version>
             <exclusions>
                 <!-- Only the synchronous S3Client (backed by apache5-client) is used; the
                      netty-based async HTTP client is unused and drags in a conflicting Netty version. -->
@@ -238,7 +147,6 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb</artifactId>
-            <version>${aws-sdk-v2.version}</version>
             <exclusions>
                 <!-- Only the synchronous DynamoDbClient (backed by apache5-client) is used; the
                      netty-based async HTTP client is unused and drags in a conflicting Netty version. -->
@@ -251,12 +159,10 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb-enhanced</artifactId>
-            <version>${aws-sdk-v2.version}</version>
         </dependency>
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>sns</artifactId>
-            <version>${aws-sdk-v2.version}</version>
             <exclusions>
                 <!-- Only the synchronous SnsClient (backed by apache5-client) is used; the
                      netty-based async HTTP client is unused and drags in a conflicting Netty version. -->
@@ -270,19 +176,16 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
-            <version>${freemarker.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.googlecode.htmlcompressor</groupId>
             <artifactId>htmlcompressor</artifactId>
-            <version>${htmlcompressor.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>
@@ -294,7 +197,6 @@
         <dependency>
             <groupId>com.yahoo.platform.yui</groupId>
             <artifactId>yuicompressor</artifactId>
-            <version>${yuicompressor.version}</version>
             <exclusions>
                 <!-- https://github.com/yui/yuicompressor/issues/173 -->
                 <exclusion>
@@ -305,15 +207,25 @@
         </dependency>
 
         <dependency>
+            <groupId>com.kolich</groupId>
+            <artifactId>kolich-build-version</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.kolich</groupId>
+            <artifactId>kolich-security</artifactId>
+        </dependency>
+
+        <!-- Required at runtime by kolich-security's PasswordHasher, which declares jbcrypt
+             optional so that it only lands on the classpath of consumers that use it. -->
+        <dependency>
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
-            <version>${jbcrypt.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.asynchttpclient</groupId>
             <artifactId>async-http-client</artifactId>
-            <version>${async-http-client.version}</version>
             <exclusions>
                 <!-- https://github.com/AsyncHttpClient/async-http-client/issues/1541 -->
                 <!-- https://github.com/AsyncHttpClient/async-http-client/issues/1589 -->
@@ -391,7 +303,6 @@
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
-            <version>${quartz.version}</version>
             <exclusions>
                 <!-- WTF is up with the 'c3p0' and 'HikariCP' dependencies in the compile scope? -->
                 <!-- https://github.com/quartz-scheduler/quartz/issues/306 -->
@@ -413,7 +324,6 @@
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-            <version>${picocli.version}</version>
         </dependency>
 
         <dependency>
@@ -429,26 +339,22 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>${mockito-core.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -459,7 +365,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>${maven-clean-plugin.version}</version>
                 <configuration>
                     <filesets>
                         <fileset>
@@ -480,7 +385,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <release>21</release>
                     <encoding>UTF-8</encoding>
@@ -497,7 +401,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <systemPropertyVariables>
                         <!-- Keeps the Surefire "ForkedBooter" from popping up in the macOS dock. -->
@@ -511,29 +414,10 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>${maven-buildnumber-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>create-buildnumber</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                        <configuration>
-                            <doCheck>false</doCheck>
-                            <doUpdate>false</doUpdate>
-                            <!-- 7-characters to match Git's default "abbreviated commit hash" length. -->
-                            <shortRevisionLength>7</shortRevisionLength>
-                            <!-- An ISO-8601 compliant timestamp string (using SimpleDateFormat). -->
-                            <timestampFormat>yyyy-MM-dd'T'HH:mm:ssXXX</timestampFormat>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
-                <version>${maven-frontend-plugin.version}</version>
                 <configuration>
                     <workingDirectory>${project.basedir}/src/main/webapp/static</workingDirectory>
                 </configuration>
@@ -571,115 +455,36 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+                Checkstyle, PMD and the duplicate class/resource check are configured in
+                kolich-parent's <pluginManagement>, which also puts kolich-build-config on each
+                plugin's classpath so the rules are loaded from there. Declaring them here is what
+                turns them on: all three run in prepare-package and fail the build on a violation.
+            -->
+            <!--
+                Enforces the build environment: required Maven, required build JDK, and that no
+                shipped dependency carries bytecode newer than this project's release target.
+                Configured in kolich-parent; runs in validate.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${maven-checkstyle-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>verify-style</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.puppycrawl.tools</groupId>
-                        <artifactId>checkstyle</artifactId>
-                        <version>${checkstyle.version}</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <configLocation>build/checkstyle/config.xml</configLocation>
-                    <violationSeverity>warning</violationSeverity>
-                    <failOnViolation>true</failOnViolation>
-                    <failsOnError>true</failsOnError>
-                    <!-- Validate source files in src/test/java too -->
-                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                    <!--consoleOutput>true</consoleOutput-->
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>${maven-pmd-plugin.version}</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-core</artifactId>
-                        <version>${maven-pmd-plugin.pmd.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-java</artifactId>
-                        <version>${maven-pmd-plugin.pmd.version}</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <id>pmd-check</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <printFailingErrors>true</printFailingErrors>
-                    <includeTests>true</includeTests>
-                    <failOnViolation>true</failOnViolation>
-                    <linkXRef>false</linkXRef>
-                    <targetJdk>${project.java-source.version}</targetJdk>
-                    <rulesets>
-                        <ruleset>build/pmd/ruleset.xml</ruleset>
-                    </rulesets>
-                    <excludeRoots>
-                        <excludeRoot>target/generated-sources</excludeRoot>
-                    </excludeRoots>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.basepom.maven</groupId>
                 <artifactId>duplicate-finder-maven-plugin</artifactId>
-                <version>${maven-duplicate-finder-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>duplicate-check</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <failBuildInCaseOfDifferentContentConflict>true</failBuildInCaseOfDifferentContentConflict>
-                    <failBuildInCaseOfEqualContentConflict>true</failBuildInCaseOfEqualContentConflict>
-                    <failBuildInCaseOfConflict>true</failBuildInCaseOfConflict>
-                    <ignoredResourcePatterns>
-                        <!-- Jetty loves their about.html pages -->
-                        <ignoredResourcePattern>.*about\.html$</ignoredResourcePattern>
-                        <ignoredResourcePattern>javax/servlet/resources/.*</ignoredResourcePattern>
-                        <ignoredResourcePattern>javax/servlet/catalog\.xml</ignoredResourcePattern>
-                        <ignoredResourcePattern>COPYING</ignoredResourcePattern>
-                    </ignoredResourcePatterns>
-                    <ignoredClassPatterns>
-                        <!--
-                                Found duplicate and different classes in
-                                [com.googlecode.htmlcompressor:htmlcompressor:1.5.2,
-                                com.yahoo.platform.yui:yuicompressor:2.4.8]
-                            -->
-                        <ignoredClassPattern>jargs\.gnu\.CmdLineParser</ignoredClassPattern>
-                        <!-- Jigsaw project (Java 9) and later module-info classes. -->
-                        <ignoredClassPattern>.*\.module-info$</ignoredClassPattern>
-                    </ignoredClassPatterns>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>${maven-resources-plugin.version}</version>
                 <configuration>
                     <propertiesEncoding>${project.build.sourceEncoding}</propertiesEncoding>
                 </configuration>
@@ -712,7 +517,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven-shade-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -765,27 +569,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>${maven-dependency-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>copy-artifact</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>${project.packaging}</type>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>dist</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <!--
                 `mvn versions:display-dependency-updates`: dump a list of dependencies that need upgrading.
@@ -794,22 +577,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
-                <version>${maven-versions-plugin.version}</version>
-                <configuration>
-                    <ignoredVersions>.*-M.*,.*-alpha.*</ignoredVersions>
-                    <allowSnapshots>false</allowSnapshots>
-                    <!--
-                        HACK: Using `${session.executionRootDirectory}` to reference the directory in
-                        which Maven was invoked. This is intentional as the `versions-maven-plugin`
-                        does not have a way to reference a single path relative to the project/module
-                        directory. So it's either use this hack, or `ln -s` a soft link pointing at the
-                        root `build/versions/rules.xml` file in EVERY project/module.
-
-                        For reference:
-                        https://github.com/mojohaus/versions-maven-plugin/issues/258#issuecomment-383021337
-                    -->
-                    <rulesUri>file:///${session.executionRootDirectory}/build/versions/rules.xml</rulesUri>
-                </configuration>
             </plugin>
         </plugins>
 
@@ -837,5 +604,22 @@
             </snapshots>
         </repository>
     </repositories>
+
+    <!--
+        Maven resolves a plugin's own dependencies from <pluginRepositories>, not <repositories>.
+        kolich-parent puts kolich-build-config on the Checkstyle, PMD and versions plugin
+        classpaths, so without this the build only finds it if it is already in ~/.m2.
+    -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>markkolich.github.io</id>
+            <name>markkolich.github.io</name>
+            <url>https://markkolich.github.io/repo</url>
+            <releases />
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
 </project>

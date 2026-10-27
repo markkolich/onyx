@@ -26,39 +26,40 @@
 
 package onyx.components.security;
 
+import com.kolich.security.sign.StringSigner;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import onyx.exceptions.OnyxException;
-import onyx.util.security.ByteSigner;
-import org.apache.commons.codec.binary.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.Base64;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Util component for digitally signing vanilla strings using the default
- * {@link ByteSigner} signing implementation.
+ * Util component for digitally signing vanilla strings, wrapping the {@link StringSigner}
+ * implementation in kolich-security.
+ *
+ * <p>The library signer throws on failure and deliberately does no logging, since it cannot
+ * know whether the values flowing through it may be written to a log file. This component
+ * makes that call for Onyx: a failure is logged and {@code null} is returned, which is what
+ * the callers here already expect.
  */
 @Component
-public final class StringSigner {
+public final class OnyxStringSigner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(StringSigner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OnyxStringSigner.class);
 
-    private final PublicKey publicKey_;
-    private final PrivateKey privateKey_;
+    private final StringSigner signer_;
 
     @Injectable
-    public StringSigner(
+    public OnyxStringSigner(
             final SecurityConfig securityConfig) throws Exception {
-        publicKey_ = securityConfig.getSignerPublicKey();
-        privateKey_ = securityConfig.getSignerPrivateKey();
+        signer_ = new StringSigner.Builder()
+                .setPublicKey(securityConfig.getSignerPublicKey())
+                .setPrivateKey(securityConfig.getSignerPrivateKey())
+                .build();
     }
 
     @Nullable
@@ -67,14 +68,7 @@ public final class StringSigner {
         checkNotNull(toSign, "String to sign cannot be null.");
 
         try {
-            final byte[] message = StringUtils.getBytesUtf8(toSign);
-            final byte[] signed = new ByteSigner.Builder()
-                    .setPrivateKey(privateKey_)
-                    .setMessage(message)
-                    .build()
-                    .sign();
-
-            return Base64.getUrlEncoder().encodeToString(signed);
+            return signer_.sign(toSign);
         } catch (final Exception e) {
             LOG.warn("Failed to sign string: {}", toSign, e);
             return null;
@@ -87,18 +81,12 @@ public final class StringSigner {
         checkNotNull(signed, "Signed string cannot be null.");
 
         try {
-            final byte[] decoded = Base64.getUrlDecoder().decode(signed);
-            final byte[] verified = new ByteSigner.Builder()
-                    .setPublicKey(publicKey_)
-                    .setMessage(decoded)
-                    .build()
-                    .extract();
-
+            final String verified = signer_.verifyAndGet(signed);
             if (verified == null) {
-                throw new OnyxException("Signed string signature validation failed: " + signed);
+                LOG.warn("Signed string signature validation failed: {}", signed);
             }
 
-            return StringUtils.newStringUtf8(verified);
+            return verified;
         } catch (final Exception e) {
             LOG.warn("Failed to verify & get signed string: {}", signed, e);
             return null;

@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.freemarker.components.AbstractFreeMarkerContentRenderer;
-import onyx.BuildVersion;
+import com.kolich.buildversion.BuildVersion;
 import onyx.components.config.OnyxConfig;
 import onyx.components.config.authentication.SessionConfig;
 

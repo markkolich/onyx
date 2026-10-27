@@ -72,8 +72,8 @@ Uses HOCON (Lightbend/Typesafe Config). Key config sections:
 
 ## Code Style
 
-- Checkstyle enforced (config in `build/checkstyle/config.xml`)
-- PMD static analysis (config in `build/pmd/ruleset.xml`)
+- Checkstyle and PMD are enforced; the rules come from `kolich-build-config`, loaded off the
+  plugin classpath and wired up in the `kolich-parent` POM rather than kept in this repo
 - Compiler warnings treated as errors (`-Werror`)
 - All code must pass `mvn package` which runs checkstyle, PMD, and duplicate-finder
 

@@ -35,7 +35,7 @@ import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.authentication.UserAuthenticator;
 import onyx.components.aws.s3.OnyxS3Client;
 import onyx.components.config.aws.AwsConfig;
-import onyx.components.security.StringSigner;
+import onyx.components.security.OnyxStringSigner;
 import onyx.components.storage.AssetManager;
 import onyx.entities.authentication.ApiKeyCredential;
 import onyx.entities.authentication.Session;
@@ -69,7 +69,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * job fronting this component, which keeps a revoked key from working again the
  * moment its backing S3 object is deleted.
  *
- * <p>Every generated key is also signed with {@link StringSigner} before being
+ * <p>Every generated key is also signed with {@link OnyxStringSigner} before being
  * returned. That signature is never consulted by the S3 lookup itself &mdash; the
  * S3 object's existence remains the sole authority on whether a key is valid, which
  * is what preserves instant revocation. Instead, {@link #getSessionForApiKey(String)}
@@ -96,7 +96,7 @@ public final class OnyxS3ApiKeyManager implements ApiKeyManager {
 
     private final UserAuthenticator userAuthenticator_;
 
-    private final StringSigner stringSigner_;
+    private final OnyxStringSigner stringSigner_;
 
     @Injectable
     public OnyxS3ApiKeyManager(
@@ -104,7 +104,7 @@ public final class OnyxS3ApiKeyManager implements ApiKeyManager {
             final OnyxS3Client onyxS3Client,
             final OnyxJacksonObjectMapper onyxJacksonObjectMapper,
             final UserAuthenticator userAuthenticator,
-            final StringSigner stringSigner) {
+            final OnyxStringSigner stringSigner) {
         s3_ = onyxS3Client.getS3Client();
         bucketName_ = awsConfig.getAwsS3BucketName();
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();

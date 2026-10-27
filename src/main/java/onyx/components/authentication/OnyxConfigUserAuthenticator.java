@@ -26,6 +26,7 @@
 
 package onyx.components.authentication;
 
+import com.kolich.security.hash.PasswordHasher;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentInitializable;
@@ -35,7 +36,6 @@ import onyx.entities.authentication.Session;
 import onyx.entities.authentication.Session.Type;
 import onyx.entities.authentication.User;
 import onyx.entities.storage.aws.dynamodb.Resource;
-import onyx.util.security.PasswordHasher;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +65,7 @@ public final class OnyxConfigUserAuthenticator implements UserAuthenticator, Com
         sessionConfig_ = sessionConfig;
         resourceManager_ = resourceManager;
 
-        pwHasher_ = PasswordHasher.getInstance();
+        pwHasher_ = new PasswordHasher.Builder().build();
         userCredentials_ = sessionConfig_.getUsers();
     }
 
