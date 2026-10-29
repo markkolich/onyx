@@ -45,6 +45,7 @@ import onyx.entities.storage.aws.dynamodb.Resource;
 import onyx.exceptions.resource.ResourceForbiddenException;
 import onyx.exceptions.resource.ResourceNotFoundException;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import static onyx.components.freemarker.FreeMarkerContentRenderer.SESSION_ATTR;
 import static onyx.util.UserUtils.userIsNotOwner;
@@ -121,7 +122,14 @@ public final class Details extends AbstractOnyxResourceFilterAwareController {
         }
 
         final String extension = FilenameUtils.getExtension(resource.getName()).toLowerCase();
-        final String contentType = ContentTypes.getContentTypeForExtension(extension, DEFAULT_CONTENT_TYPE);
+        final String contentTypeForExtension =
+                ContentTypes.getContentTypeForExtension(extension, DEFAULT_CONTENT_TYPE);
+
+        // Trimmed of any parameters for display: the content-type map declares a charset for
+        // the text formats that cannot state their own encoding, and that belongs on the wire
+        // rather than on a card labeled "Type". Deliberately not MediaType.parse(), which
+        // would throw on a hand-edited content-type and take the whole page down with it.
+        final String contentType = StringUtils.substringBefore(contentTypeForExtension, ";");
 
         final boolean localCacheEnabled = localCacheConfig_.localCacheEnabled();
         final boolean hasResourceInCache = (localCacheEnabled && userIsOwner)
