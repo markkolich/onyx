@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.kolich</groupId>
         <artifactId>kolich-parent</artifactId>
-        <version>1.2.0</version>
+        <version>1.3.1</version>
     </parent>
 
     <groupId>onyx</groupId>
@@ -71,6 +71,10 @@
         <dependency>
             <groupId>curacao</groupId>
             <artifactId>curacao-servlet-jakarta</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>curacao</groupId>
+            <artifactId>curacao-jetty11-server</artifactId>
         </dependency>
         <dependency>
             <groupId>curacao</groupId>

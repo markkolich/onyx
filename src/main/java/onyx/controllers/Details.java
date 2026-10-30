@@ -29,7 +29,7 @@ package onyx.controllers;
 import com.google.common.net.MediaType;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import curacao.freemarker.entities.FreeMarkerContent;
 import curacao.util.http.ContentTypes;
@@ -75,14 +75,14 @@ public final class Details extends AbstractOnyxResourceFilterAwareController {
         cacheManager_ = cacheManager;
     }
 
-    @RequestMapping(value = "^/details/(?<username>[a-zA-Z0-9]+)$")
+    @Route(value = "^/details/(?<username>[a-zA-Z0-9]+)$")
     public FreeMarkerContent resourceDetailsHomeDirectory(
             @Path("username") final String username,
             final Session session) {
         return resourceDetails(username, ResourceManager.ROOT_PATH, session);
     }
 
-    @RequestMapping(value = "^/details/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
+    @Route(value = "^/details/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
     public FreeMarkerContent resourceDetails(
             @Path("username") final String username,
             @Path("path") final String path,

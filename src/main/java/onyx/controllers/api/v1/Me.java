@@ -29,7 +29,7 @@ package onyx.controllers.api.v1;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import onyx.controllers.api.AbstractOnyxApiController;
@@ -37,7 +37,7 @@ import onyx.entities.api.response.v1.MeResponse;
 import onyx.entities.authentication.Session;
 import onyx.exceptions.api.ApiUnauthorizedException;
 
-import static curacao.annotations.RequestMapping.Method.GET;
+import static curacao.annotations.Route.Method.GET;
 
 /**
  * Reports who the caller is, given whatever credential they presented &mdash; the
@@ -58,7 +58,7 @@ public final class Me extends AbstractOnyxApiController {
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
-    @RequestMapping(value = "^/api/v1/me$",
+    @Route(value = "^/api/v1/me$",
             methods = GET)
     public MeResponse me(
             final Session session) {

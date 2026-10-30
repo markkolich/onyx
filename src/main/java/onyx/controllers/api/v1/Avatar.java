@@ -29,7 +29,7 @@ package onyx.controllers.api.v1;
 import com.google.common.net.HttpHeaders;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
@@ -43,7 +43,7 @@ import onyx.exceptions.resource.ResourceNotFoundException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
-import static curacao.annotations.RequestMapping.Method.GET;
+import static curacao.annotations.Route.Method.GET;
 
 @Controller
 public final class Avatar extends AbstractOnyxApiController {
@@ -65,7 +65,7 @@ public final class Avatar extends AbstractOnyxApiController {
         avatarManager_ = avatarManager;
     }
 
-    @RequestMapping(value = "^/api/v1/avatar/(?<username>[a-zA-Z0-9]+)$",
+    @Route(value = "^/api/v1/avatar/(?<username>[a-zA-Z0-9]+)$",
             methods = GET)
     public void getAvatarForUser(
             @Path("username") final String username,
