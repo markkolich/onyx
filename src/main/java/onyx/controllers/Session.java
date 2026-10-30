@@ -29,7 +29,7 @@ package onyx.controllers;
 import com.google.common.primitives.Ints;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.RequestBody;
 import curacao.annotations.parameters.convenience.Cookie;
 import curacao.core.servlet.AsyncContext;
@@ -61,7 +61,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
-import static curacao.annotations.RequestMapping.Method.POST;
+import static curacao.annotations.Route.Method.POST;
 import static onyx.components.authentication.CookieManager.RETURN_TO_COOKIE_NAME;
 import static onyx.components.authentication.CookieManager.TRUSTED_DEVICE_COOKIE_NAME;
 import static org.apache.commons.codec.binary.StringUtils.getBytesUtf8;
@@ -109,13 +109,13 @@ public final class Session extends AbstractOnyxFreeMarkerController {
         twoFactorAuthCodeManager_ = twoFactorAuthCodeManager;
     }
 
-    @RequestMapping("^/login$")
+    @Route("^/login$")
     public FreeMarkerContent login() {
         return OnyxFreeMarkerContent.newHtmlBuilder("templates/login.ftl")
                 .build();
     }
 
-    @RequestMapping(value = "^/login$",
+    @Route(value = "^/login$",
             methods = POST)
     public FreeMarkerContent doLogin(
             @Cookie(TRUSTED_DEVICE_COOKIE_NAME) final String trustedDeviceCookie,
@@ -165,7 +165,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
         return processTwoFactorLogin(user, session);
     }
 
-    @RequestMapping(value = "^/login/verify$",
+    @Route(value = "^/login/verify$",
             methods = POST)
     public void doLoginVerify(
             @Cookie(RETURN_TO_COOKIE_NAME) final String returnToCookie,
@@ -236,7 +236,7 @@ public final class Session extends AbstractOnyxFreeMarkerController {
         processLogin(session, returnToCookie, response, context);
     }
 
-    @RequestMapping("^/logout$")
+    @Route("^/logout$")
     public void logout(
             final HttpResponse response,
             final AsyncContext context) throws Exception {

@@ -89,9 +89,10 @@ function minifyJs() {
 }
 
 function addBanner() {
+    const year = new Date().getFullYear();
     const comment =
         '/*\n' +
-        ' * (c) Copyright 2026 Mark S. Kolich\n' +
+        ' * (c) Copyright ' + year + ' Mark S. Kolich\n' +
         ' * All rights reserved.\n' +
         ' * https://mark.koli.ch\n' +
         ' */\n';

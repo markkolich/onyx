@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.RequestBody;
@@ -60,10 +60,10 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 
-import static curacao.annotations.RequestMapping.Method.DELETE;
-import static curacao.annotations.RequestMapping.Method.GET;
-import static curacao.annotations.RequestMapping.Method.POST;
-import static curacao.annotations.RequestMapping.Method.PUT;
+import static curacao.annotations.Route.Method.DELETE;
+import static curacao.annotations.Route.Method.GET;
+import static curacao.annotations.Route.Method.POST;
+import static curacao.annotations.Route.Method.PUT;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.UserUtils.userIsNotOwner;
@@ -95,7 +95,7 @@ public final class File extends AbstractOnyxFileApiController {
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
-    @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = GET)
     public ResourceResponse getFile(
             @Path("username") final String username,
@@ -127,7 +127,7 @@ public final class File extends AbstractOnyxFileApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = POST)
     public UploadFileResponse uploadFile(
             @Path("username") final String username,
@@ -182,7 +182,7 @@ public final class File extends AbstractOnyxFileApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = PUT)
     public ResourceResponse updateFile(
             @Path("username") final String username,
@@ -241,7 +241,7 @@ public final class File extends AbstractOnyxFileApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/file/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = DELETE)
     public ResourceResponse deleteFile(
             @Path("username") final String username,

@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
@@ -47,7 +47,7 @@ import onyx.exceptions.api.ApiNotFoundException;
 import java.util.List;
 import java.util.Set;
 
-import static curacao.annotations.RequestMapping.Method.GET;
+import static curacao.annotations.Route.Method.GET;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.UserUtils.userIsNotOwner;
 
@@ -73,7 +73,7 @@ public final class Favorites extends AbstractOnyxApiController {
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
-    @RequestMapping(value = "^/api/v1/favorites/(?<username>[a-zA-Z0-9]+)$",
+    @Route(value = "^/api/v1/favorites/(?<username>[a-zA-Z0-9]+)$",
             methods = GET)
     public FavoritesResponse favoritesInUserHomeDirectory(
             @Path("username") final String username,
@@ -81,7 +81,7 @@ public final class Favorites extends AbstractOnyxApiController {
         return favoritesInDirectory(username, ResourceManager.ROOT_PATH, session);
     }
 
-    @RequestMapping(value = "^/api/v1/favorites/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/favorites/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = GET)
     public FavoritesResponse favoritesInDirectory(
             @Path("username") final String username,

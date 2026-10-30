@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.core.servlet.AsyncContext;
@@ -56,9 +56,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.net.URL;
 import java.util.List;
 
-import static curacao.annotations.RequestMapping.Method.DELETE;
-import static curacao.annotations.RequestMapping.Method.GET;
-import static curacao.annotations.RequestMapping.Method.PUT;
+import static curacao.annotations.Route.Method.DELETE;
+import static curacao.annotations.Route.Method.GET;
+import static curacao.annotations.Route.Method.PUT;
 import static onyx.util.PathUtils.SLASH_STRING;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.UserUtils.userIsNotOwner;
@@ -83,7 +83,7 @@ public final class Metadata extends AbstractOnyxApiController {
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
-    @RequestMapping(value = "^/api/v1/metadata/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/metadata/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = GET)
     public ResourceMetadataListResponse getMetadata(
             @Path("username") final String username,
@@ -109,7 +109,7 @@ public final class Metadata extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/metadata-download/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/metadata-download/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = GET)
     public void downloadMetadata(
             @Path("username") final String username,
@@ -135,7 +135,7 @@ public final class Metadata extends AbstractOnyxApiController {
         context.complete();
     }
 
-    @RequestMapping(value = "^/api/v1/metadata/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/metadata/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = PUT)
     public ResourceMetadataUploadResponse putMetadata(
             @Path("username") final String username,
@@ -177,7 +177,7 @@ public final class Metadata extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/metadata/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/metadata/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = DELETE)
     public StatusCodeOnlyCuracaoEntity deleteMetadata(
             @Path("username") final String username,

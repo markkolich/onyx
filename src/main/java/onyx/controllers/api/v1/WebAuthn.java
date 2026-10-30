@@ -33,7 +33,7 @@ import com.yubico.webauthn.*;
 import com.yubico.webauthn.data.*;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.RequestBody;
 import curacao.annotations.parameters.convenience.Cookie;
 import curacao.core.servlet.HttpResponse;
@@ -66,7 +66,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static curacao.annotations.RequestMapping.Method.POST;
+import static curacao.annotations.Route.Method.POST;
 import static onyx.components.authentication.CookieManager.RETURN_TO_COOKIE_NAME;
 
 @Controller
@@ -123,7 +123,7 @@ public final class WebAuthn extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/webauthn/register/begin$",
+    @Route(value = "^/api/v1/webauthn/register/begin$",
             methods = POST)
     public WebAuthnRegisterBeginResponse registerBegin(
             final Session session) throws Exception {
@@ -188,7 +188,7 @@ public final class WebAuthn extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/webauthn/register/finish$",
+    @Route(value = "^/api/v1/webauthn/register/finish$",
             methods = POST)
     public WebAuthnRegisterFinishResponse registerFinish(
             @RequestBody(REQUEST_ID_FIELD) final String requestId,
@@ -248,7 +248,7 @@ public final class WebAuthn extends AbstractOnyxApiController {
         }
     }
 
-    @RequestMapping(value = "^/api/v1/webauthn/login/begin$",
+    @Route(value = "^/api/v1/webauthn/login/begin$",
             methods = POST)
     public WebAuthnLoginBeginResponse loginBegin() throws Exception {
         if (!sessionConfig_.isWebAuthnAuthEnabled()) {
@@ -296,7 +296,7 @@ public final class WebAuthn extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/webauthn/login/finish$",
+    @Route(value = "^/api/v1/webauthn/login/finish$",
             methods = POST)
     public WebAuthnLoginFinishResponse loginFinish(
             @RequestBody(REQUEST_ID_FIELD) final String requestId,

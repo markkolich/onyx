@@ -29,12 +29,12 @@ package onyx.components.freemarker;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.core.servlet.ServletContext;
+import curacao.jetty11.CuracaoJettyServer;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.template.Configuration;
-import onyx.Application;
 import onyx.exceptions.OnyxException;
 import org.eclipse.jetty.util.resource.Resource;
 
@@ -52,7 +52,7 @@ public final class OnyxFreeMarkerConfig {
     public OnyxFreeMarkerConfig(
             final ServletContext servletContext) {
         final Resource baseResource =
-                servletContext.getAttribute(Application.CONTEXT_ATTRIBUTE_BASE_RESOURCE);
+                servletContext.getAttribute(CuracaoJettyServer.BASE_RESOURCE_CONTEXT_ATTRIBUTE);
 
         freemarkerConfig_ = new Configuration(Configuration.VERSION_2_3_35);
         freemarkerConfig_.setDefaultEncoding(StandardCharsets.UTF_8.toString());

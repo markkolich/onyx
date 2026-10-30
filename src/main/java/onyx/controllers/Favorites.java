@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import curacao.freemarker.entities.FreeMarkerContent;
 import onyx.components.config.OnyxConfig;
@@ -68,14 +68,14 @@ public final class Favorites extends AbstractOnyxResourceFilterAwareController {
         super(onyxConfig, resourceManager, resourceFilter);
     }
 
-    @RequestMapping(value = "^/favorites/(?<username>[a-zA-Z0-9]+)$")
+    @Route(value = "^/favorites/(?<username>[a-zA-Z0-9]+)$")
     public FreeMarkerContent favoritesInUserHomeDirectory(
             @Path("username") final String username,
             final Session session) {
         return favoritesInDirectory(username, ResourceManager.ROOT_PATH, session);
     }
 
-    @RequestMapping(value = "^/favorites/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
+    @Route(value = "^/favorites/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
     public FreeMarkerContent favoritesInDirectory(
             @Path("username") final String username,
             @Path("path") final String path,

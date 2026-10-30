@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
@@ -47,7 +47,7 @@ import onyx.exceptions.api.ApiNotFoundException;
 import java.util.List;
 import java.util.Set;
 
-import static curacao.annotations.RequestMapping.Method.GET;
+import static curacao.annotations.Route.Method.GET;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.UserUtils.getVisibilityForResourceAndSession;
 import static onyx.util.UserUtils.userIsNotOwner;
@@ -69,7 +69,7 @@ public final class Browse extends AbstractOnyxApiController {
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
-    @RequestMapping(value = "^/api/v1/browse$",
+    @Route(value = "^/api/v1/browse$",
             methods = GET)
     public HomeResponse browseUserHomeDirectories(
             final Session session) {
@@ -85,7 +85,7 @@ public final class Browse extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/browse/(?<username>[a-zA-Z0-9]+)$",
+    @Route(value = "^/api/v1/browse/(?<username>[a-zA-Z0-9]+)$",
             methods = GET)
     public BrowseResponse browseUserHomeDirectory(
             @Path("username") final String username,
@@ -93,7 +93,7 @@ public final class Browse extends AbstractOnyxApiController {
         return browseDirectory(username, ResourceManager.ROOT_PATH, session);
     }
 
-    @RequestMapping(value = "^/api/v1/browse/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/browse/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = GET)
     public BrowseResponse browseDirectory(
             @Path("username") final String username,

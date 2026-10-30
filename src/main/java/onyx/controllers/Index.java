@@ -28,7 +28,7 @@ package onyx.controllers;
 
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.freemarker.entities.FreeMarkerContent;
 import onyx.components.config.OnyxConfig;
 import onyx.components.storage.ResourceManager;
@@ -51,7 +51,7 @@ public final class Index extends AbstractOnyxFreeMarkerController {
         super(onyxConfig, resourceManager);
     }
 
-    @RequestMapping("^/$")
+    @Route("^/$")
     public FreeMarkerContent index(
             final Session session) {
         final List<Resource> homeDirectories = resourceManager_.listHomeDirectories();
@@ -62,13 +62,13 @@ public final class Index extends AbstractOnyxFreeMarkerController {
                 .build();
     }
 
-    @RequestMapping("^/robots\\.txt$")
+    @Route("^/robots\\.txt$")
     public FreeMarkerContent robots() {
         return OnyxFreeMarkerContent.newBuilder("templates/txt/robots.ftl", PLAIN_TEXT_UTF_8)
                 .build();
     }
 
-    @RequestMapping("^/sitemap\\.xml$")
+    @Route("^/sitemap\\.xml$")
     public FreeMarkerContent sitemap() {
         final List<Resource> homeDirectories = resourceManager_.listHomeDirectories();
 

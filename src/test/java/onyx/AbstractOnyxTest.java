@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.io.Resources;
 import curacao.core.servlet.ServletContext;
+import curacao.jetty11.CuracaoJettyServer;
 import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import org.eclipse.jetty.util.resource.Resource;
@@ -85,7 +86,8 @@ public abstract class AbstractOnyxTest {
         if (!baseResource.exists()) {
             throw new IllegalArgumentException("Test base resource does not exist: " + webAppRootPath);
         }
-        Mockito.when(servletContext_.getAttribute(ArgumentMatchers.eq(Application.CONTEXT_ATTRIBUTE_BASE_RESOURCE)))
+        final String baseResourceAttribute = CuracaoJettyServer.BASE_RESOURCE_CONTEXT_ATTRIBUTE;
+        Mockito.when(servletContext_.getAttribute(ArgumentMatchers.eq(baseResourceAttribute)))
                 .thenReturn(baseResource);
 
         Mockito.when(servletContext_.getContextPath()).thenReturn(testContextPath);

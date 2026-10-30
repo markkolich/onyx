@@ -28,7 +28,7 @@ package onyx.controllers;
 
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import curacao.freemarker.entities.FreeMarkerContent;
 import onyx.components.config.OnyxConfig;
@@ -59,14 +59,14 @@ public final class Browse extends AbstractOnyxResourceFilterAwareController {
         super(onyxConfig, resourceManager, resourceFilter);
     }
 
-    @RequestMapping(value = "^/browse/(?<username>[a-zA-Z0-9]+)$")
+    @Route(value = "^/browse/(?<username>[a-zA-Z0-9]+)$")
     public FreeMarkerContent browseUserHomeDirectory(
             @Path("username") final String username,
             final Session session) {
         return browseDirectory(username, ResourceManager.ROOT_PATH, session);
     }
 
-    @RequestMapping(value = "^/browse/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
+    @Route(value = "^/browse/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$")
     public FreeMarkerContent browseDirectory(
             @Path("username") final String username,
             @Path("path") final String path,

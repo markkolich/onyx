@@ -29,7 +29,7 @@ package onyx.controllers.api.v1;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
@@ -46,8 +46,8 @@ import onyx.exceptions.api.*;
 
 import java.net.URL;
 
-import static curacao.annotations.RequestMapping.Method.GET;
-import static curacao.annotations.RequestMapping.Method.POST;
+import static curacao.annotations.Route.Method.GET;
+import static curacao.annotations.Route.Method.POST;
 import static onyx.util.UserUtils.userIsNotOwner;
 import static onyx.util.PathUtils.normalizePath;
 
@@ -75,7 +75,7 @@ public final class ShortLink extends AbstractOnyxApiController {
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
-    @RequestMapping(value = "^/api/v1/shortlink/(?<username>[a-zA-Z0-9]+)$",
+    @Route(value = "^/api/v1/shortlink/(?<username>[a-zA-Z0-9]+)$",
             methods = POST)
     public CreateShortLinkResponse createShortLinkHomeDirectory(
             @Path("username") final String username,
@@ -83,7 +83,7 @@ public final class ShortLink extends AbstractOnyxApiController {
         return createShortLink(username, ResourceManager.ROOT_PATH, session);
     }
 
-    @RequestMapping(value = "^/api/v1/shortlink/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/shortlink/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = POST)
     public CreateShortLinkResponse createShortLink(
             @Path("username") final String username,
@@ -119,7 +119,7 @@ public final class ShortLink extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/s/(?<code>[a-f0-9]{8})$",
+    @Route(value = "^/s/(?<code>[a-f0-9]{8})$",
             methods = GET)
     public void redirectShortLink(
             @Path("code") final String code,

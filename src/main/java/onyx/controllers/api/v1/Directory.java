@@ -29,7 +29,7 @@ package onyx.controllers.api.v1;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.RequestBody;
@@ -53,10 +53,10 @@ import org.apache.commons.lang3.tuple.Triple;
 import java.time.Instant;
 import java.util.List;
 
-import static curacao.annotations.RequestMapping.Method.DELETE;
-import static curacao.annotations.RequestMapping.Method.GET;
-import static curacao.annotations.RequestMapping.Method.POST;
-import static curacao.annotations.RequestMapping.Method.PUT;
+import static curacao.annotations.Route.Method.DELETE;
+import static curacao.annotations.Route.Method.GET;
+import static curacao.annotations.Route.Method.POST;
+import static curacao.annotations.Route.Method.PUT;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.PathUtils.splitNormalizedPathToElements;
 import static onyx.util.UserUtils.userIsNotOwner;
@@ -84,7 +84,7 @@ public final class Directory extends AbstractOnyxApiController {
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
-    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = GET)
     public ResourceResponse getDirectory(
             @Path("username") final String username,
@@ -117,7 +117,7 @@ public final class Directory extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = POST)
     public ResourceResponse createDirectory(
             @Path("username") final String username,
@@ -197,7 +197,7 @@ public final class Directory extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)$",
+    @Route(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)$",
             methods = GET)
     public ResourceResponse getHomeDirectory(
             @Path("username") final String username,
@@ -205,7 +205,7 @@ public final class Directory extends AbstractOnyxApiController {
         return getDirectory(username, ResourceManager.ROOT_PATH, session);
     }
 
-    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)$",
+    @Route(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)$",
             methods = PUT)
     public ResourceResponse updateHomeDirectory(
             @Path("username") final String username,
@@ -214,7 +214,7 @@ public final class Directory extends AbstractOnyxApiController {
         return updateDirectory(username, ResourceManager.ROOT_PATH, request, session);
     }
 
-    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = PUT)
     public ResourceResponse updateDirectory(
             @Path("username") final String username,
@@ -261,7 +261,7 @@ public final class Directory extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/directory/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = DELETE)
     public ResourceResponse deleteDirectory(
             @Path("username") final String username,

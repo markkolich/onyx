@@ -28,7 +28,7 @@ package onyx.controllers.api.v1;
 
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.core.servlet.AsyncContext;
@@ -50,7 +50,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.time.Instant;
 
-import static curacao.annotations.RequestMapping.Method.GET;
+import static curacao.annotations.Route.Method.GET;
 import static onyx.util.UserUtils.userIsNotOwner;
 import static onyx.util.PathUtils.normalizePath;
 
@@ -81,7 +81,7 @@ public final class Download extends AbstractOnyxApiController {
         costAnalyzer_ = costAnalyzer;
     }
 
-    @RequestMapping(value = "^/api/v1/download/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/download/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = GET)
     public void downloadFile(
             @Path("username") final String username,

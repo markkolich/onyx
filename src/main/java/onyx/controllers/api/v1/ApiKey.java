@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.RequestBody;
 import curacao.entities.empty.StatusCodeOnlyCuracaoEntity;
@@ -50,9 +50,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 
-import static curacao.annotations.RequestMapping.Method.DELETE;
-import static curacao.annotations.RequestMapping.Method.GET;
-import static curacao.annotations.RequestMapping.Method.POST;
+import static curacao.annotations.Route.Method.DELETE;
+import static curacao.annotations.Route.Method.GET;
+import static curacao.annotations.Route.Method.POST;
 
 @Controller
 public final class ApiKey extends AbstractOnyxApiController {
@@ -71,7 +71,7 @@ public final class ApiKey extends AbstractOnyxApiController {
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
-    @RequestMapping(value = "^/api/v1/apikey$",
+    @Route(value = "^/api/v1/apikey$",
             methods = POST)
     public CreateApiKeyResponse createApiKey(
             @RequestBody final CreateApiKeyRequest request,
@@ -94,7 +94,7 @@ public final class ApiKey extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/apikey$",
+    @Route(value = "^/api/v1/apikey$",
             methods = GET)
     public ListApiKeysResponse listApiKeys(
             final Session session) {
@@ -113,7 +113,7 @@ public final class ApiKey extends AbstractOnyxApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/apikey/(?<keyHash>[a-f0-9]{64})$",
+    @Route(value = "^/api/v1/apikey/(?<keyHash>[a-f0-9]{64})$",
             methods = DELETE)
     public StatusCodeOnlyCuracaoEntity deleteApiKey(
             @Path("keyHash") final String keyHash,

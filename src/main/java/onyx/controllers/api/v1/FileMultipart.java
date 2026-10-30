@@ -29,7 +29,7 @@ package onyx.controllers.api.v1;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.RequestBody;
@@ -66,9 +66,9 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
-import static curacao.annotations.RequestMapping.Method.DELETE;
-import static curacao.annotations.RequestMapping.Method.POST;
-import static curacao.annotations.RequestMapping.Method.PUT;
+import static curacao.annotations.Route.Method.DELETE;
+import static curacao.annotations.Route.Method.POST;
+import static curacao.annotations.Route.Method.PUT;
 import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static onyx.util.PathUtils.normalizePath;
 import static onyx.util.UserUtils.userIsNotOwner;
@@ -103,7 +103,7 @@ public final class FileMultipart extends AbstractOnyxFileApiController {
         objectMapper_ = onyxJacksonObjectMapper.getObjectMapper();
     }
 
-    @RequestMapping(value = "^/api/v1/file-multipart/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/file-multipart/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = POST)
     public InitiateMultipartUploadResponse initiateMultipartUpload(
             @Path("username") final String username,
@@ -195,7 +195,7 @@ public final class FileMultipart extends AbstractOnyxFileApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/file-multipart/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/file-multipart/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = PUT)
     public ResourceResponse completeMultipartUpload(
             @Path("username") final String username,
@@ -230,7 +230,7 @@ public final class FileMultipart extends AbstractOnyxFileApiController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/v1/file-multipart/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
+    @Route(value = "^/api/v1/file-multipart/(?<username>[a-zA-Z0-9]+)/(?<path>[a-zA-Z0-9\\-._~%!$&'()*+,;=:@/]*)$",
             methods = DELETE)
     public StatusCodeOnlyCuracaoEntity abortMultipartUpload(
             @Path("username") final String username,

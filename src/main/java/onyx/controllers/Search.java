@@ -29,7 +29,7 @@ package onyx.controllers;
 import com.google.common.collect.ImmutableList;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Query;
 import curacao.freemarker.entities.FreeMarkerContent;
 import onyx.components.config.OnyxConfig;
@@ -72,7 +72,7 @@ public final class Search extends AbstractOnyxFreeMarkerController {
         searchManager_ = searchManager;
     }
 
-    @RequestMapping("^/search$")
+    @Route("^/search$")
     public FreeMarkerContent doSearch(
             @Query("query") final String query,
             final Session session) throws Exception {
