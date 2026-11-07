@@ -5960,14 +5960,41 @@ a.close.disabled {
   color: #858796;
 }
 
+/* The scroller below fixes the popover's size, so Bootstrap's own max-width would only
+   fight it. Removing the cap is also what keeps a right-placed popover fitting beside the
+   link: Popper's preventOverflow modifier (not configurable in Bootstrap 4.3.1) shifts an
+   oversized popover back on top of its trigger, and a fixed, predictable width avoids that. */
 .screencaps-popover {
-  max-width: 75vw;
+  max-width: none;
 }
 
+/* A window onto the sheet rather than a box the sheet has to squeeze into. overscroll-behavior
+   keeps the page behind from scrolling once an edge is reached, so panning around the sheet
+   doesn't walk the file listing out from under the popover. */
+.screencaps-scroller {
+  width: 60vw;
+  height: 60vh;
+  overflow: auto;
+  overscroll-behavior: contain;
+  /* Scroll bars hidden, scrolling kept - they'd eat into a window this small and frame the
+     sheet in chrome rather than image. Needs all three: scrollbar-width for Firefox,
+     -ms-overflow-style for legacy Edge, and the ::-webkit-scrollbar rule below for
+     Chrome/Safari, none of which the others honour. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.screencaps-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+/* Native size on purpose - no max-width/max-height. Scaling the sheet to fit is exactly what
+   made frames unreadable: tools/screencaps.sh sizes the grid to the frame count, so a long
+   video's sheet runs to ~6900px across and fitting that into a popover left tiles under 90px. */
 .screencaps-img {
   display: block;
-  max-width: 75vw;
-  max-height: 75vh;
+  max-width: none;
+  max-height: none;
 }
 
 .carousel {
