@@ -56,8 +56,10 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static onyx.util.FileUtils.humanReadableByteCountBin;
 import static org.asynchttpclient.Dsl.asyncHttpClient;
 
 @Component
@@ -97,12 +99,18 @@ public final class LocalCacheManager implements CacheManager, ComponentDestroyab
 
         final long readTimeoutMs =
                 localCacheConfig_.getLocalCacheDownloaderReadTimeout(TimeUnit.MILLISECONDS);
-        final long requestTimeoutMs =
-                localCacheConfig_.getLocalCacheDownloaderRequestTimeout(TimeUnit.MILLISECONDS);
         final DefaultAsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder()
-                // Very long read & connect timeout; intentional.
+                // Very long read timeout; intentional. This one is an inactivity timeout,
+                // armed against the response future's last touch, so it only fires when bytes
+                // genuinely stop arriving and a slow but healthy transfer keeps resetting it.
                 .setReadTimeout(Duration.ofMillis(readTimeoutMs))
-                .setRequestTimeout(Duration.ofMillis(requestTimeoutMs))
+                // No request timeout, intentional. Unlike the read timeout this is a single
+                // wall-clock deadline for the whole exchange, computed once when the request
+                // starts and never refreshed, so it kills a download that is streaming
+                // perfectly well the moment it elapses. The value has to be negative to
+                // disable it: the client arms the timer for anything greater than -1, so
+                // zero arms a deadline already in the past.
+                .setRequestTimeout(Duration.ofMillis(-1L))
                 .build();
         asyncHttpClient_ = asyncHttpClient(clientConfig);
     }
@@ -189,16 +197,25 @@ public final class LocalCacheManager implements CacheManager, ComponentDestroyab
         final Path cachedResource = generateCachedResourcePath(resource.getPath());
 
         try {
+            final StreamedFileDownloadAsyncHandler handler =
+                    new StreamedFileDownloadAsyncHandler(cachedResource);
             final ListenableFuture<Path> future = asyncHttpClient_.prepareGet(downloadUrl.toString())
-                    .execute(new StreamedFileDownloadAsyncHandler(cachedResource));
-            future.toCompletableFuture()
-                .exceptionally(t -> {
-                    LOG.error("Failed to download resource cache file: {}", cachedResource, t);
-                    return null;
-                }).join();
+                    .execute(handler);
+            final Path downloaded = future.toCompletableFuture()
+                    .exceptionally(t -> {
+                        LOG.error("Failed to download resource cache file: {}", cachedResource, t);
+                        return null;
+                    }).join();
 
-            LOG.info("Successfully downloaded file to cache: {} -> {}", resource.getPath(),
-                    cachedResource);
+            // The handler returns null for every failure - a non-200 response it aborted as
+            // well as one that threw - and exceptionally() above recovers a failed future
+            // into a successful one carrying that null, so join() does not throw and the
+            // returned path is the only thing that says whether the file reached disk.
+            // Logging success without checking it reports a cache entry never written.
+            if (downloaded != null) {
+                LOG.info("Successfully downloaded file to cache: {} -> {} ({})", resource.getPath(),
+                        cachedResource, humanReadableByteCountBin(handler.getBytesWritten()));
+            }
         } catch (final Exception e) {
             LOG.error("Failed to download resource to cache from pre-signed "
                     + "download URL: {}", downloadUrl, e);
@@ -305,6 +322,8 @@ public final class LocalCacheManager implements CacheManager, ComponentDestroyab
 
         private volatile boolean failed_ = false;
 
+        private final AtomicLong bytesWritten_ = new AtomicLong(0L);
+
         private StreamedFileDownloadAsyncHandler(
                 final Path filePath) throws Exception {
             filePath_ = filePath;
@@ -317,6 +336,12 @@ public final class LocalCacheManager implements CacheManager, ComponentDestroyab
         public State onStatusReceived(
                 final HttpResponseStatus responseStatus) throws Exception {
             if (responseStatus.getStatusCode() != HttpStatus.SC_OK) {
+                // Aborting here completes the future normally with the null from onCompleted
+                // rather than exceptionally, so without this the whole failure - an expired
+                // pre-signed URL, a 5xx from S3 - would leave no trace in the log at all.
+                LOG.error("Refusing to cache non-200 response ({}) for local cache file: {}",
+                        responseStatus.getStatusCode(), filePath_);
+
                 failed_ = true;
                 closeAndCleanup();
                 return State.ABORT;
@@ -338,7 +363,13 @@ public final class LocalCacheManager implements CacheManager, ComponentDestroyab
                 return State.ABORT;
             }
 
-            os_.write(bodyPart.getBodyPartBytes());
+            // Held in a local because getBodyPartBytes() copies the body part's bytes out
+            // of the underlying buffer on every call.
+            final byte[] bodyPartBytes = bodyPart.getBodyPartBytes();
+
+            os_.write(bodyPartBytes);
+            bytesWritten_.addAndGet(bodyPartBytes.length);
+
             return State.CONTINUE;
         }
 
@@ -361,6 +392,10 @@ public final class LocalCacheManager implements CacheManager, ComponentDestroyab
             Files.move(tempFilePath_, filePath_, StandardCopyOption.ATOMIC_MOVE,
                     StandardCopyOption.REPLACE_EXISTING);
             return filePath_;
+        }
+
+        public long getBytesWritten() {
+            return bytesWritten_.get();
         }
 
         private void closeAndCleanup() {

@@ -31,6 +31,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentDestroyable;
+import onyx.components.config.cache.LocalCacheConfig;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,8 +40,6 @@ import java.util.concurrent.ThreadFactory;
 @Component
 public final class AsyncCacheThreadPool implements ComponentDestroyable {
 
-    private static final int DEFAULT_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
-
     private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder()
             .setDaemon(true)
             .setNameFormat("onyx-async-cache-pool-worker-%d")
@@ -48,9 +47,15 @@ public final class AsyncCacheThreadPool implements ComponentDestroyable {
 
     private final ExecutorService executorService_;
 
+    // Sized from configuration rather than from the core count. Every worker here streams
+    // a whole cache file off S3, so one thread per core leaves nothing for request handling
+    // or for the softirq processing the downloads themselves generate - on a four core box
+    // a full warm-up saturates the machine.
     @Injectable
-    public AsyncCacheThreadPool() {
-        this(Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE, THREAD_FACTORY));
+    public AsyncCacheThreadPool(
+            final LocalCacheConfig localCacheConfig) {
+        this(Executors.newFixedThreadPool(
+                localCacheConfig.getLocalCacheDownloaderThreadPoolSize(), THREAD_FACTORY));
     }
 
     @VisibleForTesting

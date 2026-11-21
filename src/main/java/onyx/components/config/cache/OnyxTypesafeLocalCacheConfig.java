@@ -34,6 +34,8 @@ import onyx.components.config.OnyxConfig;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 @Component
 public final class OnyxTypesafeLocalCacheConfig implements LocalCacheConfig {
 
@@ -59,6 +61,15 @@ public final class OnyxTypesafeLocalCacheConfig implements LocalCacheConfig {
     public long getLocalCacheTokenValidityDuration(
             final TimeUnit timeUnit) {
         return config_.getDuration(LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP, timeUnit);
+    }
+
+    @Override
+    public int getLocalCacheDownloaderThreadPoolSize() {
+        final int threadPoolSize = config_.getInt(LOCAL_CACHE_DOWNLOADER_THREAD_POOL_SIZE_PROP);
+        checkArgument(threadPoolSize > 0, "Local cache downloader thread pool size must be "
+                + "greater than zero, but was: %s", threadPoolSize);
+
+        return threadPoolSize;
     }
 
     @Override

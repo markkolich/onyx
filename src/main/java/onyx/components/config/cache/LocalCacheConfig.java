@@ -37,6 +37,8 @@ public interface LocalCacheConfig {
     String LOCAL_CACHE_DIRECTORY_PROP = "directory";
     String LOCAL_CACHE_TOKEN_VALIDITY_DURATION_PROP = "token-validity-duration";
 
+    String LOCAL_CACHE_DOWNLOADER_THREAD_POOL_SIZE_PROP = "cache-downloader-thread-pool-size";
+
     String LOCAL_CACHE_DOWNLOADER_READ_TIMEOUT_DURATION_PROP = "cache-downloader-read-timeout-duration";
     String LOCAL_CACHE_DOWNLOADER_REQUEST_TIMEOUT_DURATION_PROP = "cache-downloader-request-timeout-duration";
 
@@ -46,6 +48,8 @@ public interface LocalCacheConfig {
 
     long getLocalCacheTokenValidityDuration(
             final TimeUnit timeUnit);
+
+    int getLocalCacheDownloaderThreadPoolSize();
 
     long getLocalCacheDownloaderReadTimeout(
             final TimeUnit timeUnit);
