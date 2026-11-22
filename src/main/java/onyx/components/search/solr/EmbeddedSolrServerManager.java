@@ -32,6 +32,7 @@ import curacao.components.CuracaoComponent;
 import onyx.components.search.SearchConfig;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.api.model.CoreStatusResponse;
 import org.apache.solr.client.solrj.request.CoreAdminRequest;
 import org.apache.solr.core.MetricsConfig;
 import org.apache.solr.core.NodeConfig;
@@ -96,14 +97,15 @@ public final class EmbeddedSolrServerManager implements SolrClientProvider, Cura
 
     @Override
     public void initialize() throws Exception {
-        try {
-            // Check if the core exists; send a ping which will fail with an
-            // exception if the core hasn't been created yet, which will then be
-            // our trigger to create it on app-startup.
-            solrClient_.ping();
-        } catch (final Exception e) {
-            LOG.debug("Initialize ping failed (as likely expected) - creating core!", e);
-            final String coreName = searchConfig_.getSolrCoreName();
+        final String coreName = searchConfig_.getSolrCoreName();
+
+        // Ask the core admin handler whether the core is already there, and create it on
+        // app-startup when it isn't. This used to probe with a ping() and treat the failure as
+        // "absent", which Solr 10 deprecates; asking for the core's status says the same thing
+        // directly, and does not confuse a core that exists but is unwell with one that was
+        // never created.
+        if (!coreExists(coreName)) {
+            LOG.debug("Found no existing Solr core - creating core: {}", coreName);
 
             final CoreAdminRequest.Create createRequest = new CoreAdminRequest.Create();
             createRequest.setCoreName(coreName);
@@ -116,6 +118,19 @@ public final class EmbeddedSolrServerManager implements SolrClientProvider, Cura
     @Override
     public void destroy() throws Exception {
         solrClient_.close();
+    }
+
+    /**
+     * Whether a core of the given name already exists. The core admin handler answers for a core it
+     * has never heard of with an entry carrying no name, rather than with an error, so the name is
+     * what gets checked here.
+     */
+    private boolean coreExists(
+            final String coreName) throws Exception {
+        final CoreStatusResponse.SingleCoreData coreStatus =
+                CoreAdminRequest.getCoreStatus(coreName, solrClient_);
+
+        return coreStatus != null && coreStatus.name != null;
     }
 
 }

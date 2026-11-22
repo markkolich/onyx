@@ -31,10 +31,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.io.Resources;
 import curacao.core.servlet.ServletContext;
-import curacao.jetty11.CuracaoJettyServer;
+import curacao.jetty12.CuracaoJettyServer;
 import onyx.components.jackson.OnyxJacksonObjectMapper;
 import onyx.components.config.OnyxConfig;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
@@ -82,7 +83,7 @@ public abstract class AbstractOnyxTest {
 
         servletContext_ = Mockito.mock(ServletContext.class);
 
-        final Resource baseResource = Resource.newResource(webAppRootPath);
+        final Resource baseResource = ResourceFactory.root().newResource(webAppRootPath);
         if (!baseResource.exists()) {
             throw new IllegalArgumentException("Test base resource does not exist: " + webAppRootPath);
         }

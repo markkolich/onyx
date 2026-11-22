@@ -27,9 +27,12 @@
 package onyx;
 
 import com.kolich.buildversion.BuildVersion;
-import curacao.jetty11.CuracaoJettyServer;
+import curacao.jetty12.CuracaoJettyServer;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
+import org.eclipse.jetty.http.UriCompliance;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -51,6 +54,21 @@ public final class Application {
     private static final String STATIC_SERVLET_DIR_ALLOWED = "dirAllowed";
     private static final String STATIC_SERVLET_CACHE_CONTROL = "cacheControl";
     private static final String STATIC_SERVLET_ACCEPT_RANGES = "acceptRanges";
+    private static final String STATIC_SERVLET_PATH_INFO_ONLY = "pathInfoOnly";
+
+    private static final int STATIC_SERVLET_INIT_ORDER = 2;
+
+    /**
+     * Jetty's own default for redirects, plus percent-encoded percent signs in the path.
+     */
+    private static final UriCompliance REDIRECT_URI_COMPLIANCE = UriCompliance.DEFAULT_REDIRECT
+            .with("onyx-redirect", UriCompliance.Violation.AMBIGUOUS_PATH_ENCODING);
+
+    /**
+     * Jetty's own default for requests, plus percent-encoded percent signs in the path.
+     */
+    private static final UriCompliance REQUEST_URI_COMPLIANCE = UriCompliance.DEFAULT
+            .with("onyx-request", UriCompliance.Violation.AMBIGUOUS_PATH_ENCODING);
 
     /**
      * Every error the container sends (such as a static file's 404) is forwarded here; no controller maps
@@ -87,6 +105,21 @@ public final class Application {
                     .setPort(onyx.port_)
                     .addServlet(staticFiles, STATIC_PATH_SPEC)
                     .setErrorPage(ERROR_PAGE)
+                    .customizeConnector(connector -> {
+                        final HttpConnectionFactory connectionFactory =
+                                connector.getConnectionFactory(HttpConnectionFactory.class);
+                        final HttpConfiguration httpConfiguration =
+                                connectionFactory.getHttpConfiguration();
+                        httpConfiguration.setRedirectUriCompliance(REDIRECT_URI_COMPLIANCE);
+                        httpConfiguration.setUriCompliance(REQUEST_URI_COMPLIANCE);
+                    })
+                    .customizeContext(context -> {
+                        // Both halves are needed, and this is the half that is easy to miss. The
+                        // connector setting above only gets the request past the HTTP layer; the servlet
+                        // layer then refuses it separately, because getServletPath() and getPathInfo()
+                        // cannot represent an ambiguous path.
+                        context.getServletHandler().setDecodeAmbiguousURIs(true);
+                    })
                     .build();
 
             server.start();
@@ -98,13 +131,23 @@ public final class Application {
 
     @Nonnull
     private static ServletHolder createLocaleCacheAwareStaticServletHolder() {
-        final ServletHolder staticFiles = new ServletHolder(LocalCacheAwareDefaultServlet.class);
+        final ServletHolder staticFiles = new ServletHolder(LocalCacheAwareResourceServlet.class);
         staticFiles.setAsyncSupported(true);
 
-        // Jetty's DefaultServlet lists directories unless told not to.
+        // Initialize at startup rather than on the first request for a static file. Jetty defers a
+        // servlet with no init order until something asks it for something, which leaves a
+        // misconfigured static servlet - a base resource that cannot be read, say - to surface as a
+        // broken page later instead of at boot. Ordered after the Curacao dispatcher, which is 1.
+        staticFiles.setInitOrder(STATIC_SERVLET_INIT_ORDER);
+
+        // Jetty's static file servlet lists directories unless told not to.
         staticFiles.setInitParameter(STATIC_SERVLET_DIR_ALLOWED, Boolean.FALSE.toString());
         staticFiles.setInitParameter(STATIC_SERVLET_CACHE_CONTROL, STATIC_CACHE_CONTROL);
         staticFiles.setInitParameter(STATIC_SERVLET_ACCEPT_RANGES, Boolean.TRUE.toString());
+        // Keep the whole path within the context, rather than only the part after "/static".
+        // ResourceServlet defaults this the other way round, where Jetty 11's DefaultServlet did
+        // not, and left alone it would look for every static file one directory too high.
+        staticFiles.setInitParameter(STATIC_SERVLET_PATH_INFO_ONLY, Boolean.FALSE.toString());
 
         return staticFiles;
     }

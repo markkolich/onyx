@@ -29,7 +29,7 @@ package onyx.components.freemarker;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.core.servlet.ServletContext;
-import curacao.jetty11.CuracaoJettyServer;
+import curacao.jetty12.CuracaoJettyServer;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;

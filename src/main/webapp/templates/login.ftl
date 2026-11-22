@@ -19,7 +19,8 @@
                   <div class="col-12">
                     <div class="p-5">
                       <div class="text-center">
-                        <h3 class="text-dark mb-4">Onyx</h3>
+                        <img src="${contextPath}/static/img/onyx/logo.svg" width="56" height="56" alt="">
+                        <h3 class="text-dark mb-4 mt-3">Onyx</h3>
                       </div>
 
                       <#if passwordAuthEnabled>

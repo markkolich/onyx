@@ -15,10 +15,20 @@
     <packaging>jar</packaging>
 
     <properties>
+        <!--
+            Overrides of versions kolich-parent manages, so that its inherited
+            dependencyManagement resolves to these instead. Here rather than in the parent
+            because Jetty 12 is not a drop-in for Jetty 11: it needs the EE11 artifacts
+            below, and every other kolich-parent consumer is still on Jetty 11. Move these
+            up to the parent once the rest have followed.
+        -->
+        <curacao.version>8.1.0</curacao.version>
+        <jetty.version>12.1.15</jetty.version>
+
         <!-- Libraries kolich-parent does not manage. -->
 
         <jackson-databind-nullable.version>0.2.13</jackson-databind-nullable.version>
-        <solr.version>9.10.1</solr.version>
+        <solr.version>10.1.0</solr.version>
         <icu4j.version>79.1</icu4j.version>
         <webauthn-server-core.version>2.10.1</webauthn-server-core.version>
     </properties>
@@ -39,6 +49,42 @@
             <email>social@kolich.com</email>
         </developer>
     </developers>
+
+    <dependencyManagement>
+        <dependencies>
+            <!--
+                Jetty artifacts that arrive transitively through Solr, pinned to the same
+                version as the server. kolich-parent manages the ones Onyx declares, but not
+                these, and Maven's nearest-wins would otherwise settle jetty-util on Solr's
+                12.0.x while the server runs 12.1.x.
+            -->
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-util</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-client</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-alpn-java-client</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty.http2</groupId>
+                <artifactId>jetty-http2-client</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty.http2</groupId>
+                <artifactId>jetty-http2-client-transport</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
 
@@ -74,7 +120,8 @@
         </dependency>
         <dependency>
             <groupId>curacao</groupId>
-            <artifactId>curacao-jetty11-server</artifactId>
+            <artifactId>curacao-jetty12-server</artifactId>
+            <version>${curacao.version}</version>
         </dependency>
         <dependency>
             <groupId>curacao</groupId>
@@ -89,13 +136,21 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
         </dependency>
+        <!--
+            Jetty 12 moved the servlet container out of core into one module per Servlet
+            specification; EE11 is the Servlet 6.1 one, which is what curacao-servlet-jakarta
+            is built against. These carry their own version because kolich-parent's
+            dependencyManagement only knows the Jetty 11 artifact names.
+        -->
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-webapp</artifactId>
+            <groupId>org.eclipse.jetty.ee11</groupId>
+            <artifactId>jetty-ee11-servlet</artifactId>
+            <version>${jetty.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlets</artifactId>
+            <groupId>org.eclipse.jetty.ee11</groupId>
+            <artifactId>jetty-ee11-webapp</artifactId>
+            <version>${jetty.version}</version>
         </dependency>
 
         <dependency>
@@ -277,10 +332,6 @@
                     <artifactId>*</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>org.apache.curator</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>com.google.protobuf</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
@@ -288,6 +339,15 @@
                     <groupId>org.xerial.snappy</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
+                <!--
+                    Solr 10's HTTP client stack is deliberately NOT excluded here, unlike under
+                    Solr 9. An embedded core never opens a connection, but its bootstrap loads
+                    both org.eclipse.jetty.client.Request and Solr's own HttpJettySolrClient
+                    while starting the CoreContainer, so removing either fails at runtime with a
+                    NoClassDefFoundError that no unit test catches. Their Jetty versions are
+                    pinned in dependencyManagement above instead, since Solr tracks the Jetty
+                    12.0 line while Onyx runs the server from 12.1.
+                -->
                 <!--
                     CJK morphological analyzers, ~33MB of the fat JAR between them. Neither
                     schema.xml nor solrconfig.xml references a Japanese or Korean analyzer, so
